@@ -23,7 +23,24 @@ if (userCount === 0) {
 }
 
 const app = express();
-app.use(cors());
+
+// CORS: allow the deployed front-end plus local dev servers. Falls back to
+// allow-all only if ALLOWED_ORIGINS isn't set, so this stays permissive
+// during local development but locks down once deployed.
+const defaultOrigins = [
+  "https://frontend-production-4cc8.up.railway.app",
+  "http://localhost:5173",
+  "http://localhost:4173",
+];
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+  : defaultOrigins;
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`Origin ${origin} not allowed by CORS`));
+  },
+}));
 app.use(express.json({ limit: "15mb" })); // generous limit: base64 photos in the request body
 
 app.get("/api/health", (req, res) => res.json({ ok: true, service: "terex-logistics-backend" }));
