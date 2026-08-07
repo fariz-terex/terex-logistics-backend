@@ -1,0 +1,37 @@
+From 892abb8c38694064ee9d6f537e09dece22c0dd9e Mon Sep 17 00:00:00 2001
+From: TEREX Dev <dev@terex.local>
+Date: Fri, 7 Aug 2026 15:14:28 +0000
+Subject: [PATCH] db.js: auto-create data directory if missing, with diagnostic
+ logging
+
+---
+ src/db.js | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/src/db.js b/src/db.js
+index aae2f72..b40ee25 100644
+--- a/src/db.js
++++ b/src/db.js
+@@ -5,7 +5,18 @@ const Database = require("better-sqlite3");
+ require("dotenv").config();
+ 
+ const DB_FILE = process.env.DB_FILE || "./terex.db";
+-const dbPath = path.resolve(__dirname, "..", DB_FILE);
++const dbPath = path.isAbsolute(DB_FILE) ? DB_FILE : path.resolve(__dirname, "..", DB_FILE);
++
++console.log(`[db] DB_FILE env = ${JSON.stringify(process.env.DB_FILE)}`);
++console.log(`[db] resolved dbPath = ${dbPath}`);
++
++const dir = path.dirname(dbPath);
++if (!fs.existsSync(dir)) {
++  console.log(`[db] directory ${dir} did not exist — creating it`);
++  fs.mkdirSync(dir, { recursive: true });
++} else {
++  console.log(`[db] directory ${dir} exists, contents: ${fs.readdirSync(dir).join(", ") || "(empty)"}`);
++}
+ 
+ const db = new Database(dbPath);
+ db.pragma("journal_mode = WAL");
+-- 
+2.43.0
+

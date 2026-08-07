@@ -5,7 +5,18 @@ const Database = require("better-sqlite3");
 require("dotenv").config();
 
 const DB_FILE = process.env.DB_FILE || "./terex.db";
-const dbPath = path.resolve(__dirname, "..", DB_FILE);
+const dbPath = path.isAbsolute(DB_FILE) ? DB_FILE : path.resolve(__dirname, "..", DB_FILE);
+
+console.log(`[db] DB_FILE env = ${JSON.stringify(process.env.DB_FILE)}`);
+console.log(`[db] resolved dbPath = ${dbPath}`);
+
+const dir = path.dirname(dbPath);
+if (!fs.existsSync(dir)) {
+  console.log(`[db] directory ${dir} did not exist — creating it`);
+  fs.mkdirSync(dir, { recursive: true });
+} else {
+  console.log(`[db] directory ${dir} exists, contents: ${fs.readdirSync(dir).join(", ") || "(empty)"}`);
+}
 
 const db = new Database(dbPath);
 db.pragma("journal_mode = WAL");
