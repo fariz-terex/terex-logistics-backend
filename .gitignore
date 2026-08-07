@@ -1,0 +1,5 @@
+node_modules/
+terex.db
+terex.db-shm
+terex.db-wal
+.env
