@@ -1,6 +1,8 @@
 // Populates the database with the same sample data used by the original
 // front-end prototype, so switching the UI over to this API doesn't change
-// what you see. Safe to re-run: it wipes and reinserts every table.
+// what you see. Exported as a function so it can be called both from the
+// CLI (`npm run seed`, always wipes+reseeds) and automatically on server
+// boot when the database is empty (see server.js — never wipes existing data).
 
 const bcrypt = require("bcryptjs");
 const db = require("./db");
@@ -17,7 +19,7 @@ function reset() {
   tables.forEach((t) => db.prepare(`DELETE FROM ${t}`).run());
 }
 
-function seed() {
+function seedDatabase() {
   reset();
 
   const hash = bcrypt.hashSync(DEMO_PASSWORD, 10);
@@ -71,4 +73,8 @@ function seed() {
   console.log("e.g. fariz@terex.local / sari@terex.local / andi@terex.local / yohanes@terex.local");
 }
 
-seed();
+module.exports = { seedDatabase };
+
+if (require.main === module) {
+  seedDatabase();
+}

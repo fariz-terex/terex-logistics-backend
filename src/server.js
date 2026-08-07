@@ -1,6 +1,8 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const db = require("./db");
+const { seedDatabase } = require("./seed");
 
 const authRoutes = require("./routes/auth");
 const materialRoutes = require("./routes/materials");
@@ -9,6 +11,16 @@ const stockRoutes = require("./routes/stock");
 const deliveryRoutes = require("./routes/deliveries");
 const returnRoutes = require("./routes/returns");
 const reconciliationRoutes = require("./routes/reconciliations");
+
+// First boot on a fresh volume: schema.sql already ran (via db.js) but every
+// table is empty. Seed once, automatically — this never runs again once
+// users exist, so it's safe to leave in place permanently (unlike a
+// preDeployCommand, which would need to be manually added/removed).
+const userCount = db.prepare("SELECT COUNT(*) AS n FROM users").get().n;
+if (userCount === 0) {
+  console.log("No users found — database looks empty, running initial seed...");
+  seedDatabase();
+}
 
 const app = express();
 app.use(cors());
