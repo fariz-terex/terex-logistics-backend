@@ -103,25 +103,25 @@ router.post("/sites", requireAuth, requireRole(MANAGER), (req, res) => {
 
 // ---------- Users ----------
 router.get("/users", requireAuth, requireRole(MANAGER), (req, res) => {
-  const rows = db.prepare("SELECT id, name, email, role, assignment, status FROM users ORDER BY name").all();
+  const rows = db.prepare("SELECT id, name, username, role, assignment, status FROM users ORDER BY name").all();
   res.json(rows);
 });
 router.post("/users", requireAuth, requireRole(MANAGER), (req, res) => {
-  const { name, email, password, role, assignment } = req.body;
-  if (!name || !email || !password || !role) return res.status(400).json({ error: "name, email, password, role are required" });
-  if (db.prepare("SELECT 1 FROM users WHERE email = ?").get(email.toLowerCase())) return res.status(409).json({ error: "Email already registered" });
+  const { name, username, password, role, assignment } = req.body;
+  if (!name || !username || !password || !role) return res.status(400).json({ error: "name, username, password, role are required" });
+  if (db.prepare("SELECT 1 FROM users WHERE username = ?").get(username.toLowerCase())) return res.status(409).json({ error: "Username already taken" });
   const id = paddedSequenceId(db, "users", "USR");
   const hash = bcrypt.hashSync(password, 10);
-  db.prepare(`INSERT INTO users (id, name, email, password_hash, role, assignment, status) VALUES (?, ?, ?, ?, ?, ?, 'Active')`)
-    .run(id, name, email.toLowerCase(), hash, role, assignment || "");
-  res.status(201).json({ id, name, email: email.toLowerCase(), role, assignment: assignment || "", status: "Active" });
+  db.prepare(`INSERT INTO users (id, name, username, password_hash, role, assignment, status) VALUES (?, ?, ?, ?, ?, ?, 'Active')`)
+    .run(id, name, username.toLowerCase(), hash, role, assignment || "");
+  res.status(201).json({ id, name, username: username.toLowerCase(), role, assignment: assignment || "", status: "Active" });
 });
 router.patch("/users/:id/toggle-status", requireAuth, requireRole(MANAGER), (req, res) => {
   const row = db.prepare("SELECT * FROM users WHERE id = ?").get(req.params.id);
   if (!row) return res.status(404).json({ error: "User not found" });
   const next = row.status === "Active" ? "Inactive" : "Active";
   db.prepare("UPDATE users SET status = ? WHERE id = ?").run(next, row.id);
-  res.json({ id: row.id, name: row.name, email: row.email, role: row.role, assignment: row.assignment, status: next });
+  res.json({ id: row.id, name: row.name, username: row.username, role: row.role, assignment: row.assignment, status: next });
 });
 
 module.exports = router;

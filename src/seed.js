@@ -23,11 +23,11 @@ function seedDatabase() {
   reset();
 
   const hash = bcrypt.hashSync(DEMO_PASSWORD, 10);
-  const insertUser = db.prepare(`INSERT INTO users (id, name, email, password_hash, role, assignment, status) VALUES (?, ?, ?, ?, ?, ?, 'Active')`);
-  insertUser.run("USR001", "Fariz Asad", "fariz@terex.local", hash, "Admin / Manager Logistics", "Semua Area");
-  insertUser.run("USR002", "Sari Dewi", "sari@terex.local", hash, "Logistics Staff", "Warehouse Pusat");
-  insertUser.run("USR003", "Andi Wijaya", "andi@terex.local", hash, "SPV", "Merauke");
-  insertUser.run("USR004", "Yohanes K.", "yohanes@terex.local", hash, "Technician", "Maumere");
+  const insertUser = db.prepare(`INSERT INTO users (id, name, username, password_hash, role, assignment, status) VALUES (?, ?, ?, ?, ?, ?, 'Active')`);
+  insertUser.run("USR001", "Fariz Asad", "fariz", hash, "Admin / Manager Logistics", "Semua Area");
+  insertUser.run("USR002", "Sari Dewi", "sari", hash, "Logistics Staff", "Warehouse Pusat");
+  insertUser.run("USR003", "Andi Wijaya", "andi", hash, "SPV", "Merauke");
+  insertUser.run("USR004", "Yohanes K.", "yohanes", hash, "Technician", "Maumere");
 
   const insertArea = db.prepare("INSERT INTO areas (code, name, status) VALUES (?, ?, 'Active')");
   [["AR001", "Papua"], ["AR002", "Kalimantan"], ["AR003", "Nusra"], ["AR004", "Sumatera"]].forEach((a) => insertArea.run(...a));
@@ -69,8 +69,8 @@ function seedDatabase() {
   ].forEach((m) => insertMaterial.run(...m));
 
   console.log("Seed complete.");
-  console.log(`Demo login — any email above with password: ${DEMO_PASSWORD}`);
-  console.log("e.g. fariz@terex.local / sari@terex.local / andi@terex.local / yohanes@terex.local");
+  console.log(`Demo login — any username above with password: ${DEMO_PASSWORD}`);
+  console.log("e.g. fariz / sari / andi / yohanes");
 }
 
 module.exports = { seedDatabase };

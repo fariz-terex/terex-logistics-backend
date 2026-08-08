@@ -35,16 +35,16 @@ npm start                  # listens on http://localhost:4000
 
 Demo accounts (all use password `password123`):
 
-| Email                  | Role                        |
-|-------------------------|-----------------------------|
-| fariz@terex.local       | Admin / Manager Logistics   |
-| sari@terex.local        | Logistics Staff              |
-| andi@terex.local        | SPV                           |
-| yohanes@terex.local     | Technician                    |
+| Username | Role                        |
+|----------|------------------------------|
+| fariz    | Admin / Manager Logistics   |
+| sari     | Logistics Staff              |
+| andi     | SPV                           |
+| yohanes  | Technician                    |
 
 ## Auth
 
-`POST /api/auth/login` with `{ email, password }` returns a JWT. Send it
+`POST /api/auth/login` with `{ username, password }` returns a JWT. Send it
 back as `Authorization: Bearer <token>` on every other request. Each route
 is guarded server-side by role — the front-end's role switcher was a demo
 convenience; here, permissions are enforced no matter what the client sends.

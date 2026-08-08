@@ -1,0 +1,155 @@
+From 2b41cf7bea474f52fdd970f26588f389c50b61cc Mon Sep 17 00:00:00 2001
+From: TEREX Dev <dev@terex.local>
+Date: Sat, 8 Aug 2026 04:12:50 +0000
+Subject: [PATCH] Switch login from email to username
+
+---
+ README.md                | 14 +++++++-------
+ src/routes/auth.js       | 12 ++++++------
+ src/routes/masterData.js | 16 ++++++++--------
+ src/schema.sql           |  2 +-
+ src/seed.js              | 14 +++++++-------
+ 5 files changed, 29 insertions(+), 29 deletions(-)
+
+diff --git a/README.md b/README.md
+index 55757f3..ea1c1b3 100644
+--- a/README.md
++++ b/README.md
+@@ -35,16 +35,16 @@ npm start                  # listens on http://localhost:4000
+ 
+ Demo accounts (all use password `password123`):
+ 
+-| Email                  | Role                        |
+-|-------------------------|-----------------------------|
+-| fariz@terex.local       | Admin / Manager Logistics   |
+-| sari@terex.local        | Logistics Staff              |
+-| andi@terex.local        | SPV                           |
+-| yohanes@terex.local     | Technician                    |
++| Username | Role                        |
++|----------|------------------------------|
++| fariz    | Admin / Manager Logistics   |
++| sari     | Logistics Staff              |
++| andi     | SPV                           |
++| yohanes  | Technician                    |
+ 
+ ## Auth
+ 
+-`POST /api/auth/login` with `{ email, password }` returns a JWT. Send it
++`POST /api/auth/login` with `{ username, password }` returns a JWT. Send it
+ back as `Authorization: Bearer <token>` on every other request. Each route
+ is guarded server-side by role — the front-end's role switcher was a demo
+ convenience; here, permissions are enforced no matter what the client sends.
+diff --git a/src/routes/auth.js b/src/routes/auth.js
+index 5fd1885..97c474b 100644
+--- a/src/routes/auth.js
++++ b/src/routes/auth.js
+@@ -7,17 +7,17 @@ const { JWT_SECRET } = require("../middleware/auth");
+ const router = express.Router();
+ 
+ router.post("/login", (req, res) => {
+-  const { email, password } = req.body;
+-  if (!email || !password) return res.status(400).json({ error: "email and password are required" });
++  const { username, password } = req.body;
++  if (!username || !password) return res.status(400).json({ error: "username and password are required" });
+ 
+-  const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email.toLowerCase());
+-  if (!user) return res.status(401).json({ error: "Invalid email or password" });
++  const user = db.prepare("SELECT * FROM users WHERE username = ?").get(username.toLowerCase());
++  if (!user) return res.status(401).json({ error: "Invalid username or password" });
+   if (user.status !== "Active") return res.status(403).json({ error: "This account has been deactivated" });
+ 
+   const ok = bcrypt.compareSync(password, user.password_hash);
+-  if (!ok) return res.status(401).json({ error: "Invalid email or password" });
++  if (!ok) return res.status(401).json({ error: "Invalid username or password" });
+ 
+-  const payload = { id: user.id, name: user.name, email: user.email, role: user.role, assignment: user.assignment };
++  const payload = { id: user.id, name: user.name, username: user.username, role: user.role, assignment: user.assignment };
+   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "12h" });
+   res.json({ token, user: payload });
+ });
+diff --git a/src/routes/masterData.js b/src/routes/masterData.js
+index 71ede0e..08ace1e 100644
+--- a/src/routes/masterData.js
++++ b/src/routes/masterData.js
+@@ -103,25 +103,25 @@ router.post("/sites", requireAuth, requireRole(MANAGER), (req, res) => {
+ 
+ // ---------- Users ----------
+ router.get("/users", requireAuth, requireRole(MANAGER), (req, res) => {
+-  const rows = db.prepare("SELECT id, name, email, role, assignment, status FROM users ORDER BY name").all();
++  const rows = db.prepare("SELECT id, name, username, role, assignment, status FROM users ORDER BY name").all();
+   res.json(rows);
+ });
+ router.post("/users", requireAuth, requireRole(MANAGER), (req, res) => {
+-  const { name, email, password, role, assignment } = req.body;
+-  if (!name || !email || !password || !role) return res.status(400).json({ error: "name, email, password, role are required" });
+-  if (db.prepare("SELECT 1 FROM users WHERE email = ?").get(email.toLowerCase())) return res.status(409).json({ error: "Email already registered" });
++  const { name, username, password, role, assignment } = req.body;
++  if (!name || !username || !password || !role) return res.status(400).json({ error: "name, username, password, role are required" });
++  if (db.prepare("SELECT 1 FROM users WHERE username = ?").get(username.toLowerCase())) return res.status(409).json({ error: "Username already taken" });
+   const id = paddedSequenceId(db, "users", "USR");
+   const hash = bcrypt.hashSync(password, 10);
+-  db.prepare(`INSERT INTO users (id, name, email, password_hash, role, assignment, status) VALUES (?, ?, ?, ?, ?, ?, 'Active')`)
+-    .run(id, name, email.toLowerCase(), hash, role, assignment || "");
+-  res.status(201).json({ id, name, email: email.toLowerCase(), role, assignment: assignment || "", status: "Active" });
++  db.prepare(`INSERT INTO users (id, name, username, password_hash, role, assignment, status) VALUES (?, ?, ?, ?, ?, ?, 'Active')`)
++    .run(id, name, username.toLowerCase(), hash, role, assignment || "");
++  res.status(201).json({ id, name, username: username.toLowerCase(), role, assignment: assignment || "", status: "Active" });
+ });
+ router.patch("/users/:id/toggle-status", requireAuth, requireRole(MANAGER), (req, res) => {
+   const row = db.prepare("SELECT * FROM users WHERE id = ?").get(req.params.id);
+   if (!row) return res.status(404).json({ error: "User not found" });
+   const next = row.status === "Active" ? "Inactive" : "Active";
+   db.prepare("UPDATE users SET status = ? WHERE id = ?").run(next, row.id);
+-  res.json({ id: row.id, name: row.name, email: row.email, role: row.role, assignment: row.assignment, status: next });
++  res.json({ id: row.id, name: row.name, username: row.username, role: row.role, assignment: row.assignment, status: next });
+ });
+ 
+ module.exports = router;
+diff --git a/src/schema.sql b/src/schema.sql
+index 5eb6106..0e5a043 100644
+--- a/src/schema.sql
++++ b/src/schema.sql
+@@ -7,7 +7,7 @@ PRAGMA foreign_keys = ON;
+ CREATE TABLE IF NOT EXISTS users (
+   id            TEXT PRIMARY KEY,
+   name          TEXT NOT NULL,
+-  email         TEXT UNIQUE NOT NULL,
++  username      TEXT UNIQUE NOT NULL,
+   password_hash TEXT NOT NULL,
+   role          TEXT NOT NULL CHECK (role IN ('Admin / Manager Logistics','Logistics Staff','SPV','Technician')),
+   assignment    TEXT DEFAULT '',
+diff --git a/src/seed.js b/src/seed.js
+index 0afd823..d293c6e 100644
+--- a/src/seed.js
++++ b/src/seed.js
+@@ -23,11 +23,11 @@ function seedDatabase() {
+   reset();
+ 
+   const hash = bcrypt.hashSync(DEMO_PASSWORD, 10);
+-  const insertUser = db.prepare(`INSERT INTO users (id, name, email, password_hash, role, assignment, status) VALUES (?, ?, ?, ?, ?, ?, 'Active')`);
+-  insertUser.run("USR001", "Fariz Asad", "fariz@terex.local", hash, "Admin / Manager Logistics", "Semua Area");
+-  insertUser.run("USR002", "Sari Dewi", "sari@terex.local", hash, "Logistics Staff", "Warehouse Pusat");
+-  insertUser.run("USR003", "Andi Wijaya", "andi@terex.local", hash, "SPV", "Merauke");
+-  insertUser.run("USR004", "Yohanes K.", "yohanes@terex.local", hash, "Technician", "Maumere");
++  const insertUser = db.prepare(`INSERT INTO users (id, name, username, password_hash, role, assignment, status) VALUES (?, ?, ?, ?, ?, ?, 'Active')`);
++  insertUser.run("USR001", "Fariz Asad", "fariz", hash, "Admin / Manager Logistics", "Semua Area");
++  insertUser.run("USR002", "Sari Dewi", "sari", hash, "Logistics Staff", "Warehouse Pusat");
++  insertUser.run("USR003", "Andi Wijaya", "andi", hash, "SPV", "Merauke");
++  insertUser.run("USR004", "Yohanes K.", "yohanes", hash, "Technician", "Maumere");
+ 
+   const insertArea = db.prepare("INSERT INTO areas (code, name, status) VALUES (?, ?, 'Active')");
+   [["AR001", "Papua"], ["AR002", "Kalimantan"], ["AR003", "Nusra"], ["AR004", "Sumatera"]].forEach((a) => insertArea.run(...a));
+@@ -69,8 +69,8 @@ function seedDatabase() {
+   ].forEach((m) => insertMaterial.run(...m));
+ 
+   console.log("Seed complete.");
+-  console.log(`Demo login — any email above with password: ${DEMO_PASSWORD}`);
+-  console.log("e.g. fariz@terex.local / sari@terex.local / andi@terex.local / yohanes@terex.local");
++  console.log(`Demo login — any username above with password: ${DEMO_PASSWORD}`);
++  console.log("e.g. fariz / sari / andi / yohanes");
+ }
+ 
+ module.exports = { seedDatabase };
+-- 
+2.43.0
+
