@@ -66,4 +66,13 @@ function isoDateForMigration() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// One-time rename: any delivery still sitting at the old "Approved" status
+// (from before this status was renamed to "Waiting Stock Assignment" for
+// clarity) gets updated in place so it isn't orphaned by the rename.
+const legacyApprovedCount = db.prepare("SELECT COUNT(*) AS n FROM deliveries WHERE status = 'Approved'").get().n;
+if (legacyApprovedCount > 0) {
+  console.log(`[db] renaming ${legacyApprovedCount} deliveries from status 'Approved' to 'Waiting Stock Assignment'`);
+  db.exec("UPDATE deliveries SET status = 'Waiting Stock Assignment' WHERE status = 'Approved'");
+}
+
 module.exports = db;

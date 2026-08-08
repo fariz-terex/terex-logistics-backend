@@ -1,0 +1,67 @@
+From d8d3ff9aa64fa8f51267dd4944c6ed091698d56f Mon Sep 17 00:00:00 2001
+From: TEREX Dev <dev@terex.local>
+Date: Sat, 8 Aug 2026 08:36:30 +0000
+Subject: [PATCH 1/2] Rename delivery status 'Approved' to 'Waiting Stock
+ Assignment' for clarity
+
+---
+ src/routes/deliveries.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/routes/deliveries.js b/src/routes/deliveries.js
+index 2aa6445..1b7456e 100644
+--- a/src/routes/deliveries.js
++++ b/src/routes/deliveries.js
+@@ -82,7 +82,7 @@ router.post("/:id/approve", requireAuth, requireRole(MANAGER), (req, res) => {
+     }
+   }
+ 
+-  db.prepare("UPDATE deliveries SET status = 'Approved' WHERE id = ?").run(delivery.id);
++  db.prepare("UPDATE deliveries SET status = 'Waiting Stock Assignment' WHERE id = ?").run(delivery.id);
+   addHistory(delivery.id, `Approved by ${req.user.name} (Manager) — menunggu penugasan stock oleh Logistics Staff`);
+ 
+   res.json(loadDelivery(delivery.id));
+@@ -98,7 +98,7 @@ router.post("/:id/approve", requireAuth, requireRole(MANAGER), (req, res) => {
+ router.post("/:id/assign-stock", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+   const delivery = loadDelivery(req.params.id);
+   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+-  if (delivery.status !== "Approved") {
++  if (delivery.status !== "Waiting Stock Assignment") {
+     return res.status(409).json({ error: `Cannot assign stock for a request with status "${delivery.status}"` });
+   }
+ 
+-- 
+2.43.0
+
+
+From cfd2a8c55bfd3669995ff67b2af9b493f23ac694 Mon Sep 17 00:00:00 2001
+From: TEREX Dev <dev@terex.local>
+Date: Sat, 8 Aug 2026 08:37:09 +0000
+Subject: [PATCH 2/2] Auto-migrate legacy 'Approved' deliveries to the renamed
+ status
+
+---
+ src/db.js | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/src/db.js b/src/db.js
+index f666386..a3b5af0 100644
+--- a/src/db.js
++++ b/src/db.js
+@@ -66,4 +66,13 @@ function isoDateForMigration() {
+   return new Date().toISOString().slice(0, 10);
+ }
+ 
++// One-time rename: any delivery still sitting at the old "Approved" status
++// (from before this status was renamed to "Waiting Stock Assignment" for
++// clarity) gets updated in place so it isn't orphaned by the rename.
++const legacyApprovedCount = db.prepare("SELECT COUNT(*) AS n FROM deliveries WHERE status = 'Approved'").get().n;
++if (legacyApprovedCount > 0) {
++  console.log(`[db] renaming ${legacyApprovedCount} deliveries from status 'Approved' to 'Waiting Stock Assignment'`);
++  db.exec("UPDATE deliveries SET status = 'Waiting Stock Assignment' WHERE status = 'Approved'");
++}
++
+ module.exports = db;
+-- 
+2.43.0
+

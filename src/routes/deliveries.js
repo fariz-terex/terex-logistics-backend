@@ -82,7 +82,7 @@ router.post("/:id/approve", requireAuth, requireRole(MANAGER), (req, res) => {
     }
   }
 
-  db.prepare("UPDATE deliveries SET status = 'Approved' WHERE id = ?").run(delivery.id);
+  db.prepare("UPDATE deliveries SET status = 'Waiting Stock Assignment' WHERE id = ?").run(delivery.id);
   addHistory(delivery.id, `Approved by ${req.user.name} (Manager) — menunggu penugasan stock oleh Logistics Staff`);
 
   res.json(loadDelivery(delivery.id));
@@ -98,7 +98,7 @@ router.post("/:id/approve", requireAuth, requireRole(MANAGER), (req, res) => {
 router.post("/:id/assign-stock", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
-  if (delivery.status !== "Approved") {
+  if (delivery.status !== "Waiting Stock Assignment") {
     return res.status(409).json({ error: `Cannot assign stock for a request with status "${delivery.status}"` });
   }
 
