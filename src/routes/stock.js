@@ -17,7 +17,20 @@ router.get("/movements", requireAuth, (req, res) => {
   const rows = material
     ? db.prepare("SELECT * FROM stock_movements WHERE material = ? ORDER BY id DESC").all(material)
     : db.prepare("SELECT * FROM stock_movements ORDER BY id DESC").all();
-  res.json(rows);
+
+  // Stock movements only ever store a reference id (the Goods Receipt,
+  // Delivery, or Return that caused them), not the individual units — so
+  // look those units up the same way the rest of the app already links
+  // them: Receipts mark `received_ref`, Deliveries/Returns mark
+  // `current_ref` as they move a unit through its lifecycle.
+  const withSerials = rows.map((m) => {
+    const serials = db.prepare(
+      "SELECT sn FROM serial_numbers WHERE material = ? AND (received_ref = ? OR current_ref = ?) ORDER BY sn"
+    ).all(m.material, m.ref, m.ref).map((r) => r.sn);
+    return { ...m, serials };
+  });
+
+  res.json(withSerials);
 });
 
 // Browse the serial number registry — used by Warehouse Stock (see which
