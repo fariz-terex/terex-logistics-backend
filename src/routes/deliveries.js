@@ -64,17 +64,42 @@ router.post("/", requireAuth, requireRole(SPV, MANAGER), (req, res) => {
   res.status(201).json(loadDelivery(id));
 });
 
-// Logistics approves: reserve stock (ready -> reserved), status -> Preparing.
-// For serialized materials, the caller picks exactly which units to reserve
-// (serialSelections: { materialName: ["SN1","SN2"] }); if it omits a
-// serialized material, the server falls back to auto-picking the oldest
-// Ready units so this endpoint still works for older/simpler clients.
-// Everything below is one transaction so a partial reservation can't happen.
-router.post("/:id/approve", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+// Manager Logistics reviews and approves at the qty level only — no stock
+// or Serial Numbers are touched here. This is a business decision ("do we
+// fulfill this request at all"), separate from the operational question of
+// exactly which physical units go out, which Logistics Staff decides next.
+router.post("/:id/approve", requireAuth, requireRole(MANAGER), (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
   if (delivery.status !== "Waiting Logistics Approval") {
     return res.status(409).json({ error: `Cannot approve a request with status "${delivery.status}"` });
+  }
+
+  for (const item of delivery.items) {
+    const material = db.prepare("SELECT ready FROM materials WHERE name = ?").get(item.material);
+    if (!material || item.qty > material.ready) {
+      return res.status(409).json({ error: `Stock for ${item.material} changed and is no longer sufficient` });
+    }
+  }
+
+  db.prepare("UPDATE deliveries SET status = 'Approved' WHERE id = ?").run(delivery.id);
+  addHistory(delivery.id, `Approved by ${req.user.name} (Manager) — menunggu penugasan stock oleh Logistics Staff`);
+
+  res.json(loadDelivery(delivery.id));
+});
+
+// Logistics Staff picks the specific units to fulfill an already-Approved
+// request: reserve stock (ready -> reserved), status -> Preparing. For
+// serialized materials, the caller picks exactly which units to reserve
+// (serialSelections: { materialName: ["SN1","SN2"] }); if it omits a
+// serialized material, the server falls back to auto-picking the oldest
+// Ready units so this endpoint still works for older/simpler clients.
+// Everything below is one transaction so a partial reservation can't happen.
+router.post("/:id/assign-stock", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+  const delivery = loadDelivery(req.params.id);
+  if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+  if (delivery.status !== "Approved") {
+    return res.status(409).json({ error: `Cannot assign stock for a request with status "${delivery.status}"` });
   }
 
   const serialSelections = req.body?.serialSelections || {};
@@ -127,21 +152,21 @@ router.post("/:id/approve", requireAuth, requireRole(LOGISTICS, MANAGER), (req, 
       }
     });
     db.prepare("UPDATE deliveries SET status = 'Preparing' WHERE id = ?").run(delivery.id);
-    addHistory(delivery.id, `Approved by ${req.user.name} (Logistics) — stock direservasi`);
+    addHistory(delivery.id, `Stock direservasi oleh ${req.user.name} (Logistics)`);
   });
   tx();
 
   res.json(loadDelivery(delivery.id));
 });
 
-router.post("/:id/reject", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+router.post("/:id/reject", requireAuth, requireRole(MANAGER), (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
   if (delivery.status !== "Waiting Logistics Approval") {
     return res.status(409).json({ error: `Cannot reject a request with status "${delivery.status}"` });
   }
   db.prepare("UPDATE deliveries SET status = 'Rejected' WHERE id = ?").run(delivery.id);
-  addHistory(delivery.id, `Rejected by ${req.user.name} (Logistics)`);
+  addHistory(delivery.id, `Rejected by ${req.user.name} (Manager)`);
   res.json(loadDelivery(delivery.id));
 });
 
