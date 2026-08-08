@@ -14,6 +14,7 @@ function reset() {
     "reconciliation_serials", "reconciliation_items", "reconciliation_history", "reconciliations",
     "return_serials", "return_items", "return_history", "returns",
     "delivery_items", "delivery_history", "deliveries",
+    "serial_numbers", "receipts",
     "stock_movements", "sites", "customers", "homebases", "areas", "materials", "users",
   ];
   tables.forEach((t) => db.prepare(`DELETE FROM ${t}`).run());
@@ -67,6 +68,25 @@ function seedDatabase() {
     ["MAT006", "Feedhorn 1.8M", "RF Component", "Unit", 0, 4, 9, 1, 1, 0],
     ["MAT007", "SCC Morningstar", "Controller", "Unit", 1, 3, 6, 0, 0, 0],
   ].forEach((m) => insertMaterial.run(...m));
+
+  // Seed a Ready Serial Number pool for every serialized material, matching
+  // its `ready` quantity above, so the new Goods Receipt / SN-picker features
+  // have real data to work with immediately. Prefixes are kept distinct from
+  // the SNs already referenced in the Return Faulty / Reconciliation seed
+  // data below (HT33..., LNBKU..., RB45...) so nothing collides.
+  const insertSerial = db.prepare(`INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref) VALUES (?, ?, 'Ready', NULL, ?, 'WR-SEED')`);
+  const seedSerials = [
+    { material: "Modem HT3300", prefix: "MOD-R", count: 25 },
+    { material: "LNB Ku-Band", prefix: "LNB-R", count: 40 },
+    { material: "Router Mikrotik RB450Gx4", prefix: "RTR-R", count: 12 },
+    { material: "Inverter AC to DC", prefix: "INV-R", count: 2 },
+    { material: "SCC Morningstar", prefix: "SCC-R", count: 6 },
+  ];
+  seedSerials.forEach(({ material, prefix, count }) => {
+    for (let i = 1; i <= count; i++) {
+      insertSerial.run(`${prefix}${String(i).padStart(3, "0")}`, material, "2026-08-01");
+    }
+  });
 
   console.log("Seed complete.");
   console.log(`Demo login — any username above with password: ${DEMO_PASSWORD}`);

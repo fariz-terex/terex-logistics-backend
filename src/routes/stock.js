@@ -1,8 +1,11 @@
 const express = require("express");
 const db = require("../db");
-const { requireAuth } = require("../middleware/auth");
+const { requireAuth, requireRole } = require("../middleware/auth");
+const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
 
 const router = express.Router();
+const MANAGER = "Admin / Manager Logistics";
+const LOGISTICS = "Logistics Staff";
 
 router.get("/", requireAuth, (req, res) => {
   const rows = db.prepare("SELECT * FROM materials ORDER BY name").all();
@@ -15,6 +18,73 @@ router.get("/movements", requireAuth, (req, res) => {
     ? db.prepare("SELECT * FROM stock_movements WHERE material = ? ORDER BY id DESC").all(material)
     : db.prepare("SELECT * FROM stock_movements ORDER BY id DESC").all();
   res.json(rows);
+});
+
+// Browse the serial number registry — used by Warehouse Stock (see which
+// units make up a material's count) and by the Delivery approval screen
+// (pick specific Ready units to reserve).
+router.get("/serials", requireAuth, (req, res) => {
+  const { material, status } = req.query;
+  let query = "SELECT * FROM serial_numbers WHERE 1=1";
+  const params = [];
+  if (material) { query += " AND material = ?"; params.push(material); }
+  if (status) { query += " AND status = ?"; params.push(status); }
+  query += " ORDER BY sn";
+  res.json(db.prepare(query).all(...params));
+});
+
+router.get("/receipts", requireAuth, (req, res) => {
+  res.json(db.prepare("SELECT * FROM receipts ORDER BY id DESC").all());
+});
+
+// Goods Receipt: the only place new stock (and new Serial Numbers) enters
+// the warehouse. Serialized materials require one SN per unit; everything
+// else is just a quantity. Wrapped in one transaction so the receipt record,
+// the serial rows, the material total, and the stock movement can never
+// partially apply.
+router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+  const { material, serials, qty, note } = req.body;
+  const mat = db.prepare("SELECT * FROM materials WHERE name = ?").get(material);
+  if (!mat) return res.status(400).json({ error: "Unknown material" });
+
+  const id = dailySequenceId(db, "receipts", "WR");
+  let addedQty = 0;
+
+  const tx = db.transaction(() => {
+    if (mat.serialized) {
+      if (!Array.isArray(serials) || serials.length === 0) throw new Error("Serial Number wajib diisi untuk material serialized");
+      const seen = new Set();
+      serials.forEach((raw) => {
+        const sn = (raw || "").trim();
+        if (!sn) throw new Error("Ada Serial Number kosong");
+        if (seen.has(sn)) throw new Error(`Serial Number duplikat dalam penerimaan ini: ${sn}`);
+        seen.add(sn);
+        if (db.prepare("SELECT 1 FROM serial_numbers WHERE sn = ?").get(sn)) throw new Error(`Serial Number sudah terdaftar di sistem: ${sn}`);
+      });
+      const insertSn = db.prepare("INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref) VALUES (?, ?, 'Ready', NULL, ?, ?)");
+      serials.forEach((raw) => insertSn.run(raw.trim(), material, isoDate(), id));
+      addedQty = serials.length;
+    } else {
+      addedQty = Number(qty) || 0;
+      if (addedQty <= 0) throw new Error("Qty harus lebih dari 0");
+    }
+
+    db.prepare("INSERT INTO receipts (id, date, material, qty, note, created_by) VALUES (?, ?, ?, ?, ?, ?)")
+      .run(id, isoDate(), material, addedQty, note || "", req.user.name);
+    db.prepare("UPDATE materials SET ready = ready + ? WHERE name = ?").run(addedQty, material);
+    const updated = db.prepare("SELECT ready FROM materials WHERE name = ?").get(material);
+    const movId = nextStockMovementId(db);
+    db.prepare(`INSERT INTO stock_movements (id, date, material, qty, ref, remaining, type) VALUES (?, ?, ?, ?, ?, ?, 'Receipt')`)
+      .run(movId, isoDate(), material, addedQty, id, updated.ready);
+  });
+
+  try {
+    tx();
+  } catch (err) {
+    return res.status(409).json({ error: err.message });
+  }
+
+  res.status(201).json({ id, material, qty: addedQty, serialized: !!mat.serialized });
 });
 
 module.exports = router;

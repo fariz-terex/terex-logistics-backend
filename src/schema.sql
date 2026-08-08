@@ -172,3 +172,29 @@ CREATE TABLE IF NOT EXISTS reconciliation_history (
 CREATE INDEX IF NOT EXISTS idx_return_serials_sn ON return_serials(sn);
 CREATE INDEX IF NOT EXISTS idx_recon_serials_sn ON reconciliation_serials(sn);
 CREATE INDEX IF NOT EXISTS idx_stock_movements_material ON stock_movements(material);
+
+-- ===================== SERIAL NUMBER REGISTRY =====================
+-- Every individual unit of a serialized material that has ever entered the
+-- warehouse (via a Goods Receipt) or come back from the field (via a
+-- completed Return Faulty) gets a row here. Non-serialized materials never
+-- touch this table — they stay purely quantity-based, as before.
+
+CREATE TABLE IF NOT EXISTS serial_numbers (
+  sn             TEXT PRIMARY KEY,
+  material       TEXT NOT NULL REFERENCES materials(name),
+  status         TEXT NOT NULL DEFAULT 'Ready' CHECK (status IN ('Ready','Reserved','In Transit','Delivered','Faulty')),
+  current_ref    TEXT,     -- id of the delivery/return currently holding this unit (nullable when sitting in Ready stock)
+  received_date  TEXT,
+  received_ref   TEXT      -- Goods Receipt id this unit arrived on (nullable for units first seen via a Return Faulty)
+);
+CREATE INDEX IF NOT EXISTS idx_serials_material_status ON serial_numbers(material, status);
+
+CREATE TABLE IF NOT EXISTS receipts (
+  id         TEXT PRIMARY KEY,
+  date       TEXT NOT NULL,
+  material   TEXT NOT NULL,
+  qty        INTEGER NOT NULL,
+  note       TEXT DEFAULT '',
+  created_by TEXT
+);
+

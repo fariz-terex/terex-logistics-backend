@@ -1,0 +1,324 @@
+From 22099cc7ec213b8079553b84e7fbe63641bb2d11 Mon Sep 17 00:00:00 2001
+From: TEREX Dev <dev@terex.local>
+Date: Sat, 8 Aug 2026 07:16:54 +0000
+Subject: [PATCH] Add Serial Number tracking: Goods Receipt, SN registry, SN
+ picker on delivery approval
+
+---
+ src/routes/deliveries.js | 67 ++++++++++++++++++++++++++++++++++---
+ src/routes/returns.js    | 14 ++++++++
+ src/routes/stock.js      | 72 +++++++++++++++++++++++++++++++++++++++-
+ src/schema.sql           | 26 +++++++++++++++
+ src/seed.js              | 20 +++++++++++
+ 5 files changed, 193 insertions(+), 6 deletions(-)
+
+diff --git a/src/routes/deliveries.js b/src/routes/deliveries.js
+index 7adb091..0b89bbf 100644
+--- a/src/routes/deliveries.js
++++ b/src/routes/deliveries.js
+@@ -11,7 +11,10 @@ const SPV = "SPV";
+ function loadDelivery(id) {
+   const delivery = db.prepare("SELECT * FROM deliveries WHERE id = ?").get(id);
+   if (!delivery) return null;
+-  const items = db.prepare("SELECT material, qty FROM delivery_items WHERE delivery_id = ?").all(id);
++  const items = db.prepare("SELECT material, qty FROM delivery_items WHERE delivery_id = ?").all(id).map((item) => ({
++    ...item,
++    serials: db.prepare("SELECT sn, status FROM serial_numbers WHERE current_ref = ? AND material = ?").all(id, item.material).map((s) => s.sn),
++  }));
+   const history = db.prepare("SELECT time, text FROM delivery_history WHERE delivery_id = ? ORDER BY id").all(id);
+   return { ...delivery, items, history };
+ }
+@@ -62,7 +65,11 @@ router.post("/", requireAuth, requireRole(SPV, MANAGER), (req, res) => {
+ });
+ 
+ // Logistics approves: reserve stock (ready -> reserved), status -> Preparing.
+-// Wrapped in one transaction so a partial reservation can never happen.
++// For serialized materials, the caller picks exactly which units to reserve
++// (serialSelections: { materialName: ["SN1","SN2"] }); if it omits a
++// serialized material, the server falls back to auto-picking the oldest
++// Ready units so this endpoint still works for older/simpler clients.
++// Everything below is one transaction so a partial reservation can't happen.
+ router.post("/:id/approve", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+   const delivery = loadDelivery(req.params.id);
+   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+@@ -70,17 +77,54 @@ router.post("/:id/approve", requireAuth, requireRole(LOGISTICS, MANAGER), (req,
+     return res.status(409).json({ error: `Cannot approve a request with status "${delivery.status}"` });
+   }
+ 
++  const serialSelections = req.body?.serialSelections || {};
++
++  const materialRows = {};
+   for (const item of delivery.items) {
+-    const material = db.prepare("SELECT ready FROM materials WHERE name = ?").get(item.material);
++    const material = db.prepare("SELECT * FROM materials WHERE name = ?").get(item.material);
+     if (!material || item.qty > material.ready) {
+       return res.status(409).json({ error: `Stock for ${item.material} changed and is no longer sufficient` });
+     }
++    materialRows[item.material] = material;
++  }
++
++  // Pre-validate every serialized item's SN selection before touching the DB.
++  for (const item of delivery.items) {
++    if (!materialRows[item.material].serialized) continue;
++    const chosen = serialSelections[item.material];
++    if (chosen) {
++      if (chosen.length !== item.qty) {
++        return res.status(400).json({ error: `Pilih tepat ${item.qty} Serial Number untuk ${item.material} (dipilih: ${chosen.length})` });
++      }
++      const uniqueChosen = new Set(chosen);
++      if (uniqueChosen.size !== chosen.length) {
++        return res.status(400).json({ error: `Ada Serial Number terpilih dua kali untuk ${item.material}` });
++      }
++      for (const sn of chosen) {
++        const row = db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(sn);
++        if (!row || row.material !== item.material || row.status !== "Ready") {
++          return res.status(409).json({ error: `Serial Number ${sn} tidak tersedia (Ready) untuk ${item.material}` });
++        }
++      }
++    } else {
++      const available = db.prepare("SELECT COUNT(*) AS n FROM serial_numbers WHERE material = ? AND status = 'Ready'").get(item.material).n;
++      if (available < item.qty) {
++        return res.status(409).json({ error: `Serial Number Ready untuk ${item.material} tidak mencukupi (tersedia ${available}, butuh ${item.qty})` });
++      }
++    }
+   }
+ 
+   const tx = db.transaction(() => {
+     delivery.items.forEach((item) => {
+       db.prepare("UPDATE materials SET ready = ready - ?, reserved = reserved + ? WHERE name = ?")
+         .run(item.qty, item.qty, item.material);
++
++      if (materialRows[item.material].serialized) {
++        const chosen = serialSelections[item.material]
++          || db.prepare("SELECT sn FROM serial_numbers WHERE material = ? AND status = 'Ready' ORDER BY sn LIMIT ?").all(item.material, item.qty).map((r) => r.sn);
++        const markReserved = db.prepare("UPDATE serial_numbers SET status = 'Reserved', current_ref = ? WHERE sn = ?");
++        chosen.forEach((sn) => markReserved.run(delivery.id, sn));
++      }
+     });
+     db.prepare("UPDATE deliveries SET status = 'Preparing' WHERE id = ?").run(delivery.id);
+     addHistory(delivery.id, `Approved by ${req.user.name} (Logistics) — stock direservasi`);
+@@ -101,8 +145,13 @@ router.post("/:id/reject", requireAuth, requireRole(LOGISTICS, MANAGER), (req, r
+   res.json(loadDelivery(delivery.id));
+ });
+ 
+-// Advances Preparing -> Shipped -> Delivered. On Preparing->Shipped, moves
+-// reserved stock into transit and writes a stock movement row.
++// Advances Preparing -> Shipped -> Delivered.
++// Preparing->Shipped: reserved stock moves into transit, matching SNs go
++// Reserved -> In Transit, and a stock movement is logged.
++// Shipped->Delivered: the units have left the warehouse for good, so
++// in_transit is now cleared for them and their SNs move to a final
++// "Delivered" state (previously in_transit was never cleared here — a gap
++// fixed alongside this SN work since both track the same real-world fact).
+ router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+   const delivery = loadDelivery(req.params.id);
+   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+@@ -116,11 +165,19 @@ router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req,
+       delivery.items.forEach((item) => {
+         db.prepare("UPDATE materials SET reserved = reserved - ?, in_transit = in_transit + ? WHERE name = ?")
+           .run(item.qty, item.qty, item.material);
++        db.prepare("UPDATE serial_numbers SET status = 'In Transit' WHERE current_ref = ? AND material = ? AND status = 'Reserved'")
++          .run(delivery.id, item.material);
+         const material = db.prepare("SELECT ready FROM materials WHERE name = ?").get(item.material);
+         const movId = nextStockMovementId(db);
+         db.prepare(`INSERT INTO stock_movements (id, date, material, qty, ref, remaining, type) VALUES (?, ?, ?, ?, ?, ?, 'Delivery')`)
+           .run(movId, isoDate(), item.material, -item.qty, delivery.id, material.ready);
+       });
++    } else if (delivery.status === "Shipped") {
++      delivery.items.forEach((item) => {
++        db.prepare("UPDATE materials SET in_transit = MAX(0, in_transit - ?) WHERE name = ?").run(item.qty, item.material);
++        db.prepare("UPDATE serial_numbers SET status = 'Delivered' WHERE current_ref = ? AND material = ? AND status = 'In Transit'")
++          .run(delivery.id, item.material);
++      });
+     }
+     db.prepare("UPDATE deliveries SET status = ? WHERE id = ?").run(next, delivery.id);
+     addHistory(delivery.id, `Status diubah ke ${next} oleh ${req.user.name}`);
+diff --git a/src/routes/returns.js b/src/routes/returns.js
+index 387db24..f5905ca 100644
+--- a/src/routes/returns.js
++++ b/src/routes/returns.js
+@@ -202,6 +202,20 @@ router.post("/:id/complete", requireAuth, requireRole(LOGISTICS, MANAGER), (req,
+       const movId = nextStockMovementId(db);
+       db.prepare(`INSERT INTO stock_movements (id, date, material, qty, ref, remaining, type) VALUES (?, ?, ?, ?, ?, ?, 'Faulty Return')`)
+         .run(movId, isoDate(), item.material, item.qty, ret.id, material.ready);
++
++      // Fold the returned Serial Numbers into the registry as Faulty. If a
++      // unit was already known (it went out through a Delivery earlier),
++      // this closes the loop on it; if it's new to the system, it's
++      // registered here for the first time.
++      item.serials.forEach((s) => {
++        const existing = db.prepare("SELECT 1 FROM serial_numbers WHERE sn = ?").get(s.sn);
++        if (existing) {
++          db.prepare("UPDATE serial_numbers SET status = 'Faulty', current_ref = ?, material = ? WHERE sn = ?").run(ret.id, item.material, s.sn);
++        } else {
++          db.prepare("INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref) VALUES (?, ?, 'Faulty', ?, ?, NULL)")
++            .run(s.sn, item.material, ret.id, isoDate());
++        }
++      });
+     });
+     db.prepare("UPDATE returns SET status = 'Completed' WHERE id = ?").run(ret.id);
+     addHistory(ret.id, `Completed by ${req.user.name} — stock warehouse diperbarui`);
+diff --git a/src/routes/stock.js b/src/routes/stock.js
+index 06070e9..a6083a1 100644
+--- a/src/routes/stock.js
++++ b/src/routes/stock.js
+@@ -1,8 +1,11 @@
+ const express = require("express");
+ const db = require("../db");
+-const { requireAuth } = require("../middleware/auth");
++const { requireAuth, requireRole } = require("../middleware/auth");
++const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
+ 
+ const router = express.Router();
++const MANAGER = "Admin / Manager Logistics";
++const LOGISTICS = "Logistics Staff";
+ 
+ router.get("/", requireAuth, (req, res) => {
+   const rows = db.prepare("SELECT * FROM materials ORDER BY name").all();
+@@ -17,4 +20,71 @@ router.get("/movements", requireAuth, (req, res) => {
+   res.json(rows);
+ });
+ 
++// Browse the serial number registry — used by Warehouse Stock (see which
++// units make up a material's count) and by the Delivery approval screen
++// (pick specific Ready units to reserve).
++router.get("/serials", requireAuth, (req, res) => {
++  const { material, status } = req.query;
++  let query = "SELECT * FROM serial_numbers WHERE 1=1";
++  const params = [];
++  if (material) { query += " AND material = ?"; params.push(material); }
++  if (status) { query += " AND status = ?"; params.push(status); }
++  query += " ORDER BY sn";
++  res.json(db.prepare(query).all(...params));
++});
++
++router.get("/receipts", requireAuth, (req, res) => {
++  res.json(db.prepare("SELECT * FROM receipts ORDER BY id DESC").all());
++});
++
++// Goods Receipt: the only place new stock (and new Serial Numbers) enters
++// the warehouse. Serialized materials require one SN per unit; everything
++// else is just a quantity. Wrapped in one transaction so the receipt record,
++// the serial rows, the material total, and the stock movement can never
++// partially apply.
++router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
++  const { material, serials, qty, note } = req.body;
++  const mat = db.prepare("SELECT * FROM materials WHERE name = ?").get(material);
++  if (!mat) return res.status(400).json({ error: "Unknown material" });
++
++  const id = dailySequenceId(db, "receipts", "WR");
++  let addedQty = 0;
++
++  const tx = db.transaction(() => {
++    if (mat.serialized) {
++      if (!Array.isArray(serials) || serials.length === 0) throw new Error("Serial Number wajib diisi untuk material serialized");
++      const seen = new Set();
++      serials.forEach((raw) => {
++        const sn = (raw || "").trim();
++        if (!sn) throw new Error("Ada Serial Number kosong");
++        if (seen.has(sn)) throw new Error(`Serial Number duplikat dalam penerimaan ini: ${sn}`);
++        seen.add(sn);
++        if (db.prepare("SELECT 1 FROM serial_numbers WHERE sn = ?").get(sn)) throw new Error(`Serial Number sudah terdaftar di sistem: ${sn}`);
++      });
++      const insertSn = db.prepare("INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref) VALUES (?, ?, 'Ready', NULL, ?, ?)");
++      serials.forEach((raw) => insertSn.run(raw.trim(), material, isoDate(), id));
++      addedQty = serials.length;
++    } else {
++      addedQty = Number(qty) || 0;
++      if (addedQty <= 0) throw new Error("Qty harus lebih dari 0");
++    }
++
++    db.prepare("INSERT INTO receipts (id, date, material, qty, note, created_by) VALUES (?, ?, ?, ?, ?, ?)")
++      .run(id, isoDate(), material, addedQty, note || "", req.user.name);
++    db.prepare("UPDATE materials SET ready = ready + ? WHERE name = ?").run(addedQty, material);
++    const updated = db.prepare("SELECT ready FROM materials WHERE name = ?").get(material);
++    const movId = nextStockMovementId(db);
++    db.prepare(`INSERT INTO stock_movements (id, date, material, qty, ref, remaining, type) VALUES (?, ?, ?, ?, ?, ?, 'Receipt')`)
++      .run(movId, isoDate(), material, addedQty, id, updated.ready);
++  });
++
++  try {
++    tx();
++  } catch (err) {
++    return res.status(409).json({ error: err.message });
++  }
++
++  res.status(201).json({ id, material, qty: addedQty, serialized: !!mat.serialized });
++});
++
+ module.exports = router;
+diff --git a/src/schema.sql b/src/schema.sql
+index 0e5a043..73a4aee 100644
+--- a/src/schema.sql
++++ b/src/schema.sql
+@@ -172,3 +172,29 @@ CREATE TABLE IF NOT EXISTS reconciliation_history (
+ CREATE INDEX IF NOT EXISTS idx_return_serials_sn ON return_serials(sn);
+ CREATE INDEX IF NOT EXISTS idx_recon_serials_sn ON reconciliation_serials(sn);
+ CREATE INDEX IF NOT EXISTS idx_stock_movements_material ON stock_movements(material);
++
++-- ===================== SERIAL NUMBER REGISTRY =====================
++-- Every individual unit of a serialized material that has ever entered the
++-- warehouse (via a Goods Receipt) or come back from the field (via a
++-- completed Return Faulty) gets a row here. Non-serialized materials never
++-- touch this table — they stay purely quantity-based, as before.
++
++CREATE TABLE IF NOT EXISTS serial_numbers (
++  sn             TEXT PRIMARY KEY,
++  material       TEXT NOT NULL REFERENCES materials(name),
++  status         TEXT NOT NULL DEFAULT 'Ready' CHECK (status IN ('Ready','Reserved','In Transit','Delivered','Faulty')),
++  current_ref    TEXT,     -- id of the delivery/return currently holding this unit (nullable when sitting in Ready stock)
++  received_date  TEXT,
++  received_ref   TEXT      -- Goods Receipt id this unit arrived on (nullable for units first seen via a Return Faulty)
++);
++CREATE INDEX IF NOT EXISTS idx_serials_material_status ON serial_numbers(material, status);
++
++CREATE TABLE IF NOT EXISTS receipts (
++  id         TEXT PRIMARY KEY,
++  date       TEXT NOT NULL,
++  material   TEXT NOT NULL,
++  qty        INTEGER NOT NULL,
++  note       TEXT DEFAULT '',
++  created_by TEXT
++);
++
+diff --git a/src/seed.js b/src/seed.js
+index d293c6e..d7021a8 100644
+--- a/src/seed.js
++++ b/src/seed.js
+@@ -14,6 +14,7 @@ function reset() {
+     "reconciliation_serials", "reconciliation_items", "reconciliation_history", "reconciliations",
+     "return_serials", "return_items", "return_history", "returns",
+     "delivery_items", "delivery_history", "deliveries",
++    "serial_numbers", "receipts",
+     "stock_movements", "sites", "customers", "homebases", "areas", "materials", "users",
+   ];
+   tables.forEach((t) => db.prepare(`DELETE FROM ${t}`).run());
+@@ -68,6 +69,25 @@ function seedDatabase() {
+     ["MAT007", "SCC Morningstar", "Controller", "Unit", 1, 3, 6, 0, 0, 0],
+   ].forEach((m) => insertMaterial.run(...m));
+ 
++  // Seed a Ready Serial Number pool for every serialized material, matching
++  // its `ready` quantity above, so the new Goods Receipt / SN-picker features
++  // have real data to work with immediately. Prefixes are kept distinct from
++  // the SNs already referenced in the Return Faulty / Reconciliation seed
++  // data below (HT33..., LNBKU..., RB45...) so nothing collides.
++  const insertSerial = db.prepare(`INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref) VALUES (?, ?, 'Ready', NULL, ?, 'WR-SEED')`);
++  const seedSerials = [
++    { material: "Modem HT3300", prefix: "MOD-R", count: 25 },
++    { material: "LNB Ku-Band", prefix: "LNB-R", count: 40 },
++    { material: "Router Mikrotik RB450Gx4", prefix: "RTR-R", count: 12 },
++    { material: "Inverter AC to DC", prefix: "INV-R", count: 2 },
++    { material: "SCC Morningstar", prefix: "SCC-R", count: 6 },
++  ];
++  seedSerials.forEach(({ material, prefix, count }) => {
++    for (let i = 1; i <= count; i++) {
++      insertSerial.run(`${prefix}${String(i).padStart(3, "0")}`, material, "2026-08-01");
++    }
++  });
++
+   console.log("Seed complete.");
+   console.log(`Demo login — any username above with password: ${DEMO_PASSWORD}`);
+   console.log("e.g. fariz / sari / andi / yohanes");
+-- 
+2.43.0
+

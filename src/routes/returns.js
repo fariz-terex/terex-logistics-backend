@@ -202,6 +202,20 @@ router.post("/:id/complete", requireAuth, requireRole(LOGISTICS, MANAGER), (req,
       const movId = nextStockMovementId(db);
       db.prepare(`INSERT INTO stock_movements (id, date, material, qty, ref, remaining, type) VALUES (?, ?, ?, ?, ?, ?, 'Faulty Return')`)
         .run(movId, isoDate(), item.material, item.qty, ret.id, material.ready);
+
+      // Fold the returned Serial Numbers into the registry as Faulty. If a
+      // unit was already known (it went out through a Delivery earlier),
+      // this closes the loop on it; if it's new to the system, it's
+      // registered here for the first time.
+      item.serials.forEach((s) => {
+        const existing = db.prepare("SELECT 1 FROM serial_numbers WHERE sn = ?").get(s.sn);
+        if (existing) {
+          db.prepare("UPDATE serial_numbers SET status = 'Faulty', current_ref = ?, material = ? WHERE sn = ?").run(ret.id, item.material, s.sn);
+        } else {
+          db.prepare("INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref) VALUES (?, ?, 'Faulty', ?, ?, NULL)")
+            .run(s.sn, item.material, ret.id, isoDate());
+        }
+      });
     });
     db.prepare("UPDATE returns SET status = 'Completed' WHERE id = ?").run(ret.id);
     addHistory(ret.id, `Completed by ${req.user.name} — stock warehouse diperbarui`);
