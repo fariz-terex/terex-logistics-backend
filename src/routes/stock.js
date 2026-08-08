@@ -37,12 +37,14 @@ router.get("/movements", requireAuth, (req, res) => {
 // units make up a material's count) and by the Delivery approval screen
 // (pick specific Ready units to reserve).
 router.get("/serials", requireAuth, (req, res) => {
-  const { material, status } = req.query;
+  const { material, status, q } = req.query;
   let query = "SELECT * FROM serial_numbers WHERE 1=1";
   const params = [];
   if (material) { query += " AND material = ?"; params.push(material); }
   if (status) { query += " AND status = ?"; params.push(status); }
+  if (q) { query += " AND sn LIKE ?"; params.push(`%${q}%`); }
   query += " ORDER BY sn";
+  if (q) query += " LIMIT 10"; // free-text search only — the SN-picker use case (material+status) needs the full list
   res.json(db.prepare(query).all(...params));
 });
 

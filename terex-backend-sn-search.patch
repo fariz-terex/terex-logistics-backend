@@ -1,0 +1,33 @@
+From 41c02749d8f4d3d37cfc084b9083f1209326aba1 Mon Sep 17 00:00:00 2001
+From: TEREX Dev <dev@terex.local>
+Date: Sat, 8 Aug 2026 14:00:04 +0000
+Subject: [PATCH] Support partial Serial Number search on GET
+ /api/stock/serials
+
+---
+ src/routes/stock.js | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/routes/stock.js b/src/routes/stock.js
+index ee1feed..32f4323 100644
+--- a/src/routes/stock.js
++++ b/src/routes/stock.js
+@@ -37,12 +37,14 @@ router.get("/movements", requireAuth, (req, res) => {
+ // units make up a material's count) and by the Delivery approval screen
+ // (pick specific Ready units to reserve).
+ router.get("/serials", requireAuth, (req, res) => {
+-  const { material, status } = req.query;
++  const { material, status, q } = req.query;
+   let query = "SELECT * FROM serial_numbers WHERE 1=1";
+   const params = [];
+   if (material) { query += " AND material = ?"; params.push(material); }
+   if (status) { query += " AND status = ?"; params.push(status); }
++  if (q) { query += " AND sn LIKE ?"; params.push(`%${q}%`); }
+   query += " ORDER BY sn";
++  if (q) query += " LIMIT 10"; // free-text search only — the SN-picker use case (material+status) needs the full list
+   res.json(db.prepare(query).all(...params));
+ });
+ 
+-- 
+2.43.0
+
