@@ -36,4 +36,29 @@ router.patch("/:id/toggle-status", requireAuth, requireRole(MANAGER), (req, res)
   res.json(serialize(db.prepare("SELECT * FROM materials WHERE id = ?").get(material.id)));
 });
 
+router.post("/import", requireAuth, requireRole(MANAGER), (req, res) => {
+  const rows = req.body.rows || [];
+  const startCount = db.prepare("SELECT COUNT(*) AS n FROM materials").get().n;
+  const seenNames = new Set();
+  const results = rows.map((r, idx) => {
+    const errors = [];
+    const name = (r.name || "").trim();
+    if (!name) errors.push("Material Name kosong");
+    else if (db.prepare("SELECT 1 FROM materials WHERE name = ?").get(name)) errors.push("Material Name sudah ada");
+    else if (seenNames.has(name.toLowerCase())) errors.push("Duplikat dalam file ini");
+    if (!r.category) errors.push("Category kosong");
+    seenNames.add(name.toLowerCase());
+    return { name, category: r.category || "", unit: r.unit || "Unit", serialized: r.serialized, minStock: Number(r.minStock) || 0, status: r.status || "Active", errors, _seq: startCount + idx + 1 };
+  });
+
+  const insert = db.prepare(`INSERT INTO materials (id, name, category, unit, serialized, min_stock, status, ready, faulty, reserved, in_transit) VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0)`);
+  const tx = db.transaction((validRows) => {
+    validRows.forEach((r) => insert.run(`MAT${String(r._seq).padStart(3, "0")}`, r.name, r.category, r.unit, r.serialized ? 1 : 0, r.minStock, r.status));
+  });
+  const validRows = results.filter((r) => r.errors.length === 0);
+  tx(validRows);
+
+  res.json({ imported: validRows.length, total: results.length, results });
+});
+
 module.exports = router;

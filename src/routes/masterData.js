@@ -25,6 +25,25 @@ router.patch("/areas/:code/toggle-status", requireAuth, requireRole(MANAGER), (r
   db.prepare("UPDATE areas SET status = ? WHERE code = ?").run(next, row.code);
   res.json(db.prepare("SELECT * FROM areas WHERE code = ?").get(row.code));
 });
+router.post("/areas/import", requireAuth, requireRole(MANAGER), (req, res) => {
+  const rows = req.body.rows || [];
+  const startCount = db.prepare("SELECT COUNT(*) AS n FROM areas").get().n;
+  const seen = new Set();
+  const results = rows.map((r, idx) => {
+    const errors = [];
+    const name = (r.name || "").trim();
+    if (!name) errors.push("Area Name kosong");
+    else if (db.prepare("SELECT 1 FROM areas WHERE name = ?").get(name)) errors.push("Area Name sudah ada");
+    else if (seen.has(name.toLowerCase())) errors.push("Duplikat dalam file ini");
+    seen.add(name.toLowerCase());
+    return { name, status: r.status || "Active", errors, _seq: startCount + idx + 1 };
+  });
+  const insert = db.prepare("INSERT INTO areas (code, name, status) VALUES (?, ?, ?)");
+  const tx = db.transaction((validRows) => validRows.forEach((r) => insert.run(`AR${String(r._seq).padStart(3, "0")}`, r.name, r.status)));
+  const validRows = results.filter((r) => r.errors.length === 0);
+  tx(validRows);
+  res.json({ imported: validRows.length, total: results.length, results });
+});
 
 // ---------- Homebases ----------
 router.get("/homebases", requireAuth, (req, res) => {
@@ -47,6 +66,27 @@ router.patch("/homebases/:code/toggle-status", requireAuth, requireRole(MANAGER)
   db.prepare("UPDATE homebases SET status = ? WHERE code = ?").run(next, row.code);
   res.json(db.prepare("SELECT * FROM homebases WHERE code = ?").get(row.code));
 });
+router.post("/homebases/import", requireAuth, requireRole(MANAGER), (req, res) => {
+  const rows = req.body.rows || [];
+  const startCount = db.prepare("SELECT COUNT(*) AS n FROM homebases").get().n;
+  const seen = new Set();
+  const results = rows.map((r, idx) => {
+    const errors = [];
+    const name = (r.name || "").trim();
+    if (!name) errors.push("Nama Homebase kosong");
+    else if (db.prepare("SELECT 1 FROM homebases WHERE name = ?").get(name)) errors.push("Nama Homebase sudah ada");
+    else if (seen.has(name.toLowerCase())) errors.push("Duplikat dalam file ini");
+    if (!r.area) errors.push("Area kosong");
+    else if (!db.prepare("SELECT 1 FROM areas WHERE name = ?").get(r.area)) errors.push("Area tidak ditemukan di Master Area");
+    seen.add(name.toLowerCase());
+    return { name, area: r.area || "", address: r.address || "", pic: r.pic || "", phone: r.phone || "", status: r.status || "Active", errors, _seq: startCount + idx + 1 };
+  });
+  const insert = db.prepare(`INSERT INTO homebases (code, name, area, address, pic, phone, status) VALUES (?, ?, ?, ?, ?, ?, ?)`);
+  const tx = db.transaction((validRows) => validRows.forEach((r) => insert.run(`HB${String(r._seq).padStart(3, "0")}`, r.name, r.area, r.address, r.pic, r.phone, r.status)));
+  const validRows = results.filter((r) => r.errors.length === 0);
+  tx(validRows);
+  res.json({ imported: validRows.length, total: results.length, results });
+});
 
 // ---------- Customers ----------
 router.get("/customers", requireAuth, (req, res) => {
@@ -65,6 +105,25 @@ router.patch("/customers/:id/toggle-status", requireAuth, requireRole(MANAGER), 
   const next = row.status === "Active" ? "Inactive" : "Active";
   db.prepare("UPDATE customers SET status = ? WHERE id = ?").run(next, row.id);
   res.json(db.prepare("SELECT * FROM customers WHERE id = ?").get(row.id));
+});
+router.post("/customers/import", requireAuth, requireRole(MANAGER), (req, res) => {
+  const rows = req.body.rows || [];
+  const startCount = db.prepare("SELECT COUNT(*) AS n FROM customers").get().n;
+  const seen = new Set();
+  const results = rows.map((r, idx) => {
+    const errors = [];
+    const name = (r.name || "").trim();
+    if (!name) errors.push("Customer Name kosong");
+    else if (db.prepare("SELECT 1 FROM customers WHERE name = ?").get(name)) errors.push("Customer Name sudah ada");
+    else if (seen.has(name.toLowerCase())) errors.push("Duplikat dalam file ini");
+    seen.add(name.toLowerCase());
+    return { name, status: r.status || "Active", errors, _seq: startCount + idx + 1 };
+  });
+  const insert = db.prepare("INSERT INTO customers (id, name, status) VALUES (?, ?, ?)");
+  const tx = db.transaction((validRows) => validRows.forEach((r) => insert.run(`CUST${String(r._seq).padStart(3, "0")}`, r.name, r.status)));
+  const validRows = results.filter((r) => r.errors.length === 0);
+  tx(validRows);
+  res.json({ imported: validRows.length, total: results.length, results });
 });
 
 // ---------- Sites (incl. bulk import, matches Master Site CSV import) ----------
