@@ -39,4 +39,31 @@ if (usersColumns.length > 0 && !usersColumns.includes("username")) {
   db.exec(schema);
 }
 
+// Backfill: `serial_numbers` is a brand-new table (this migration was added
+// alongside it), so any database that already had materials with a `ready`
+// count before this deploy has zero matching SN rows — which would make
+// every serialized material look like it has no Ready stock at all. Top up
+// each serialized material's Ready pool with placeholder SNs until it
+// matches `materials.ready`, so existing deployments don't lose the ability
+// to approve deliveries the moment this ships.
+const serializedMaterials = db.prepare("SELECT id, name, ready FROM materials WHERE serialized = 1").all();
+serializedMaterials.forEach((mat) => {
+  const existing = db.prepare("SELECT COUNT(*) AS n FROM serial_numbers WHERE material = ? AND status = 'Ready'").get(mat.name).n;
+  const missing = mat.ready - existing;
+  if (missing > 0) {
+    console.log(`[db] backfilling ${missing} placeholder Ready SN(s) for ${mat.name}`);
+    const insertSn = db.prepare("INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref) VALUES (?, ?, 'Ready', NULL, ?, 'BACKFILL')");
+    for (let i = 1; i <= missing; i++) {
+      const sn = `LEGACY-${mat.id}-${String(i).padStart(3, "0")}`;
+      if (!db.prepare("SELECT 1 FROM serial_numbers WHERE sn = ?").get(sn)) {
+        insertSn.run(sn, mat.name, isoDateForMigration());
+      }
+    }
+  }
+});
+
+function isoDateForMigration() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 module.exports = db;
