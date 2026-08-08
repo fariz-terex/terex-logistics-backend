@@ -183,4 +183,35 @@ router.patch("/users/:id/toggle-status", requireAuth, requireRole(MANAGER), (req
   res.json({ id: row.id, name: row.name, username: row.username, role: row.role, assignment: row.assignment, status: next });
 });
 
+const VALID_ROLES = ["Admin / Manager Logistics", "Logistics Staff", "SPV", "Technician"];
+
+router.patch("/users/:id", requireAuth, requireRole(MANAGER), (req, res) => {
+  const row = db.prepare("SELECT * FROM users WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "User not found" });
+
+  const { name, username, role, assignment, password } = req.body;
+
+  if (role && !VALID_ROLES.includes(role)) return res.status(400).json({ error: `Invalid role: ${role}` });
+
+  let nextUsername = row.username;
+  if (username && username.trim().toLowerCase() !== row.username) {
+    nextUsername = username.trim().toLowerCase();
+    if (!nextUsername) return res.status(400).json({ error: "Username cannot be empty" });
+    if (db.prepare("SELECT 1 FROM users WHERE username = ? AND id != ?").get(nextUsername, row.id)) {
+      return res.status(409).json({ error: "Username already taken" });
+    }
+  }
+
+  const nextName = name?.trim() ? name.trim() : row.name;
+  const nextRole = role || row.role;
+  const nextAssignment = assignment !== undefined ? assignment : row.assignment;
+  // Password is optional on edit — blank/omitted means "keep the current password".
+  const nextHash = password?.trim() ? bcrypt.hashSync(password, 10) : row.password_hash;
+
+  db.prepare("UPDATE users SET name = ?, username = ?, role = ?, assignment = ?, password_hash = ? WHERE id = ?")
+    .run(nextName, nextUsername, nextRole, nextAssignment, nextHash, row.id);
+
+  res.json({ id: row.id, name: nextName, username: nextUsername, role: nextRole, assignment: nextAssignment, status: row.status });
+});
+
 module.exports = router;
