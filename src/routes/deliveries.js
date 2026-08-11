@@ -21,6 +21,7 @@ function loadDelivery(id) {
   return {
     ...delivery, items, history,
     docOverall: delivery.doc_overall, docAfterPacking: delivery.doc_after_packing, resiNumber: delivery.resi_number, resiPhoto: delivery.resi_photo,
+    deliveredPhoto: delivery.delivered_photo, receivedBy: delivery.received_by,
     serialPhotos,
   };
 }
@@ -247,11 +248,20 @@ router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
 // Shipped -> Delivered: the units have left the warehouse for good, so
 // in_transit is cleared for them and their SNs move to a final "Delivered"
 // state. No extra documentation required at this step.
+// Shipped -> Delivered: the units have left the warehouse for good, so
+// in_transit is cleared for them and their SNs move to a final "Delivered"
+// state. A proof-of-receipt photo is required here — the recipient's name
+// is a nice-to-have, so it stays optional.
 router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
   if (delivery.status !== "Shipped") {
     return res.status(409).json({ error: `Cannot advance a request with status "${delivery.status}"` });
+  }
+
+  const { deliveredPhoto, receivedBy } = req.body || {};
+  if (!deliveredPhoto) {
+    return res.status(400).json({ error: "Foto bukti penerimaan barang wajib diisi" });
   }
 
   const tx = db.transaction(() => {
@@ -260,8 +270,9 @@ router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, 
       db.prepare("UPDATE serial_numbers SET status = 'Delivered' WHERE current_ref = ? AND material = ? AND status = 'In Transit'")
         .run(delivery.id, item.material);
     });
-    db.prepare("UPDATE deliveries SET status = 'Delivered' WHERE id = ?").run(delivery.id);
-    addHistory(delivery.id, `Status diubah ke Delivered oleh ${req.user.name}`);
+    db.prepare("UPDATE deliveries SET status = 'Delivered', delivered_photo = ?, received_by = ? WHERE id = ?")
+      .run(deliveredPhoto, receivedBy || null, delivery.id);
+    addHistory(delivery.id, `Status diubah ke Delivered oleh ${req.user.name}${receivedBy ? ` — diterima oleh ${receivedBy}` : ""}`);
   });
   tx();
 

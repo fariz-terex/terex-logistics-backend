@@ -89,5 +89,10 @@ if (!deliveryColumns.includes("resi_photo")) {
   console.log("[db] adding resi_photo column to deliveries");
   db.exec("ALTER TABLE deliveries ADD COLUMN resi_photo TEXT");
 }
+if (!deliveryColumns.includes("delivered_photo")) {
+  console.log("[db] adding delivered_photo and received_by columns to deliveries");
+  db.exec("ALTER TABLE deliveries ADD COLUMN delivered_photo TEXT");
+  db.exec("ALTER TABLE deliveries ADD COLUMN received_by TEXT");
+}
 
 module.exports = db;

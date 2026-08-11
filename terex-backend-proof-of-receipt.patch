@@ -1,0 +1,91 @@
+From 4ddbe30883386b7a56abb78e45ff20467aa9618a Mon Sep 17 00:00:00 2001
+From: TEREX Dev <dev@terex.local>
+Date: Tue, 11 Aug 2026 06:55:45 +0000
+Subject: [PATCH] Require proof-of-receipt photo before Shipped->Delivered,
+ optional receiver name
+
+---
+ src/db.js                |  5 +++++
+ src/routes/deliveries.js | 15 +++++++++++++--
+ src/schema.sql           |  4 +++-
+ 3 files changed, 21 insertions(+), 3 deletions(-)
+
+diff --git a/src/db.js b/src/db.js
+index 5caa11f..5fbcb03 100644
+--- a/src/db.js
++++ b/src/db.js
+@@ -95,5 +95,10 @@ if (!deliveryColumns.includes("resi_photo")) {
+   console.log("[db] adding resi_photo column to deliveries");
+   db.exec("ALTER TABLE deliveries ADD COLUMN resi_photo TEXT");
+ }
++if (!deliveryColumns.includes("delivered_photo")) {
++  console.log("[db] adding delivered_photo and received_by columns to deliveries");
++  db.exec("ALTER TABLE deliveries ADD COLUMN delivered_photo TEXT");
++  db.exec("ALTER TABLE deliveries ADD COLUMN received_by TEXT");
++}
+ 
+ module.exports = db;
+diff --git a/src/routes/deliveries.js b/src/routes/deliveries.js
+index 9398888..4312213 100644
+--- a/src/routes/deliveries.js
++++ b/src/routes/deliveries.js
+@@ -21,6 +21,7 @@ function loadDelivery(id) {
+   return {
+     ...delivery, items, history,
+     docOverall: delivery.doc_overall, docAfterPacking: delivery.doc_after_packing, resiNumber: delivery.resi_number, resiPhoto: delivery.resi_photo,
++    deliveredPhoto: delivery.delivered_photo, receivedBy: delivery.received_by,
+     serialPhotos,
+   };
+ }
+@@ -247,6 +248,10 @@ router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
+ // Shipped -> Delivered: the units have left the warehouse for good, so
+ // in_transit is cleared for them and their SNs move to a final "Delivered"
+ // state. No extra documentation required at this step.
++// Shipped -> Delivered: the units have left the warehouse for good, so
++// in_transit is cleared for them and their SNs move to a final "Delivered"
++// state. A proof-of-receipt photo is required here — the recipient's name
++// is a nice-to-have, so it stays optional.
+ router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+   const delivery = loadDelivery(req.params.id);
+   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+@@ -254,14 +259,20 @@ router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req,
+     return res.status(409).json({ error: `Cannot advance a request with status "${delivery.status}"` });
+   }
+ 
++  const { deliveredPhoto, receivedBy } = req.body || {};
++  if (!deliveredPhoto) {
++    return res.status(400).json({ error: "Foto bukti penerimaan barang wajib diisi" });
++  }
++
+   const tx = db.transaction(() => {
+     delivery.items.forEach((item) => {
+       db.prepare("UPDATE materials SET in_transit = MAX(0, in_transit - ?) WHERE name = ?").run(item.qty, item.material);
+       db.prepare("UPDATE serial_numbers SET status = 'Delivered' WHERE current_ref = ? AND material = ? AND status = 'In Transit'")
+         .run(delivery.id, item.material);
+     });
+-    db.prepare("UPDATE deliveries SET status = 'Delivered' WHERE id = ?").run(delivery.id);
+-    addHistory(delivery.id, `Status diubah ke Delivered oleh ${req.user.name}`);
++    db.prepare("UPDATE deliveries SET status = 'Delivered', delivered_photo = ?, received_by = ? WHERE id = ?")
++      .run(deliveredPhoto, receivedBy || null, delivery.id);
++    addHistory(delivery.id, `Status diubah ke Delivered oleh ${req.user.name}${receivedBy ? ` — diterima oleh ${receivedBy}` : ""}`);
+   });
+   tx();
+ 
+diff --git a/src/schema.sql b/src/schema.sql
+index 7f7ac05..978fb66 100644
+--- a/src/schema.sql
++++ b/src/schema.sql
+@@ -84,7 +84,9 @@ CREATE TABLE IF NOT EXISTS deliveries (
+   doc_overall       TEXT,   -- photo of all materials together, taken before shipping
+   doc_after_packing TEXT,   -- photo of the materials once packed
+   resi_number       TEXT,   -- shipping receipt number — optional, often added after shipping
+-  resi_photo        TEXT    -- photo of the shipping receipt — also optional, added the same way
++  resi_photo        TEXT,   -- photo of the shipping receipt — also optional, added the same way
++  delivered_photo   TEXT,   -- proof-of-receipt photo, required before Shipped -> Delivered
++  received_by       TEXT    -- name of whoever accepted the goods in the field — optional
+ );
+ 
+ CREATE TABLE IF NOT EXISTS delivery_items (
+-- 
+2.43.0
+
