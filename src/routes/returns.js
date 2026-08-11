@@ -69,19 +69,29 @@ router.get("/:id", requireAuth, (req, res) => {
   res.json(ret);
 });
 
-// Shared validation for create + resubmit: full docs, every SN filled with a
-// photo, no duplicates within the submission, and no cross-transaction SN
-// conflicts (except the transaction being edited).
-function validateSubmission({ material, qty, serials, docs }, excludeReturnId) {
-  if (!material || !qty || !Array.isArray(serials) || serials.length === 0) return "material, qty, and at least one serial are required";
+// Shared validation for create + resubmit: full docs, every item has a
+// material/qty/serials, every SN filled with a photo, no duplicates within
+// the whole submission (across items, not just within one), and no
+// cross-transaction SN conflicts (except the transaction being edited).
+function validateSubmission({ items, docs }, excludeReturnId) {
+  if (!Array.isArray(items) || items.length === 0) return "Minimal satu material dengan Serial Number wajib diisi";
   if (!docs?.beforePacking || !docs?.afterPacking || !docs?.weighing) return "Foto sebelum packing, setelah packing, dan timbangan wajib diisi";
   const seen = new Set();
-  for (const s of serials) {
-    if (!s.sn?.trim() || !s.photo) return "Setiap Serial Number wajib diisi beserta fotonya";
-    if (seen.has(s.sn.trim())) return `Serial Number duplikat dalam transaksi ini: ${s.sn}`;
-    seen.add(s.sn.trim());
-    const conflict = findSNConflict(s.sn.trim(), excludeReturnId);
-    if (conflict) return `Serial Number ${s.sn} sedang digunakan pada ${conflict}`;
+  for (const item of items) {
+    if (!item.material || !item.qty || !Array.isArray(item.serials) || item.serials.length === 0) {
+      return `Material, qty, dan Serial Number wajib diisi untuk ${item.material || "salah satu material"}`;
+    }
+    if (item.qty !== item.serials.length) {
+      return `Jumlah Serial Number (${item.serials.length}) harus sama dengan qty (${item.qty}) untuk ${item.material}`;
+    }
+    for (const s of item.serials) {
+      if (!s.sn?.trim() || !s.photo) return `Setiap Serial Number wajib diisi beserta fotonya (${item.material})`;
+      const trimmed = s.sn.trim();
+      if (seen.has(trimmed)) return `Serial Number duplikat dalam transaksi ini: ${trimmed}`;
+      seen.add(trimmed);
+      const conflict = findSNConflict(trimmed, excludeReturnId);
+      if (conflict) return `Serial Number ${trimmed} sedang digunakan pada ${conflict}`;
+    }
   }
   return null;
 }
@@ -90,14 +100,17 @@ router.post("/", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
   const err = validateSubmission(req.body, null);
   if (err) return res.status(409).json({ error: err });
 
-  const { material, qty, serials, docs } = req.body;
+  const { items, docs } = req.body;
   const id = dailySequenceId(db, "returns", "RF");
   const tx = db.transaction(() => {
     db.prepare(`INSERT INTO returns (id, technician, homebase, site, status, date, resi_number, doc_before, doc_after, doc_weighing) VALUES (?, ?, ?, ?, 'Waiting Logistics Review', ?, '', ?, ?, ?)`)
       .run(id, req.user.name, req.body.homebase || req.user.assignment || "", req.body.site || "", isoDate(), docs.beforePacking, docs.afterPacking, docs.weighing);
-    const itemId = db.prepare("INSERT INTO return_items (return_id, material, qty) VALUES (?, ?, ?)").run(id, material, qty).lastInsertRowid;
+    const insertItem = db.prepare("INSERT INTO return_items (return_id, material, qty) VALUES (?, ?, ?)");
     const insertSerial = db.prepare("INSERT INTO return_serials (return_item_id, sn, photo) VALUES (?, ?, ?)");
-    serials.forEach((s) => insertSerial.run(itemId, s.sn.trim(), s.photo));
+    items.forEach((item) => {
+      const itemId = insertItem.run(id, item.material, item.qty).lastInsertRowid;
+      item.serials.forEach((s) => insertSerial.run(itemId, s.sn.trim(), s.photo));
+    });
     addHistory(id, `Draft dibuat dan disubmit oleh Technician ${req.user.name}`);
   });
   tx();
@@ -135,14 +148,17 @@ router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), (req, res)
   const err = validateSubmission(req.body, ret.id);
   if (err) return res.status(409).json({ error: err });
 
-  const { material, qty, serials, docs } = req.body;
+  const { items, docs } = req.body;
   const tx = db.transaction(() => {
     db.prepare("UPDATE returns SET status = 'Waiting Logistics Review', revision_note = NULL, doc_before = ?, doc_after = ?, doc_weighing = ? WHERE id = ?")
       .run(docs.beforePacking, docs.afterPacking, docs.weighing, ret.id);
     db.prepare("DELETE FROM return_items WHERE return_id = ?").run(ret.id); // cascades to serials
-    const itemId = db.prepare("INSERT INTO return_items (return_id, material, qty) VALUES (?, ?, ?)").run(ret.id, material, qty).lastInsertRowid;
+    const insertItem = db.prepare("INSERT INTO return_items (return_id, material, qty) VALUES (?, ?, ?)");
     const insertSerial = db.prepare("INSERT INTO return_serials (return_item_id, sn, photo) VALUES (?, ?, ?)");
-    serials.forEach((s) => insertSerial.run(itemId, s.sn.trim(), s.photo));
+    items.forEach((item) => {
+      const itemId = insertItem.run(ret.id, item.material, item.qty).lastInsertRowid;
+      item.serials.forEach((s) => insertSerial.run(itemId, s.sn.trim(), s.photo));
+    });
     addHistory(ret.id, `Diperbaiki dan dikirim ulang oleh Technician ${req.user.name}`);
   });
   tx();
