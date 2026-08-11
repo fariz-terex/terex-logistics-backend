@@ -73,14 +73,17 @@ CREATE TABLE IF NOT EXISTS stock_movements (
 -- ===================== DELIVERY REQUEST =====================
 
 CREATE TABLE IF NOT EXISTS deliveries (
-  id        TEXT PRIMARY KEY,
-  requester TEXT NOT NULL,
-  homebase  TEXT NOT NULL,
-  site      TEXT DEFAULT '',
-  keperluan TEXT NOT NULL,
-  note      TEXT DEFAULT '',
-  status    TEXT NOT NULL DEFAULT 'Waiting Logistics Approval',
-  date      TEXT NOT NULL
+  id                TEXT PRIMARY KEY,
+  requester         TEXT NOT NULL,
+  homebase          TEXT NOT NULL,
+  site              TEXT DEFAULT '',
+  keperluan         TEXT NOT NULL,
+  note              TEXT DEFAULT '',
+  status            TEXT NOT NULL DEFAULT 'Waiting Logistics Approval',
+  date              TEXT NOT NULL,
+  doc_overall       TEXT,   -- photo of all materials together, taken before shipping
+  doc_after_packing TEXT,   -- photo of the materials once packed
+  resi_number       TEXT    -- shipping receipt number — optional, often added after shipping
 );
 
 CREATE TABLE IF NOT EXISTS delivery_items (
@@ -95,6 +98,18 @@ CREATE TABLE IF NOT EXISTS delivery_history (
   delivery_id TEXT NOT NULL REFERENCES deliveries(id) ON DELETE CASCADE,
   time        TEXT NOT NULL,
   text        TEXT NOT NULL
+);
+
+-- Shipment documentation captured right before a Delivery Request moves to
+-- "Shipped": one photo per Serial Number being sent, plus overall/packing
+-- photos. Resi (shipping receipt) is deliberately separate and nullable —
+-- it's often issued by the courier after the fact, so it's added later via
+-- its own endpoint rather than being required at ship time.
+CREATE TABLE IF NOT EXISTS delivery_serial_photos (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  delivery_id TEXT NOT NULL REFERENCES deliveries(id) ON DELETE CASCADE,
+  sn          TEXT NOT NULL,
+  photo       TEXT NOT NULL
 );
 
 -- ===================== RETURN MATERIAL FAULTY =====================

@@ -16,7 +16,13 @@ function loadDelivery(id) {
     serials: db.prepare("SELECT sn, status FROM serial_numbers WHERE current_ref = ? AND material = ?").all(id, item.material).map((s) => s.sn),
   }));
   const history = db.prepare("SELECT time, text FROM delivery_history WHERE delivery_id = ? ORDER BY id").all(id);
-  return { ...delivery, items, history };
+  const serialPhotoRows = db.prepare("SELECT sn, photo FROM delivery_serial_photos WHERE delivery_id = ?").all(id);
+  const serialPhotos = Object.fromEntries(serialPhotoRows.map((r) => [r.sn, r.photo]));
+  return {
+    ...delivery, items, history,
+    docOverall: delivery.doc_overall, docAfterPacking: delivery.doc_after_packing, resiNumber: delivery.resi_number,
+    serialPhotos,
+  };
 }
 
 function addHistory(id, text) {
@@ -170,42 +176,85 @@ router.post("/:id/reject", requireAuth, requireRole(MANAGER), (req, res) => {
   res.json(loadDelivery(delivery.id));
 });
 
-// Advances Preparing -> Shipped -> Delivered.
-// Preparing->Shipped: reserved stock moves into transit, matching SNs go
-// Reserved -> In Transit, and a stock movement is logged.
-// Shipped->Delivered: the units have left the warehouse for good, so
-// in_transit is now cleared for them and their SNs move to a final
-// "Delivered" state (previously in_transit was never cleared here — a gap
-// fixed alongside this SN work since both track the same real-world fact).
+// Preparing -> Shipped requires shipment documentation first: one photo per
+// Serial Number being sent, plus an overall photo and a post-packing photo.
+// Resi is intentionally NOT required here — couriers often issue it after
+// pickup, so it's added later via POST /:id/resi. Reserved stock moves into
+// transit and matching SNs go Reserved -> In Transit, same as before.
+router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+  const delivery = loadDelivery(req.params.id);
+  if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+  if (delivery.status !== "Preparing") {
+    return res.status(409).json({ error: `Cannot ship a request with status "${delivery.status}"` });
+  }
+
+  const { docOverall, docAfterPacking, serialPhotos } = req.body || {};
+  if (!docOverall || !docAfterPacking) {
+    return res.status(400).json({ error: "Foto keseluruhan material dan foto setelah packing wajib diisi" });
+  }
+
+  const photos = serialPhotos || {};
+  const allSerials = delivery.items.flatMap((item) => item.serials || []);
+  const missingPhotos = allSerials.filter((sn) => !photos[sn]);
+  if (missingPhotos.length > 0) {
+    return res.status(400).json({ error: `Foto Serial Number belum lengkap untuk: ${missingPhotos.join(", ")}` });
+  }
+
+  const tx = db.transaction(() => {
+    delivery.items.forEach((item) => {
+      db.prepare("UPDATE materials SET reserved = reserved - ?, in_transit = in_transit + ? WHERE name = ?")
+        .run(item.qty, item.qty, item.material);
+      db.prepare("UPDATE serial_numbers SET status = 'In Transit' WHERE current_ref = ? AND material = ? AND status = 'Reserved'")
+        .run(delivery.id, item.material);
+      const material = db.prepare("SELECT ready FROM materials WHERE name = ?").get(item.material);
+      const movId = nextStockMovementId(db);
+      db.prepare(`INSERT INTO stock_movements (id, date, material, qty, ref, remaining, type) VALUES (?, ?, ?, ?, ?, ?, 'Delivery')`)
+        .run(movId, isoDate(), item.material, -item.qty, delivery.id, material.ready);
+    });
+
+    const insertPhoto = db.prepare("INSERT INTO delivery_serial_photos (delivery_id, sn, photo) VALUES (?, ?, ?)");
+    allSerials.forEach((sn) => insertPhoto.run(delivery.id, sn, photos[sn]));
+
+    db.prepare("UPDATE deliveries SET status = 'Shipped', doc_overall = ?, doc_after_packing = ? WHERE id = ?")
+      .run(docOverall, docAfterPacking, delivery.id);
+    addHistory(delivery.id, `Ditandai Shipped oleh ${req.user.name} — dokumentasi pengiriman lengkap`);
+  });
+  tx();
+
+  res.json(loadDelivery(delivery.id));
+});
+
+// Resi is optional and can be added any time after shipping — the courier
+// frequently issues it after pickup, so this is deliberately its own step
+// rather than being required before Shipped.
+router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+  const { resiNumber } = req.body;
+  if (!resiNumber?.trim()) return res.status(400).json({ error: "resiNumber is required" });
+  const delivery = db.prepare("SELECT * FROM deliveries WHERE id = ?").get(req.params.id);
+  if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+  db.prepare("UPDATE deliveries SET resi_number = ? WHERE id = ?").run(resiNumber, delivery.id);
+  addHistory(delivery.id, `Resi ditambahkan: ${resiNumber}`);
+  res.json(loadDelivery(delivery.id));
+});
+
+// Shipped -> Delivered: the units have left the warehouse for good, so
+// in_transit is cleared for them and their SNs move to a final "Delivered"
+// state. No extra documentation required at this step.
 router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
-
-  const nextStatusMap = { Preparing: "Shipped", Shipped: "Delivered" };
-  const next = nextStatusMap[delivery.status];
-  if (!next) return res.status(409).json({ error: `Cannot advance a request with status "${delivery.status}"` });
+  if (delivery.status !== "Shipped") {
+    return res.status(409).json({ error: `Cannot advance a request with status "${delivery.status}"` });
+  }
 
   const tx = db.transaction(() => {
-    if (delivery.status === "Preparing") {
-      delivery.items.forEach((item) => {
-        db.prepare("UPDATE materials SET reserved = reserved - ?, in_transit = in_transit + ? WHERE name = ?")
-          .run(item.qty, item.qty, item.material);
-        db.prepare("UPDATE serial_numbers SET status = 'In Transit' WHERE current_ref = ? AND material = ? AND status = 'Reserved'")
-          .run(delivery.id, item.material);
-        const material = db.prepare("SELECT ready FROM materials WHERE name = ?").get(item.material);
-        const movId = nextStockMovementId(db);
-        db.prepare(`INSERT INTO stock_movements (id, date, material, qty, ref, remaining, type) VALUES (?, ?, ?, ?, ?, ?, 'Delivery')`)
-          .run(movId, isoDate(), item.material, -item.qty, delivery.id, material.ready);
-      });
-    } else if (delivery.status === "Shipped") {
-      delivery.items.forEach((item) => {
-        db.prepare("UPDATE materials SET in_transit = MAX(0, in_transit - ?) WHERE name = ?").run(item.qty, item.material);
-        db.prepare("UPDATE serial_numbers SET status = 'Delivered' WHERE current_ref = ? AND material = ? AND status = 'In Transit'")
-          .run(delivery.id, item.material);
-      });
-    }
-    db.prepare("UPDATE deliveries SET status = ? WHERE id = ?").run(next, delivery.id);
-    addHistory(delivery.id, `Status diubah ke ${next} oleh ${req.user.name}`);
+    delivery.items.forEach((item) => {
+      db.prepare("UPDATE materials SET in_transit = MAX(0, in_transit - ?) WHERE name = ?").run(item.qty, item.material);
+      db.prepare("UPDATE serial_numbers SET status = 'Delivered' WHERE current_ref = ? AND material = ? AND status = 'In Transit'")
+        .run(delivery.id, item.material);
+    });
+    db.prepare("UPDATE deliveries SET status = 'Delivered' WHERE id = ?").run(delivery.id);
+    addHistory(delivery.id, `Status diubah ke Delivered oleh ${req.user.name}`);
   });
   tx();
 

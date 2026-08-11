@@ -75,4 +75,15 @@ if (legacyApprovedCount > 0) {
   db.exec("UPDATE deliveries SET status = 'Waiting Stock Assignment' WHERE status = 'Approved'");
 }
 
+// Add the shipment-documentation columns to any deliveries table created
+// before this feature existed. ALTER TABLE ADD COLUMN is non-destructive —
+// existing rows just get NULL in the new columns.
+const deliveryColumns = db.prepare("PRAGMA table_info(deliveries)").all().map((c) => c.name);
+if (!deliveryColumns.includes("doc_overall")) {
+  console.log("[db] adding shipment documentation columns to deliveries");
+  db.exec("ALTER TABLE deliveries ADD COLUMN doc_overall TEXT");
+  db.exec("ALTER TABLE deliveries ADD COLUMN doc_after_packing TEXT");
+  db.exec("ALTER TABLE deliveries ADD COLUMN resi_number TEXT");
+}
+
 module.exports = db;
