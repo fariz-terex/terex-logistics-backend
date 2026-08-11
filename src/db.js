@@ -85,5 +85,9 @@ if (!deliveryColumns.includes("doc_overall")) {
   db.exec("ALTER TABLE deliveries ADD COLUMN doc_after_packing TEXT");
   db.exec("ALTER TABLE deliveries ADD COLUMN resi_number TEXT");
 }
+if (!deliveryColumns.includes("resi_photo")) {
+  console.log("[db] adding resi_photo column to deliveries");
+  db.exec("ALTER TABLE deliveries ADD COLUMN resi_photo TEXT");
+}
 
 module.exports = db;

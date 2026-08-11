@@ -1,0 +1,82 @@
+From d5ac987aee568e5a5c7e93548aec53439babdcdd Mon Sep 17 00:00:00 2001
+From: TEREX Dev <dev@terex.local>
+Date: Tue, 11 Aug 2026 05:37:20 +0000
+Subject: [PATCH] Add optional resi photo upload alongside resi number
+
+---
+ src/db.js                |  4 ++++
+ src/routes/deliveries.js | 19 +++++++++++++------
+ src/schema.sql           |  3 ++-
+ 3 files changed, 19 insertions(+), 7 deletions(-)
+
+diff --git a/src/db.js b/src/db.js
+index c7a8ee4..5caa11f 100644
+--- a/src/db.js
++++ b/src/db.js
+@@ -91,5 +91,9 @@ if (!deliveryColumns.includes("doc_overall")) {
+   db.exec("ALTER TABLE deliveries ADD COLUMN doc_after_packing TEXT");
+   db.exec("ALTER TABLE deliveries ADD COLUMN resi_number TEXT");
+ }
++if (!deliveryColumns.includes("resi_photo")) {
++  console.log("[db] adding resi_photo column to deliveries");
++  db.exec("ALTER TABLE deliveries ADD COLUMN resi_photo TEXT");
++}
+ 
+ module.exports = db;
+diff --git a/src/routes/deliveries.js b/src/routes/deliveries.js
+index 5ddfd3a..9398888 100644
+--- a/src/routes/deliveries.js
++++ b/src/routes/deliveries.js
+@@ -20,7 +20,7 @@ function loadDelivery(id) {
+   const serialPhotos = Object.fromEntries(serialPhotoRows.map((r) => [r.sn, r.photo]));
+   return {
+     ...delivery, items, history,
+-    docOverall: delivery.doc_overall, docAfterPacking: delivery.doc_after_packing, resiNumber: delivery.resi_number,
++    docOverall: delivery.doc_overall, docAfterPacking: delivery.doc_after_packing, resiNumber: delivery.resi_number, resiPhoto: delivery.resi_photo,
+     serialPhotos,
+   };
+ }
+@@ -226,14 +226,21 @@ router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
+ 
+ // Resi is optional and can be added any time after shipping — the courier
+ // frequently issues it after pickup, so this is deliberately its own step
+-// rather than being required before Shipped.
++// rather than being required before Shipped. Number and photo are each
++// optional on their own (some couriers only give a number, some hand over
++// a printed slip you'd rather just photograph) — at least one is required.
+ router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+-  const { resiNumber } = req.body;
+-  if (!resiNumber?.trim()) return res.status(400).json({ error: "resiNumber is required" });
++  const { resiNumber, resiPhoto } = req.body;
++  if (!resiNumber?.trim() && !resiPhoto) {
++    return res.status(400).json({ error: "Isi nomor resi atau upload foto resi" });
++  }
+   const delivery = db.prepare("SELECT * FROM deliveries WHERE id = ?").get(req.params.id);
+   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+-  db.prepare("UPDATE deliveries SET resi_number = ? WHERE id = ?").run(resiNumber, delivery.id);
+-  addHistory(delivery.id, `Resi ditambahkan: ${resiNumber}`);
++
++  const nextNumber = resiNumber?.trim() || delivery.resi_number;
++  const nextPhoto = resiPhoto || delivery.resi_photo;
++  db.prepare("UPDATE deliveries SET resi_number = ?, resi_photo = ? WHERE id = ?").run(nextNumber, nextPhoto, delivery.id);
++  addHistory(delivery.id, `Resi ditambahkan${nextNumber ? `: ${nextNumber}` : " (foto)"}`);
+   res.json(loadDelivery(delivery.id));
+ });
+ 
+diff --git a/src/schema.sql b/src/schema.sql
+index 454e3d3..7f7ac05 100644
+--- a/src/schema.sql
++++ b/src/schema.sql
+@@ -83,7 +83,8 @@ CREATE TABLE IF NOT EXISTS deliveries (
+   date              TEXT NOT NULL,
+   doc_overall       TEXT,   -- photo of all materials together, taken before shipping
+   doc_after_packing TEXT,   -- photo of the materials once packed
+-  resi_number       TEXT    -- shipping receipt number — optional, often added after shipping
++  resi_number       TEXT,   -- shipping receipt number — optional, often added after shipping
++  resi_photo        TEXT    -- photo of the shipping receipt — also optional, added the same way
+ );
+ 
+ CREATE TABLE IF NOT EXISTS delivery_items (
+-- 
+2.43.0
+

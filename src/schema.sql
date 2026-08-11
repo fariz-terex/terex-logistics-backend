@@ -83,7 +83,8 @@ CREATE TABLE IF NOT EXISTS deliveries (
   date              TEXT NOT NULL,
   doc_overall       TEXT,   -- photo of all materials together, taken before shipping
   doc_after_packing TEXT,   -- photo of the materials once packed
-  resi_number       TEXT    -- shipping receipt number — optional, often added after shipping
+  resi_number       TEXT,   -- shipping receipt number — optional, often added after shipping
+  resi_photo        TEXT    -- photo of the shipping receipt — also optional, added the same way
 );
 
 CREATE TABLE IF NOT EXISTS delivery_items (

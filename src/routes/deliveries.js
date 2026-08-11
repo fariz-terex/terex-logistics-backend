@@ -20,7 +20,7 @@ function loadDelivery(id) {
   const serialPhotos = Object.fromEntries(serialPhotoRows.map((r) => [r.sn, r.photo]));
   return {
     ...delivery, items, history,
-    docOverall: delivery.doc_overall, docAfterPacking: delivery.doc_after_packing, resiNumber: delivery.resi_number,
+    docOverall: delivery.doc_overall, docAfterPacking: delivery.doc_after_packing, resiNumber: delivery.resi_number, resiPhoto: delivery.resi_photo,
     serialPhotos,
   };
 }
@@ -226,14 +226,21 @@ router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
 
 // Resi is optional and can be added any time after shipping — the courier
 // frequently issues it after pickup, so this is deliberately its own step
-// rather than being required before Shipped.
+// rather than being required before Shipped. Number and photo are each
+// optional on their own (some couriers only give a number, some hand over
+// a printed slip you'd rather just photograph) — at least one is required.
 router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
-  const { resiNumber } = req.body;
-  if (!resiNumber?.trim()) return res.status(400).json({ error: "resiNumber is required" });
+  const { resiNumber, resiPhoto } = req.body;
+  if (!resiNumber?.trim() && !resiPhoto) {
+    return res.status(400).json({ error: "Isi nomor resi atau upload foto resi" });
+  }
   const delivery = db.prepare("SELECT * FROM deliveries WHERE id = ?").get(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
-  db.prepare("UPDATE deliveries SET resi_number = ? WHERE id = ?").run(resiNumber, delivery.id);
-  addHistory(delivery.id, `Resi ditambahkan: ${resiNumber}`);
+
+  const nextNumber = resiNumber?.trim() || delivery.resi_number;
+  const nextPhoto = resiPhoto || delivery.resi_photo;
+  db.prepare("UPDATE deliveries SET resi_number = ?, resi_photo = ? WHERE id = ?").run(nextNumber, nextPhoto, delivery.id);
+  addHistory(delivery.id, `Resi ditambahkan${nextNumber ? `: ${nextNumber}` : " (foto)"}`);
   res.json(loadDelivery(delivery.id));
 });
 
