@@ -48,7 +48,7 @@ function loadReturn(id) {
   const history = db.prepare("SELECT time, text FROM return_history WHERE return_id = ? ORDER BY id").all(id);
   return {
     id: ret.id, technician: ret.technician, homebase: ret.homebase, site: ret.site,
-    status: ret.status, date: ret.date, resiNumber: ret.resi_number, revisionNote: ret.revision_note,
+    status: ret.status, date: ret.date, resiNumber: ret.resi_number, resiPhoto: ret.resi_photo, revisionNote: ret.revision_note,
     docs: { beforePacking: ret.doc_before, afterPacking: ret.doc_after, weighing: ret.doc_weighing },
     items, history,
   };
@@ -176,12 +176,16 @@ router.post("/:id/ship", requireAuth, requireRole(TECH, MANAGER), (req, res) => 
 });
 
 router.post("/:id/resi", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
-  const { resiNumber } = req.body;
-  if (!resiNumber?.trim()) return res.status(400).json({ error: "resiNumber is required" });
+  const { resiNumber, resiPhoto } = req.body;
+  if (!resiNumber?.trim() && !resiPhoto) {
+    return res.status(400).json({ error: "Isi nomor resi atau upload foto resi" });
+  }
   const ret = db.prepare("SELECT * FROM returns WHERE id = ?").get(req.params.id);
   if (!ret) return res.status(404).json({ error: "Return Faulty not found" });
-  db.prepare("UPDATE returns SET resi_number = ? WHERE id = ?").run(resiNumber, ret.id);
-  addHistory(ret.id, `Resi ditambahkan: ${resiNumber}`);
+  const nextNumber = resiNumber?.trim() || ret.resi_number;
+  const nextPhoto = resiPhoto || ret.resi_photo;
+  db.prepare("UPDATE returns SET resi_number = ?, resi_photo = ? WHERE id = ?").run(nextNumber, nextPhoto, ret.id);
+  addHistory(ret.id, `Resi ditambahkan${nextNumber ? `: ${nextNumber}` : " (foto)"}`);
   res.json(loadReturn(ret.id));
 });
 

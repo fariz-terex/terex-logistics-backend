@@ -95,4 +95,10 @@ if (!deliveryColumns.includes("delivered_photo")) {
   db.exec("ALTER TABLE deliveries ADD COLUMN received_by TEXT");
 }
 
+const returnColumns = db.prepare("PRAGMA table_info(returns)").all().map((c) => c.name);
+if (!returnColumns.includes("resi_photo")) {
+  console.log("[db] adding resi_photo column to returns");
+  db.exec("ALTER TABLE returns ADD COLUMN resi_photo TEXT");
+}
+
 module.exports = db;

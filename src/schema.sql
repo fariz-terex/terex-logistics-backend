@@ -125,6 +125,7 @@ CREATE TABLE IF NOT EXISTS returns (
   status         TEXT NOT NULL DEFAULT 'Waiting Logistics Review',
   date           TEXT NOT NULL,
   resi_number    TEXT DEFAULT '',
+  resi_photo     TEXT,   -- photo of the shipping receipt — optional, added the same way as resi_number
   revision_note  TEXT,
   doc_before     TEXT,   -- photo (base64) or NULL — see README on object storage
   doc_after      TEXT,

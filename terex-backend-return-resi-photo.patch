@@ -1,0 +1,76 @@
+From 19700e0275cbd48d7c6b644237ace335032d7836 Mon Sep 17 00:00:00 2001
+From: TEREX Dev <dev@terex.local>
+Date: Wed, 12 Aug 2026 12:23:54 +0000
+Subject: [PATCH] Return Faulty: add optional resi photo upload alongside resi
+ number
+
+---
+ src/db.js             |  6 ++++++
+ src/routes/returns.js | 14 +++++++++-----
+ src/schema.sql        |  1 +
+ 3 files changed, 16 insertions(+), 5 deletions(-)
+
+diff --git a/src/db.js b/src/db.js
+index 5fbcb03..76f335c 100644
+--- a/src/db.js
++++ b/src/db.js
+@@ -101,4 +101,10 @@ if (!deliveryColumns.includes("delivered_photo")) {
+   db.exec("ALTER TABLE deliveries ADD COLUMN received_by TEXT");
+ }
+ 
++const returnColumns = db.prepare("PRAGMA table_info(returns)").all().map((c) => c.name);
++if (!returnColumns.includes("resi_photo")) {
++  console.log("[db] adding resi_photo column to returns");
++  db.exec("ALTER TABLE returns ADD COLUMN resi_photo TEXT");
++}
++
+ module.exports = db;
+diff --git a/src/routes/returns.js b/src/routes/returns.js
+index 3bcc58b..3e2a6ba 100644
+--- a/src/routes/returns.js
++++ b/src/routes/returns.js
+@@ -48,7 +48,7 @@ function loadReturn(id) {
+   const history = db.prepare("SELECT time, text FROM return_history WHERE return_id = ? ORDER BY id").all(id);
+   return {
+     id: ret.id, technician: ret.technician, homebase: ret.homebase, site: ret.site,
+-    status: ret.status, date: ret.date, resiNumber: ret.resi_number, revisionNote: ret.revision_note,
++    status: ret.status, date: ret.date, resiNumber: ret.resi_number, resiPhoto: ret.resi_photo, revisionNote: ret.revision_note,
+     docs: { beforePacking: ret.doc_before, afterPacking: ret.doc_after, weighing: ret.doc_weighing },
+     items, history,
+   };
+@@ -176,12 +176,16 @@ router.post("/:id/ship", requireAuth, requireRole(TECH, MANAGER), (req, res) =>
+ });
+ 
+ router.post("/:id/resi", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
+-  const { resiNumber } = req.body;
+-  if (!resiNumber?.trim()) return res.status(400).json({ error: "resiNumber is required" });
++  const { resiNumber, resiPhoto } = req.body;
++  if (!resiNumber?.trim() && !resiPhoto) {
++    return res.status(400).json({ error: "Isi nomor resi atau upload foto resi" });
++  }
+   const ret = db.prepare("SELECT * FROM returns WHERE id = ?").get(req.params.id);
+   if (!ret) return res.status(404).json({ error: "Return Faulty not found" });
+-  db.prepare("UPDATE returns SET resi_number = ? WHERE id = ?").run(resiNumber, ret.id);
+-  addHistory(ret.id, `Resi ditambahkan: ${resiNumber}`);
++  const nextNumber = resiNumber?.trim() || ret.resi_number;
++  const nextPhoto = resiPhoto || ret.resi_photo;
++  db.prepare("UPDATE returns SET resi_number = ?, resi_photo = ? WHERE id = ?").run(nextNumber, nextPhoto, ret.id);
++  addHistory(ret.id, `Resi ditambahkan${nextNumber ? `: ${nextNumber}` : " (foto)"}`);
+   res.json(loadReturn(ret.id));
+ });
+ 
+diff --git a/src/schema.sql b/src/schema.sql
+index 978fb66..82d74da 100644
+--- a/src/schema.sql
++++ b/src/schema.sql
+@@ -125,6 +125,7 @@ CREATE TABLE IF NOT EXISTS returns (
+   status         TEXT NOT NULL DEFAULT 'Waiting Logistics Review',
+   date           TEXT NOT NULL,
+   resi_number    TEXT DEFAULT '',
++  resi_photo     TEXT,   -- photo of the shipping receipt — optional, added the same way as resi_number
+   revision_note  TEXT,
+   doc_before     TEXT,   -- photo (base64) or NULL — see README on object storage
+   doc_after      TEXT,
+-- 
+2.43.0
+
