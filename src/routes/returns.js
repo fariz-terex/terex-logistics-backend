@@ -2,6 +2,7 @@ const express = require("express");
 const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
+const { scopeOf, adjustStock } = require("../utils/stock");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -47,7 +48,7 @@ function loadReturn(id) {
   }));
   const history = db.prepare("SELECT time, text FROM return_history WHERE return_id = ? ORDER BY id").all(id);
   return {
-    id: ret.id, technician: ret.technician, homebase: ret.homebase, site: ret.site,
+    id: ret.id, technician: ret.technician, homebase: ret.homebase, site: ret.site, customer: ret.customer,
     status: ret.status, date: ret.date, resiNumber: ret.resi_number, resiPhoto: ret.resi_photo, revisionNote: ret.revision_note,
     docs: { beforePacking: ret.doc_before, afterPacking: ret.doc_after, weighing: ret.doc_weighing },
     items, history,
@@ -59,13 +60,18 @@ function addHistory(id, text) {
 }
 
 router.get("/", requireAuth, (req, res) => {
-  const ids = db.prepare("SELECT id FROM returns ORDER BY id DESC").all().map((r) => r.id);
+  const scope = scopeOf(req.user);
+  const ids = scope
+    ? db.prepare("SELECT id FROM returns WHERE customer = ? ORDER BY id DESC").all(scope).map((r) => r.id)
+    : db.prepare("SELECT id FROM returns ORDER BY id DESC").all().map((r) => r.id);
   res.json(ids.map(loadReturn));
 });
 
 router.get("/:id", requireAuth, (req, res) => {
   const ret = loadReturn(req.params.id);
   if (!ret) return res.status(404).json({ error: "Return Faulty not found" });
+  const scope = scopeOf(req.user);
+  if (scope && ret.customer !== scope) return res.status(403).json({ error: "Return Faulty ini bukan milik divisi Anda" });
   res.json(ret);
 });
 
@@ -96,15 +102,26 @@ function validateSubmission({ items, docs }, excludeReturnId) {
   return null;
 }
 
+// The report is credited to the reporting technician's own division;
+// Manager (unscoped) must say explicitly which division it's for.
 router.post("/", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
   const err = validateSubmission(req.body, null);
   if (err) return res.status(409).json({ error: err });
 
+  let customer;
+  if (req.user.role === MANAGER) {
+    customer = req.body.customer;
+    if (!customer?.trim()) return res.status(400).json({ error: "Pilih Divisi (Customer) untuk laporan ini" });
+  } else {
+    customer = req.user.customer;
+    if (!customer) return res.status(400).json({ error: "Akun Anda belum di-assign ke Divisi (Customer) manapun — hubungi Manager." });
+  }
+
   const { items, docs } = req.body;
   const id = dailySequenceId(db, "returns", "RF");
   const tx = db.transaction(() => {
-    db.prepare(`INSERT INTO returns (id, technician, homebase, site, status, date, resi_number, doc_before, doc_after, doc_weighing) VALUES (?, ?, ?, ?, 'Waiting Logistics Review', ?, '', ?, ?, ?)`)
-      .run(id, req.user.name, req.body.homebase || req.user.assignment || "", req.body.site || "", isoDate(), docs.beforePacking, docs.afterPacking, docs.weighing);
+    db.prepare(`INSERT INTO returns (id, technician, homebase, site, status, date, resi_number, doc_before, doc_after, doc_weighing, customer) VALUES (?, ?, ?, ?, 'Waiting Logistics Review', ?, '', ?, ?, ?, ?)`)
+      .run(id, req.user.name, req.body.homebase || req.user.assignment || "", req.body.site || "", isoDate(), docs.beforePacking, docs.afterPacking, docs.weighing, customer);
     const insertItem = db.prepare("INSERT INTO return_items (return_id, material, qty) VALUES (?, ?, ?)");
     const insertSerial = db.prepare("INSERT INTO return_serials (return_item_id, sn, photo) VALUES (?, ?, ?)");
     items.forEach((item) => {
@@ -121,6 +138,8 @@ router.post("/", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
 router.post("/:id/approve", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const ret = db.prepare("SELECT * FROM returns WHERE id = ?").get(req.params.id);
   if (!ret) return res.status(404).json({ error: "Return Faulty not found" });
+  const scope = scopeOf(req.user);
+  if (scope && ret.customer !== scope) return res.status(403).json({ error: "Return Faulty ini bukan milik divisi Anda" });
   if (ret.status !== "Waiting Logistics Review") return res.status(409).json({ error: `Cannot approve status "${ret.status}"` });
   db.prepare("UPDATE returns SET status = 'Ready to Ship' WHERE id = ?").run(ret.id);
   addHistory(ret.id, `Approved by ${req.user.name} (Logistics) — Ready to Ship`);
@@ -132,6 +151,8 @@ router.post("/:id/revise", requireAuth, requireRole(LOGISTICS, MANAGER), (req, r
   if (!note?.trim()) return res.status(400).json({ error: "Revision note is required" });
   const ret = db.prepare("SELECT * FROM returns WHERE id = ?").get(req.params.id);
   if (!ret) return res.status(404).json({ error: "Return Faulty not found" });
+  const scope = scopeOf(req.user);
+  if (scope && ret.customer !== scope) return res.status(403).json({ error: "Return Faulty ini bukan milik divisi Anda" });
   if (ret.status !== "Waiting Logistics Review") return res.status(409).json({ error: `Cannot request revision on status "${ret.status}"` });
   db.prepare("UPDATE returns SET status = 'Revision Required', revision_note = ? WHERE id = ?").run(note, ret.id);
   addHistory(ret.id, `Revision Required by ${req.user.name} (Logistics)`);
@@ -143,6 +164,8 @@ router.post("/:id/revise", requireAuth, requireRole(LOGISTICS, MANAGER), (req, r
 router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
   const ret = db.prepare("SELECT * FROM returns WHERE id = ?").get(req.params.id);
   if (!ret) return res.status(404).json({ error: "Return Faulty not found" });
+  const scope = scopeOf(req.user);
+  if (scope && ret.customer !== scope) return res.status(403).json({ error: "Return Faulty ini bukan milik divisi Anda" });
   if (ret.status !== "Revision Required") return res.status(409).json({ error: `Cannot resubmit status "${ret.status}"` });
 
   const err = validateSubmission(req.body, ret.id);
@@ -169,6 +192,8 @@ router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), (req, res)
 router.post("/:id/ship", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
   const ret = db.prepare("SELECT * FROM returns WHERE id = ?").get(req.params.id);
   if (!ret) return res.status(404).json({ error: "Return Faulty not found" });
+  const scope = scopeOf(req.user);
+  if (scope && ret.customer !== scope) return res.status(403).json({ error: "Return Faulty ini bukan milik divisi Anda" });
   if (ret.status !== "Ready to Ship") return res.status(409).json({ error: `Cannot ship status "${ret.status}"` });
   db.prepare("UPDATE returns SET status = 'On Delivery' WHERE id = ?").run(ret.id);
   addHistory(ret.id, `Ditandai sudah dikirim oleh Technician ${req.user.name}`);
@@ -182,6 +207,8 @@ router.post("/:id/resi", requireAuth, requireRole(TECH, MANAGER), (req, res) => 
   }
   const ret = db.prepare("SELECT * FROM returns WHERE id = ?").get(req.params.id);
   if (!ret) return res.status(404).json({ error: "Return Faulty not found" });
+  const scope = scopeOf(req.user);
+  if (scope && ret.customer !== scope) return res.status(403).json({ error: "Return Faulty ini bukan milik divisi Anda" });
   const nextNumber = resiNumber?.trim() || ret.resi_number;
   const nextPhoto = resiPhoto || ret.resi_photo;
   db.prepare("UPDATE returns SET resi_number = ?, resi_photo = ? WHERE id = ?").run(nextNumber, nextPhoto, ret.id);
@@ -192,6 +219,8 @@ router.post("/:id/resi", requireAuth, requireRole(TECH, MANAGER), (req, res) => 
 router.post("/:id/receive", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const ret = db.prepare("SELECT * FROM returns WHERE id = ?").get(req.params.id);
   if (!ret) return res.status(404).json({ error: "Return Faulty not found" });
+  const scope = scopeOf(req.user);
+  if (scope && ret.customer !== scope) return res.status(403).json({ error: "Return Faulty ini bukan milik divisi Anda" });
   if (ret.status !== "On Delivery") return res.status(409).json({ error: `Cannot receive status "${ret.status}"` });
   db.prepare("UPDATE returns SET status = 'Received by Warehouse' WHERE id = ?").run(ret.id);
   addHistory(ret.id, `Received by Warehouse (${req.user.name})`);
@@ -201,6 +230,8 @@ router.post("/:id/receive", requireAuth, requireRole(LOGISTICS, MANAGER), (req, 
 router.post("/:id/qc", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const ret = db.prepare("SELECT * FROM returns WHERE id = ?").get(req.params.id);
   if (!ret) return res.status(404).json({ error: "Return Faulty not found" });
+  const scope = scopeOf(req.user);
+  if (scope && ret.customer !== scope) return res.status(403).json({ error: "Return Faulty ini bukan milik divisi Anda" });
   if (ret.status !== "Received by Warehouse") return res.status(409).json({ error: `Cannot QC status "${ret.status}"` });
   db.prepare("UPDATE returns SET status = 'QC Checking' WHERE id = ?").run(ret.id);
   addHistory(ret.id, `QC Checking selesai (${req.user.name})`);
@@ -208,32 +239,34 @@ router.post("/:id/qc", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) 
 });
 
 // Completing the return is the one step that actually touches warehouse
-// stock: faulty qty goes up and a stock movement is logged, inside one
-// transaction so the two never drift apart.
+// stock: faulty qty goes up (in the return's OWN division) and a stock
+// movement is logged, inside one transaction so the two never drift apart.
 router.post("/:id/complete", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const ret = loadReturn(req.params.id);
   if (!ret) return res.status(404).json({ error: "Return Faulty not found" });
+  const scope = scopeOf(req.user);
+  if (scope && ret.customer !== scope) return res.status(403).json({ error: "Return Faulty ini bukan milik divisi Anda" });
   if (ret.status !== "QC Checking") return res.status(409).json({ error: `Cannot complete status "${ret.status}"` });
 
   const tx = db.transaction(() => {
     ret.items.forEach((item) => {
-      db.prepare("UPDATE materials SET faulty = faulty + ? WHERE name = ?").run(item.qty, item.material);
+      adjustStock(item.material, ret.customer, "faulty", item.qty);
       const material = db.prepare("SELECT ready FROM materials WHERE name = ?").get(item.material);
       const movId = nextStockMovementId(db);
-      db.prepare(`INSERT INTO stock_movements (id, date, material, qty, ref, remaining, type) VALUES (?, ?, ?, ?, ?, ?, 'Faulty Return')`)
-        .run(movId, isoDate(), item.material, item.qty, ret.id, material.ready);
+      db.prepare(`INSERT INTO stock_movements (id, date, material, qty, ref, remaining, type, customer) VALUES (?, ?, ?, ?, ?, ?, 'Faulty Return', ?)`)
+        .run(movId, isoDate(), item.material, item.qty, ret.id, material.ready, ret.customer);
 
       // Fold the returned Serial Numbers into the registry as Faulty. If a
       // unit was already known (it went out through a Delivery earlier),
       // this closes the loop on it; if it's new to the system, it's
-      // registered here for the first time.
+      // registered here for the first time, under this return's division.
       item.serials.forEach((s) => {
         const existing = db.prepare("SELECT 1 FROM serial_numbers WHERE sn = ?").get(s.sn);
         if (existing) {
-          db.prepare("UPDATE serial_numbers SET status = 'Faulty', current_ref = ?, material = ? WHERE sn = ?").run(ret.id, item.material, s.sn);
+          db.prepare("UPDATE serial_numbers SET status = 'Faulty', current_ref = ?, material = ?, customer = ? WHERE sn = ?").run(ret.id, item.material, ret.customer, s.sn);
         } else {
-          db.prepare("INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref) VALUES (?, ?, 'Faulty', ?, ?, NULL)")
-            .run(s.sn, item.material, ret.id, isoDate());
+          db.prepare("INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref, customer) VALUES (?, ?, 'Faulty', ?, ?, NULL, ?)")
+            .run(s.sn, item.material, ret.id, isoDate(), ret.customer);
         }
       });
     });

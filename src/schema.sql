@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   role          TEXT NOT NULL CHECK (role IN ('Admin / Manager Logistics','Logistics Staff','SPV','Technician')),
   assignment    TEXT DEFAULT '',
+  customer      TEXT,   -- division: which Customer this user is scoped to (Logistics Staff/SPV/Technician). NULL = unscoped (Manager sees everything).
   status        TEXT NOT NULL DEFAULT 'Active' CHECK (status IN ('Active','Inactive'))
 );
 
@@ -54,10 +55,25 @@ CREATE TABLE IF NOT EXISTS materials (
   serialized INTEGER NOT NULL DEFAULT 1,   -- 0/1 boolean
   min_stock  INTEGER NOT NULL DEFAULT 0,
   status     TEXT NOT NULL DEFAULT 'Active',
-  ready      INTEGER NOT NULL DEFAULT 0,
+  ready      INTEGER NOT NULL DEFAULT 0,   -- GLOBAL AGGREGATE across all divisions — see material_stock for the per-division breakdown
   faulty     INTEGER NOT NULL DEFAULT 0,
   reserved   INTEGER NOT NULL DEFAULT 0,
   in_transit INTEGER NOT NULL DEFAULT 0
+);
+
+-- Per-division stock breakdown. "Division" == Customer here — each customer
+-- has its own separate pool of ready/faulty/reserved/in-transit stock per
+-- material. Every write here is mirrored into materials' aggregate columns
+-- above in the same transaction, so global (Manager) views stay accurate
+-- without needing a JOIN, while division-scoped views read this table.
+CREATE TABLE IF NOT EXISTS material_stock (
+  material   TEXT NOT NULL REFERENCES materials(name),
+  customer   TEXT NOT NULL,
+  ready      INTEGER NOT NULL DEFAULT 0,
+  faulty     INTEGER NOT NULL DEFAULT 0,
+  reserved   INTEGER NOT NULL DEFAULT 0,
+  in_transit INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (material, customer)
 );
 
 CREATE TABLE IF NOT EXISTS stock_movements (
@@ -67,7 +83,8 @@ CREATE TABLE IF NOT EXISTS stock_movements (
   qty       INTEGER NOT NULL,              -- signed: negative = stock leaving ready
   ref       TEXT,
   remaining INTEGER NOT NULL,
-  type      TEXT NOT NULL                  -- Delivery | Receipt | Faulty Return | Reconciliation Adjustment
+  type      TEXT NOT NULL,                 -- Delivery | Receipt | Faulty Return | Reconciliation Adjustment
+  customer  TEXT                           -- division this movement belongs to
 );
 
 -- ===================== DELIVERY REQUEST =====================
@@ -88,7 +105,8 @@ CREATE TABLE IF NOT EXISTS deliveries (
   delivered_photo   TEXT,   -- proof-of-receipt photo, required before Shipped -> Delivered
   received_by       TEXT,   -- name of whoever accepted the goods in the field — optional
   bast_document      TEXT,  -- Berita Acara Serah Terima file (PDF or scanned image) — optional, added any time after shipping
-  bast_filename      TEXT   -- original filename, for display purposes
+  bast_filename      TEXT,  -- original filename, for display purposes
+  customer           TEXT   -- division this request belongs to (the requesting SPV's division)
 );
 
 CREATE TABLE IF NOT EXISTS delivery_items (
@@ -131,7 +149,8 @@ CREATE TABLE IF NOT EXISTS returns (
   revision_note  TEXT,
   doc_before     TEXT,   -- photo (base64) or NULL — see README on object storage
   doc_after      TEXT,
-  doc_weighing   TEXT
+  doc_weighing   TEXT,
+  customer       TEXT    -- division this return belongs to (the reporting technician's division)
 );
 
 CREATE TABLE IF NOT EXISTS return_items (
@@ -163,7 +182,8 @@ CREATE TABLE IF NOT EXISTS reconciliations (
   period        TEXT NOT NULL,
   status        TEXT NOT NULL DEFAULT 'Waiting Logistics Review',
   date          TEXT NOT NULL,
-  revision_note TEXT
+  revision_note TEXT,
+  customer      TEXT   -- division this reconciliation belongs to (the reporting technician's division)
 );
 
 CREATE TABLE IF NOT EXISTS reconciliation_items (
@@ -206,9 +226,11 @@ CREATE TABLE IF NOT EXISTS serial_numbers (
   status         TEXT NOT NULL DEFAULT 'Ready' CHECK (status IN ('Ready','Reserved','In Transit','Delivered','Faulty')),
   current_ref    TEXT,     -- id of the delivery/return currently holding this unit (nullable when sitting in Ready stock)
   received_date  TEXT,
-  received_ref   TEXT      -- Goods Receipt id this unit arrived on (nullable for units first seen via a Return Faulty)
+  received_ref   TEXT,     -- Goods Receipt id this unit arrived on (nullable for units first seen via a Return Faulty)
+  customer       TEXT      -- division this unit belongs to
 );
 CREATE INDEX IF NOT EXISTS idx_serials_material_status ON serial_numbers(material, status);
+CREATE INDEX IF NOT EXISTS idx_serials_customer ON serial_numbers(customer);
 
 CREATE TABLE IF NOT EXISTS receipts (
   id         TEXT PRIMARY KEY,
@@ -216,6 +238,7 @@ CREATE TABLE IF NOT EXISTS receipts (
   material   TEXT NOT NULL,
   qty        INTEGER NOT NULL,
   note       TEXT DEFAULT '',
-  created_by TEXT
+  created_by TEXT,
+  customer   TEXT   -- division this receipt's stock was credited to
 );
 

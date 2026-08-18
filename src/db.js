@@ -107,4 +107,69 @@ if (!deliveryColumns.includes("bast_document")) {
   db.exec("ALTER TABLE deliveries ADD COLUMN bast_filename TEXT");
 }
 
+// ===================== DIVISION (Customer) SCOPING =====================
+// Adds a `customer` column to every table that needs to be scoped to a
+// division, plus the material_stock breakdown table. Existing rows that
+// predate this feature (and therefore have no real division) are bucketed
+// into a synthetic "Unassigned" division — Manager/global views still see
+// their totals correctly (since materials.* stays the aggregate), but
+// division-scoped users won't see "Unassigned" stock until it's manually
+// re-received under a real division via Terima Barang.
+const UNASSIGNED = "Unassigned";
+
+if (!deliveryColumns.includes("customer")) {
+  console.log("[db] adding customer (division) column to deliveries");
+  db.exec("ALTER TABLE deliveries ADD COLUMN customer TEXT");
+}
+
+const userColumnsForDivision = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
+if (!userColumnsForDivision.includes("customer")) {
+  console.log("[db] adding customer (division) column to users");
+  db.exec("ALTER TABLE users ADD COLUMN customer TEXT");
+}
+
+const returnColumnsForDivision = db.prepare("PRAGMA table_info(returns)").all().map((c) => c.name);
+if (!returnColumnsForDivision.includes("customer")) {
+  console.log("[db] adding customer (division) column to returns");
+  db.exec("ALTER TABLE returns ADD COLUMN customer TEXT");
+}
+
+const reconColumns = db.prepare("PRAGMA table_info(reconciliations)").all().map((c) => c.name);
+if (!reconColumns.includes("customer")) {
+  console.log("[db] adding customer (division) column to reconciliations");
+  db.exec("ALTER TABLE reconciliations ADD COLUMN customer TEXT");
+}
+
+const movementColumns = db.prepare("PRAGMA table_info(stock_movements)").all().map((c) => c.name);
+if (!movementColumns.includes("customer")) {
+  console.log("[db] adding customer (division) column to stock_movements");
+  db.exec("ALTER TABLE stock_movements ADD COLUMN customer TEXT");
+}
+
+const receiptColumns = db.prepare("PRAGMA table_info(receipts)").all().map((c) => c.name);
+if (!receiptColumns.includes("customer")) {
+  console.log("[db] adding customer (division) column to receipts");
+  db.exec("ALTER TABLE receipts ADD COLUMN customer TEXT");
+}
+
+const serialColumns = db.prepare("PRAGMA table_info(serial_numbers)").all().map((c) => c.name);
+if (!serialColumns.includes("customer")) {
+  console.log("[db] adding customer (division) column to serial_numbers, backfilling as 'Unassigned'");
+  db.exec("ALTER TABLE serial_numbers ADD COLUMN customer TEXT");
+  db.exec(`UPDATE serial_numbers SET customer = '${UNASSIGNED}' WHERE customer IS NULL`);
+}
+
+// Backfill material_stock from materials' existing aggregate totals — only
+// runs once (guarded by material_stock already being empty), so it never
+// clobbers real per-division data collected after this feature shipped.
+const materialStockCount = db.prepare("SELECT COUNT(*) AS n FROM material_stock").get().n;
+if (materialStockCount === 0) {
+  const existingMaterials = db.prepare("SELECT name, ready, faulty, reserved, in_transit FROM materials WHERE ready > 0 OR faulty > 0 OR reserved > 0 OR in_transit > 0").all();
+  if (existingMaterials.length > 0) {
+    console.log(`[db] backfilling material_stock for ${existingMaterials.length} material(s) into division '${UNASSIGNED}'`);
+    const insertStock = db.prepare("INSERT INTO material_stock (material, customer, ready, faulty, reserved, in_transit) VALUES (?, ?, ?, ?, ?, ?)");
+    existingMaterials.forEach((m) => insertStock.run(m.name, UNASSIGNED, m.ready, m.faulty, m.reserved, m.in_transit));
+  }
+}
+
 module.exports = db;

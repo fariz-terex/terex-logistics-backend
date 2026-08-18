@@ -2,6 +2,7 @@ const express = require("express");
 const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
+const { scopeOf, adjustStock } = require("../utils/stock");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -48,7 +49,7 @@ function loadReconciliation(id) {
     serials: item.serialized ? db.prepare("SELECT sn FROM reconciliation_serials WHERE reconciliation_item_id = ?").all(item.id).map((s) => s.sn) : [],
   }));
   const history = db.prepare("SELECT time, text FROM reconciliation_history WHERE reconciliation_id = ? ORDER BY id").all(id);
-  return { id: rc.id, homebase: rc.homebase, period: rc.period, status: rc.status, date: rc.date, revisionNote: rc.revision_note, items, history };
+  return { id: rc.id, homebase: rc.homebase, period: rc.period, status: rc.status, date: rc.date, revisionNote: rc.revision_note, customer: rc.customer, items, history };
 }
 
 function addHistory(id, text) {
@@ -56,13 +57,18 @@ function addHistory(id, text) {
 }
 
 router.get("/", requireAuth, (req, res) => {
-  const ids = db.prepare("SELECT id FROM reconciliations ORDER BY id DESC").all().map((r) => r.id);
+  const scope = scopeOf(req.user);
+  const ids = scope
+    ? db.prepare("SELECT id FROM reconciliations WHERE customer = ? ORDER BY id DESC").all(scope).map((r) => r.id)
+    : db.prepare("SELECT id FROM reconciliations ORDER BY id DESC").all().map((r) => r.id);
   res.json(ids.map(loadReconciliation));
 });
 
 router.get("/:id", requireAuth, (req, res) => {
   const rc = loadReconciliation(req.params.id);
   if (!rc) return res.status(404).json({ error: "Reconciliation not found" });
+  const scope = scopeOf(req.user);
+  if (scope && rc.customer !== scope) return res.status(403).json({ error: "Reconciliation ini bukan milik divisi Anda" });
   res.json(rc);
 });
 
@@ -91,6 +97,8 @@ function writeItems(reconId, items) {
   });
 }
 
+// The report is credited to the reporting technician's own division;
+// Manager (unscoped) must say explicitly which division it's for.
 router.post("/", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
   const { homebase, period, items } = req.body;
   if (!homebase || !period || !Array.isArray(items) || items.length === 0) {
@@ -99,9 +107,18 @@ router.post("/", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
   const err = validateItems(items, null);
   if (err) return res.status(409).json({ error: err });
 
+  let customer;
+  if (req.user.role === MANAGER) {
+    customer = req.body.customer;
+    if (!customer?.trim()) return res.status(400).json({ error: "Pilih Divisi (Customer) untuk laporan ini" });
+  } else {
+    customer = req.user.customer;
+    if (!customer) return res.status(400).json({ error: "Akun Anda belum di-assign ke Divisi (Customer) manapun — hubungi Manager." });
+  }
+
   const id = dailySequenceId(db, "reconciliations", "RC");
   const tx = db.transaction(() => {
-    db.prepare(`INSERT INTO reconciliations (id, homebase, period, status, date) VALUES (?, ?, ?, 'Waiting Logistics Review', ?)`).run(id, homebase, period, isoDate());
+    db.prepare(`INSERT INTO reconciliations (id, homebase, period, status, date, customer) VALUES (?, ?, ?, 'Waiting Logistics Review', ?, ?)`).run(id, homebase, period, isoDate(), customer);
     writeItems(id, items);
     addHistory(id, `Draft dibuat dan disubmit oleh Technician ${req.user.name}`);
   });
@@ -115,6 +132,8 @@ router.post("/:id/revise", requireAuth, requireRole(LOGISTICS, MANAGER), (req, r
   if (!note?.trim()) return res.status(400).json({ error: "Revision note is required" });
   const rc = db.prepare("SELECT * FROM reconciliations WHERE id = ?").get(req.params.id);
   if (!rc) return res.status(404).json({ error: "Reconciliation not found" });
+  const scope = scopeOf(req.user);
+  if (scope && rc.customer !== scope) return res.status(403).json({ error: "Reconciliation ini bukan milik divisi Anda" });
   if (rc.status !== "Waiting Logistics Review") return res.status(409).json({ error: `Cannot request revision on status "${rc.status}"` });
   db.prepare("UPDATE reconciliations SET status = 'Revision Required', revision_note = ? WHERE id = ?").run(note, rc.id);
   addHistory(rc.id, `Revision Required by ${req.user.name} (Logistics)`);
@@ -124,6 +143,8 @@ router.post("/:id/revise", requireAuth, requireRole(LOGISTICS, MANAGER), (req, r
 router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
   const rc = db.prepare("SELECT * FROM reconciliations WHERE id = ?").get(req.params.id);
   if (!rc) return res.status(404).json({ error: "Reconciliation not found" });
+  const scope = scopeOf(req.user);
+  if (scope && rc.customer !== scope) return res.status(403).json({ error: "Reconciliation ini bukan milik divisi Anda" });
   if (rc.status !== "Revision Required") return res.status(409).json({ error: `Cannot resubmit status "${rc.status}"` });
 
   const { items } = req.body;
@@ -143,22 +164,25 @@ router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), (req, res)
 });
 
 // Approving is the step that matters for inventory: discrepancy != 0 per
-// item becomes a real stock_movements row and adjusts materials.ready — but
-// only here, after explicit review, per the "no silent stock changes" rule.
+// item becomes a real stock_movements row and adjusts the reconciliation's
+// OWN division stock — but only here, after explicit review, per the "no
+// silent stock changes" rule.
 router.post("/:id/approve", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const rc = loadReconciliation(req.params.id);
   if (!rc) return res.status(404).json({ error: "Reconciliation not found" });
+  const scope = scopeOf(req.user);
+  if (scope && rc.customer !== scope) return res.status(403).json({ error: "Reconciliation ini bukan milik divisi Anda" });
   if (rc.status !== "Waiting Logistics Review") return res.status(409).json({ error: `Cannot approve status "${rc.status}"` });
 
   const tx = db.transaction(() => {
     rc.items.forEach((item) => {
       const disc = item.systemQty - item.actualQty;
       if (disc === 0) return;
-      db.prepare("UPDATE materials SET ready = MAX(0, ready - ?) WHERE name = ?").run(disc, item.material);
+      adjustStock(item.material, rc.customer, "ready", -disc);
       const material = db.prepare("SELECT ready FROM materials WHERE name = ?").get(item.material);
       const movId = nextStockMovementId(db);
-      db.prepare(`INSERT INTO stock_movements (id, date, material, qty, ref, remaining, type) VALUES (?, ?, ?, ?, ?, ?, 'Reconciliation Adjustment')`)
-        .run(movId, isoDate(), item.material, -disc, rc.id, material.ready);
+      db.prepare(`INSERT INTO stock_movements (id, date, material, qty, ref, remaining, type, customer) VALUES (?, ?, ?, ?, ?, ?, 'Reconciliation Adjustment', ?)`)
+        .run(movId, isoDate(), item.material, -disc, rc.id, material.ready, rc.customer);
     });
     db.prepare("UPDATE reconciliations SET status = 'Completed' WHERE id = ?").run(rc.id);
     addHistory(rc.id, `Approved by ${req.user.name} (Logistics) — stock disesuaikan`);

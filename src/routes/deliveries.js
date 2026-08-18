@@ -2,6 +2,7 @@ const express = require("express");
 const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
+const { scopeOf, getDivisionStock, adjustStock } = require("../utils/stock");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -33,36 +34,53 @@ function addHistory(id, text) {
 }
 
 router.get("/", requireAuth, (req, res) => {
-  const ids = db.prepare("SELECT id FROM deliveries ORDER BY id DESC").all().map((r) => r.id);
+  const scope = scopeOf(req.user);
+  const ids = scope
+    ? db.prepare("SELECT id FROM deliveries WHERE customer = ? ORDER BY id DESC").all(scope).map((r) => r.id)
+    : db.prepare("SELECT id FROM deliveries ORDER BY id DESC").all().map((r) => r.id);
   res.json(ids.map(loadDelivery));
 });
 
 router.get("/:id", requireAuth, (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+  const scope = scopeOf(req.user);
+  if (scope && delivery.customer !== scope) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
   res.json(delivery);
 });
 
 // SPV (or Manager) submits a new request. Server re-validates stock
 // sufficiency — the front-end UI check is a convenience, not the guarantee.
+// The request is credited to the SPV's own division; Manager (unscoped)
+// must say explicitly which division it's for.
 router.post("/", requireAuth, requireRole(SPV, MANAGER), (req, res) => {
   const { homebase, site, keperluan, note, items } = req.body;
   if (!homebase || !keperluan || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: "homebase, keperluan, and at least one item are required" });
   }
 
+  let customer;
+  if (req.user.role === MANAGER) {
+    customer = req.body.customer;
+    if (!customer?.trim()) return res.status(400).json({ error: "Pilih Divisi (Customer) untuk request ini" });
+  } else {
+    customer = req.user.customer;
+    if (!customer) return res.status(400).json({ error: "Akun Anda belum di-assign ke Divisi (Customer) manapun — hubungi Manager." });
+  }
+
   for (const item of items) {
-    const material = db.prepare("SELECT ready FROM materials WHERE name = ?").get(item.material);
+    const material = db.prepare("SELECT 1 FROM materials WHERE name = ?").get(item.material);
     if (!material) return res.status(400).json({ error: `Unknown material: ${item.material}` });
-    if (item.qty > material.ready) {
-      return res.status(409).json({ error: `Insufficient stock for ${item.material}: requested ${item.qty}, available ${material.ready}` });
+    const stock = getDivisionStock(item.material, customer);
+    if (item.qty > stock.ready) {
+      return res.status(409).json({ error: `Insufficient stock for ${item.material}: requested ${item.qty}, available ${stock.ready} (divisi ${customer})` });
     }
   }
 
   const id = dailySequenceId(db, "deliveries", "DR");
   const tx = db.transaction(() => {
-    db.prepare(`INSERT INTO deliveries (id, requester, homebase, site, keperluan, note, status, date) VALUES (?, ?, ?, ?, ?, ?, 'Waiting Logistics Approval', ?)`)
-      .run(id, req.user.name, homebase, site || "", keperluan, note || "", isoDate());
+    db.prepare(`INSERT INTO deliveries (id, requester, homebase, site, keperluan, note, status, date, customer) VALUES (?, ?, ?, ?, ?, ?, 'Waiting Logistics Approval', ?, ?)`)
+      .run(id, req.user.name, homebase, site || "", keperluan, note || "", isoDate(), customer);
     const insertItem = db.prepare("INSERT INTO delivery_items (delivery_id, material, qty) VALUES (?, ?, ?)");
     items.forEach((i) => insertItem.run(id, i.material, i.qty));
     addHistory(id, `Dibuat dan disubmit oleh ${req.user.name} (${req.user.role})`);
@@ -76,6 +94,7 @@ router.post("/", requireAuth, requireRole(SPV, MANAGER), (req, res) => {
 // or Serial Numbers are touched here. This is a business decision ("do we
 // fulfill this request at all"), separate from the operational question of
 // exactly which physical units go out, which Logistics Staff decides next.
+// Manager is unscoped, so this check always uses the delivery's own division.
 router.post("/:id/approve", requireAuth, requireRole(MANAGER), (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
@@ -84,9 +103,9 @@ router.post("/:id/approve", requireAuth, requireRole(MANAGER), (req, res) => {
   }
 
   for (const item of delivery.items) {
-    const material = db.prepare("SELECT ready FROM materials WHERE name = ?").get(item.material);
-    if (!material || item.qty > material.ready) {
-      return res.status(409).json({ error: `Stock for ${item.material} changed and is no longer sufficient` });
+    const stock = getDivisionStock(item.material, delivery.customer);
+    if (item.qty > stock.ready) {
+      return res.status(409).json({ error: `Stock for ${item.material} changed and is no longer sufficient (divisi ${delivery.customer})` });
     }
   }
 
@@ -102,10 +121,15 @@ router.post("/:id/approve", requireAuth, requireRole(MANAGER), (req, res) => {
 // (serialSelections: { materialName: ["SN1","SN2"] }); if it omits a
 // serialized material, the server falls back to auto-picking the oldest
 // Ready units so this endpoint still works for older/simpler clients.
+// Stock and SNs are drawn from the delivery's OWN division regardless of
+// who is performing the action (Manager included) — a Logistics Staff can
+// only act on their own division's requests, enforced below.
 // Everything below is one transaction so a partial reservation can't happen.
 router.post("/:id/assign-stock", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+  const scope = scopeOf(req.user);
+  if (scope && delivery.customer !== scope) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
   if (delivery.status !== "Waiting Stock Assignment") {
     return res.status(409).json({ error: `Cannot assign stock for a request with status "${delivery.status}"` });
   }
@@ -115,8 +139,9 @@ router.post("/:id/assign-stock", requireAuth, requireRole(LOGISTICS, MANAGER), (
   const materialRows = {};
   for (const item of delivery.items) {
     const material = db.prepare("SELECT * FROM materials WHERE name = ?").get(item.material);
-    if (!material || item.qty > material.ready) {
-      return res.status(409).json({ error: `Stock for ${item.material} changed and is no longer sufficient` });
+    const stock = getDivisionStock(item.material, delivery.customer);
+    if (!material || item.qty > stock.ready) {
+      return res.status(409).json({ error: `Stock for ${item.material} changed and is no longer sufficient (divisi ${delivery.customer})` });
     }
     materialRows[item.material] = material;
   }
@@ -135,26 +160,26 @@ router.post("/:id/assign-stock", requireAuth, requireRole(LOGISTICS, MANAGER), (
       }
       for (const sn of chosen) {
         const row = db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(sn);
-        if (!row || row.material !== item.material || row.status !== "Ready") {
-          return res.status(409).json({ error: `Serial Number ${sn} tidak tersedia (Ready) untuk ${item.material}` });
+        if (!row || row.material !== item.material || row.status !== "Ready" || row.customer !== delivery.customer) {
+          return res.status(409).json({ error: `Serial Number ${sn} tidak tersedia (Ready) untuk ${item.material} di divisi ${delivery.customer}` });
         }
       }
     } else {
-      const available = db.prepare("SELECT COUNT(*) AS n FROM serial_numbers WHERE material = ? AND status = 'Ready'").get(item.material).n;
+      const available = db.prepare("SELECT COUNT(*) AS n FROM serial_numbers WHERE material = ? AND status = 'Ready' AND customer = ?").get(item.material, delivery.customer).n;
       if (available < item.qty) {
-        return res.status(409).json({ error: `Serial Number Ready untuk ${item.material} tidak mencukupi (tersedia ${available}, butuh ${item.qty})` });
+        return res.status(409).json({ error: `Serial Number Ready untuk ${item.material} tidak mencukupi di divisi ${delivery.customer} (tersedia ${available}, butuh ${item.qty})` });
       }
     }
   }
 
   const tx = db.transaction(() => {
     delivery.items.forEach((item) => {
-      db.prepare("UPDATE materials SET ready = ready - ?, reserved = reserved + ? WHERE name = ?")
-        .run(item.qty, item.qty, item.material);
+      adjustStock(item.material, delivery.customer, "ready", -item.qty);
+      adjustStock(item.material, delivery.customer, "reserved", item.qty);
 
       if (materialRows[item.material].serialized) {
         const chosen = serialSelections[item.material]
-          || db.prepare("SELECT sn FROM serial_numbers WHERE material = ? AND status = 'Ready' ORDER BY sn LIMIT ?").all(item.material, item.qty).map((r) => r.sn);
+          || db.prepare("SELECT sn FROM serial_numbers WHERE material = ? AND status = 'Ready' AND customer = ? ORDER BY sn LIMIT ?").all(item.material, delivery.customer, item.qty).map((r) => r.sn);
         const markReserved = db.prepare("UPDATE serial_numbers SET status = 'Reserved', current_ref = ? WHERE sn = ?");
         chosen.forEach((sn) => markReserved.run(delivery.id, sn));
       }
@@ -186,6 +211,8 @@ router.post("/:id/reject", requireAuth, requireRole(MANAGER), (req, res) => {
 router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+  const scope = scopeOf(req.user);
+  if (scope && delivery.customer !== scope) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
   if (delivery.status !== "Preparing") {
     return res.status(409).json({ error: `Cannot ship a request with status "${delivery.status}"` });
   }
@@ -204,14 +231,14 @@ router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
 
   const tx = db.transaction(() => {
     delivery.items.forEach((item) => {
-      db.prepare("UPDATE materials SET reserved = reserved - ?, in_transit = in_transit + ? WHERE name = ?")
-        .run(item.qty, item.qty, item.material);
+      adjustStock(item.material, delivery.customer, "reserved", -item.qty);
+      adjustStock(item.material, delivery.customer, "in_transit", item.qty);
       db.prepare("UPDATE serial_numbers SET status = 'In Transit' WHERE current_ref = ? AND material = ? AND status = 'Reserved'")
         .run(delivery.id, item.material);
       const material = db.prepare("SELECT ready FROM materials WHERE name = ?").get(item.material);
       const movId = nextStockMovementId(db);
-      db.prepare(`INSERT INTO stock_movements (id, date, material, qty, ref, remaining, type) VALUES (?, ?, ?, ?, ?, ?, 'Delivery')`)
-        .run(movId, isoDate(), item.material, -item.qty, delivery.id, material.ready);
+      db.prepare(`INSERT INTO stock_movements (id, date, material, qty, ref, remaining, type, customer) VALUES (?, ?, ?, ?, ?, ?, 'Delivery', ?)`)
+        .run(movId, isoDate(), item.material, -item.qty, delivery.id, material.ready, delivery.customer);
     });
 
     const insertPhoto = db.prepare("INSERT INTO delivery_serial_photos (delivery_id, sn, photo) VALUES (?, ?, ?)");
@@ -238,6 +265,8 @@ router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
   }
   const delivery = db.prepare("SELECT * FROM deliveries WHERE id = ?").get(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+  const scope = scopeOf(req.user);
+  if (scope && delivery.customer !== scope) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
 
   const nextNumber = resiNumber?.trim() || delivery.resi_number;
   const nextPhoto = resiPhoto || delivery.resi_photo;
@@ -254,6 +283,8 @@ router.post("/:id/bast", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
   if (!bastDocument) return res.status(400).json({ error: "Upload dokumen BAST terlebih dahulu" });
   const delivery = db.prepare("SELECT * FROM deliveries WHERE id = ?").get(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+  const scope = scopeOf(req.user);
+  if (scope && delivery.customer !== scope) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
   if (!["Shipped", "Delivered"].includes(delivery.status)) {
     return res.status(409).json({ error: `Tidak bisa upload BAST untuk status "${delivery.status}"` });
   }
@@ -269,6 +300,8 @@ router.post("/:id/bast", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
 router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+  const scope = scopeOf(req.user);
+  if (scope && delivery.customer !== scope) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
   if (delivery.status !== "Shipped") {
     return res.status(409).json({ error: `Cannot advance a request with status "${delivery.status}"` });
   }
@@ -280,7 +313,7 @@ router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, 
 
   const tx = db.transaction(() => {
     delivery.items.forEach((item) => {
-      db.prepare("UPDATE materials SET in_transit = MAX(0, in_transit - ?) WHERE name = ?").run(item.qty, item.material);
+      adjustStock(item.material, delivery.customer, "in_transit", -item.qty);
       db.prepare("UPDATE serial_numbers SET status = 'Delivered' WHERE current_ref = ? AND material = ? AND status = 'In Transit'")
         .run(delivery.id, item.material);
     });

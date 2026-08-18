@@ -14,7 +14,7 @@ function reset() {
     "reconciliation_serials", "reconciliation_items", "reconciliation_history", "reconciliations",
     "return_serials", "return_items", "return_history", "returns",
     "delivery_items", "delivery_history", "deliveries",
-    "serial_numbers", "receipts",
+    "serial_numbers", "receipts", "material_stock",
     "stock_movements", "sites", "customers", "homebases", "areas", "materials", "users",
   ];
   tables.forEach((t) => db.prepare(`DELETE FROM ${t}`).run());
@@ -24,11 +24,11 @@ function seedDatabase() {
   reset();
 
   const hash = bcrypt.hashSync(DEMO_PASSWORD, 10);
-  const insertUser = db.prepare(`INSERT INTO users (id, name, username, password_hash, role, assignment, status) VALUES (?, ?, ?, ?, ?, ?, 'Active')`);
-  insertUser.run("USR001", "Fariz Asad", "fariz", hash, "Admin / Manager Logistics", "Semua Area");
-  insertUser.run("USR002", "Sari Dewi", "sari", hash, "Logistics Staff", "Warehouse Pusat");
-  insertUser.run("USR003", "Andi Wijaya", "andi", hash, "SPV", "Merauke");
-  insertUser.run("USR004", "Yohanes K.", "yohanes", hash, "Technician", "Maumere");
+  const insertUser = db.prepare(`INSERT INTO users (id, name, username, password_hash, role, assignment, customer, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'Active')`);
+  insertUser.run("USR001", "Fariz Asad", "fariz", hash, "Admin / Manager Logistics", "Semua Area", null);
+  insertUser.run("USR002", "Sari Dewi", "sari", hash, "Logistics Staff", "Warehouse Pusat", "Paramitra");
+  insertUser.run("USR003", "Andi Wijaya", "andi", hash, "SPV", "Merauke", "Paramitra");
+  insertUser.run("USR004", "Yohanes K.", "yohanes", hash, "Technician", "Maumere", "Telkomsel Regional");
 
   const insertArea = db.prepare("INSERT INTO areas (code, name, status) VALUES (?, ?, 'Active')");
   [["AR001", "Papua"], ["AR002", "Kalimantan"], ["AR003", "Nusra"], ["AR004", "Sumatera"]].forEach((a) => insertArea.run(...a));
@@ -74,7 +74,11 @@ function seedDatabase() {
   // have real data to work with immediately. Prefixes are kept distinct from
   // the SNs already referenced in the Return Faulty / Reconciliation seed
   // data below (HT33..., LNBKU..., RB45...) so nothing collides.
-  const insertSerial = db.prepare(`INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref) VALUES (?, ?, 'Ready', NULL, ?, 'WR-SEED')`);
+  // All demo stock is seeded under the "Paramitra" division (matching Sari
+  // and Andi's assigned customer) so the division-scoping feature has real
+  // data to demo against immediately.
+  const DEMO_DIVISION = "Paramitra";
+  const insertSerial = db.prepare(`INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref, customer) VALUES (?, ?, 'Ready', NULL, ?, 'WR-SEED', ?)`);
   const seedSerials = [
     { material: "Modem HT3300", prefix: "MOD-R", count: 25 },
     { material: "LNB Ku-Band", prefix: "LNB-R", count: 40 },
@@ -84,8 +88,16 @@ function seedDatabase() {
   ];
   seedSerials.forEach(({ material, prefix, count }) => {
     for (let i = 1; i <= count; i++) {
-      insertSerial.run(`${prefix}${String(i).padStart(3, "0")}`, material, "2026-08-01");
+      insertSerial.run(`${prefix}${String(i).padStart(3, "0")}`, material, "2026-08-01", DEMO_DIVISION);
     }
+  });
+
+  // Mirror the materials' aggregate quantities into material_stock under the
+  // same demo division, so Warehouse Stock looks identical whether Sari/Andi
+  // (division-scoped) or Fariz (Manager, sees the global aggregate) are logged in.
+  const insertStock = db.prepare(`INSERT INTO material_stock (material, customer, ready, faulty, reserved, in_transit) VALUES (?, ?, ?, ?, ?, ?)`);
+  db.prepare("SELECT name, ready, faulty, reserved, in_transit FROM materials").all().forEach((m) => {
+    insertStock.run(m.name, DEMO_DIVISION, m.ready, m.faulty, m.reserved, m.in_transit);
   });
 
   console.log("Seed complete.");

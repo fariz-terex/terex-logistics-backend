@@ -162,25 +162,32 @@ router.post("/sites", requireAuth, requireRole(MANAGER), (req, res) => {
 
 // ---------- Users ----------
 router.get("/users", requireAuth, requireRole(MANAGER), (req, res) => {
-  const rows = db.prepare("SELECT id, name, username, role, assignment, status FROM users ORDER BY name").all();
+  const rows = db.prepare("SELECT id, name, username, role, assignment, customer, status FROM users ORDER BY name").all();
   res.json(rows);
 });
 router.post("/users", requireAuth, requireRole(MANAGER), (req, res) => {
-  const { name, username, password, role, assignment } = req.body;
+  const { name, username, password, role, assignment, customer } = req.body;
   if (!name || !username || !password || !role) return res.status(400).json({ error: "name, username, password, role are required" });
   if (db.prepare("SELECT 1 FROM users WHERE username = ?").get(username.toLowerCase())) return res.status(409).json({ error: "Username already taken" });
+  // Logistics Staff / SPV / Technician are scoped to one division (Customer)
+  // each — Manager stays unscoped (sees every division) regardless of what's sent.
+  if (role !== MANAGER) {
+    if (!customer?.trim()) return res.status(400).json({ error: "Divisi (Customer) wajib diisi untuk role ini" });
+    if (!db.prepare("SELECT 1 FROM customers WHERE name = ?").get(customer)) return res.status(400).json({ error: `Customer "${customer}" tidak ditemukan di Master Customer` });
+  }
   const id = paddedSequenceId(db, "users", "USR");
   const hash = bcrypt.hashSync(password, 10);
-  db.prepare(`INSERT INTO users (id, name, username, password_hash, role, assignment, status) VALUES (?, ?, ?, ?, ?, ?, 'Active')`)
-    .run(id, name, username.toLowerCase(), hash, role, assignment || "");
-  res.status(201).json({ id, name, username: username.toLowerCase(), role, assignment: assignment || "", status: "Active" });
+  const finalCustomer = role === MANAGER ? null : customer;
+  db.prepare(`INSERT INTO users (id, name, username, password_hash, role, assignment, customer, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'Active')`)
+    .run(id, name, username.toLowerCase(), hash, role, assignment || "", finalCustomer);
+  res.status(201).json({ id, name, username: username.toLowerCase(), role, assignment: assignment || "", customer: finalCustomer, status: "Active" });
 });
 router.patch("/users/:id/toggle-status", requireAuth, requireRole(MANAGER), (req, res) => {
   const row = db.prepare("SELECT * FROM users WHERE id = ?").get(req.params.id);
   if (!row) return res.status(404).json({ error: "User not found" });
   const next = row.status === "Active" ? "Inactive" : "Active";
   db.prepare("UPDATE users SET status = ? WHERE id = ?").run(next, row.id);
-  res.json({ id: row.id, name: row.name, username: row.username, role: row.role, assignment: row.assignment, status: next });
+  res.json({ id: row.id, name: row.name, username: row.username, role: row.role, assignment: row.assignment, customer: row.customer, status: next });
 });
 
 const VALID_ROLES = ["Admin / Manager Logistics", "Logistics Staff", "SPV", "Technician"];
@@ -189,7 +196,7 @@ router.patch("/users/:id", requireAuth, requireRole(MANAGER), (req, res) => {
   const row = db.prepare("SELECT * FROM users WHERE id = ?").get(req.params.id);
   if (!row) return res.status(404).json({ error: "User not found" });
 
-  const { name, username, role, assignment, password } = req.body;
+  const { name, username, role, assignment, password, customer } = req.body;
 
   if (role && !VALID_ROLES.includes(role)) return res.status(400).json({ error: `Invalid role: ${role}` });
 
@@ -208,10 +215,18 @@ router.patch("/users/:id", requireAuth, requireRole(MANAGER), (req, res) => {
   // Password is optional on edit — blank/omitted means "keep the current password".
   const nextHash = password?.trim() ? bcrypt.hashSync(password, 10) : row.password_hash;
 
-  db.prepare("UPDATE users SET name = ?, username = ?, role = ?, assignment = ?, password_hash = ? WHERE id = ?")
-    .run(nextName, nextUsername, nextRole, nextAssignment, nextHash, row.id);
+  let nextCustomer = customer !== undefined ? customer : row.customer;
+  if (nextRole === MANAGER) {
+    nextCustomer = null; // Manager is always unscoped, regardless of what was previously set
+  } else {
+    if (!nextCustomer?.trim()) return res.status(400).json({ error: "Divisi (Customer) wajib diisi untuk role ini" });
+    if (!db.prepare("SELECT 1 FROM customers WHERE name = ?").get(nextCustomer)) return res.status(400).json({ error: `Customer "${nextCustomer}" tidak ditemukan di Master Customer` });
+  }
 
-  res.json({ id: row.id, name: nextName, username: nextUsername, role: nextRole, assignment: nextAssignment, status: row.status });
+  db.prepare("UPDATE users SET name = ?, username = ?, role = ?, assignment = ?, password_hash = ?, customer = ? WHERE id = ?")
+    .run(nextName, nextUsername, nextRole, nextAssignment, nextHash, nextCustomer, row.id);
+
+  res.json({ id: row.id, name: nextName, username: nextUsername, role: nextRole, assignment: nextAssignment, customer: nextCustomer, status: row.status });
 });
 
 module.exports = router;
