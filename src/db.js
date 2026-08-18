@@ -172,4 +172,18 @@ if (materialStockCount === 0) {
   }
 }
 
+// Users can now belong to more than one division — migrate anyone who still
+// only has the old single-value users.customer into the new user_divisions
+// table (a no-op once everyone's been migrated, since it only looks at
+// users who have zero rows there yet).
+const usersNeedingMigration = db.prepare(`
+  SELECT id, customer FROM users
+  WHERE customer IS NOT NULL AND id NOT IN (SELECT user_id FROM user_divisions)
+`).all();
+if (usersNeedingMigration.length > 0) {
+  console.log(`[db] migrating ${usersNeedingMigration.length} user(s) from single-division to user_divisions`);
+  const insertDivision = db.prepare("INSERT OR IGNORE INTO user_divisions (user_id, customer) VALUES (?, ?)");
+  usersNeedingMigration.forEach((u) => insertDivision.run(u.id, u.customer));
+}
+
 module.exports = db;

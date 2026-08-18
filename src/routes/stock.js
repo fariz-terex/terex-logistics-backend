@@ -2,7 +2,7 @@ const express = require("express");
 const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
-const { scopeOf } = require("../utils/stock");
+const { scopeOf, resolveCreateCustomer } = require("../utils/stock");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -14,17 +14,25 @@ router.get("/", requireAuth, (req, res) => {
     const rows = db.prepare("SELECT * FROM materials ORDER BY name").all();
     return res.json(rows.map((r) => ({ ...r, serialized: !!r.serialized })));
   }
-  // Division-scoped: same shape as the global row, but quantities come from
-  // material_stock for this user's customer (0 when no stock has ever been
-  // received under that division).
+  if (scope.length === 0) {
+    // Scoped but assigned to zero divisions — sees everything as zero,
+    // not the same as Manager's "unscoped" case.
+    const rows = db.prepare("SELECT id, name, category, unit, serialized, min_stock, status FROM materials ORDER BY name").all();
+    return res.json(rows.map((r) => ({ ...r, serialized: !!r.serialized, ready: 0, faulty: 0, reserved: 0, in_transit: 0 })));
+  }
+  // Division-scoped: same shape as the global row, but quantities are
+  // summed from material_stock across every division this user covers (0
+  // when none of them has ever received the material).
+  const placeholders = scope.map(() => "?").join(",");
   const rows = db.prepare(`
     SELECT m.id, m.name, m.category, m.unit, m.serialized, m.min_stock, m.status,
-           COALESCE(ms.ready, 0) AS ready, COALESCE(ms.faulty, 0) AS faulty,
-           COALESCE(ms.reserved, 0) AS reserved, COALESCE(ms.in_transit, 0) AS in_transit
+           COALESCE(SUM(ms.ready), 0) AS ready, COALESCE(SUM(ms.faulty), 0) AS faulty,
+           COALESCE(SUM(ms.reserved), 0) AS reserved, COALESCE(SUM(ms.in_transit), 0) AS in_transit
     FROM materials m
-    LEFT JOIN material_stock ms ON ms.material = m.name AND ms.customer = ?
+    LEFT JOIN material_stock ms ON ms.material = m.name AND ms.customer IN (${placeholders})
+    GROUP BY m.id
     ORDER BY m.name
-  `).all(scope);
+  `).all(...scope);
   res.json(rows.map((r) => ({ ...r, serialized: !!r.serialized })));
 });
 
@@ -34,7 +42,11 @@ router.get("/movements", requireAuth, (req, res) => {
   let query = "SELECT * FROM stock_movements WHERE 1=1";
   const params = [];
   if (material) { query += " AND material = ?"; params.push(material); }
-  if (scope) { query += " AND customer = ?"; params.push(scope); }
+  if (scope) {
+    if (scope.length === 0) return res.json([]);
+    query += ` AND customer IN (${scope.map(() => "?").join(",")})`;
+    params.push(...scope);
+  }
   query += " ORDER BY id DESC";
   const rows = db.prepare(query).all(...params);
 
@@ -58,16 +70,26 @@ router.get("/movements", requireAuth, (req, res) => {
 // (pick specific Ready units to reserve). A caller can pass `customer`
 // explicitly (e.g. the delivery's own division when Logistics/Manager is
 // picking SNs to fulfill it) — otherwise it defaults to the caller's own
-// division, and Manager with no override sees everything.
+// division(s), and Manager with no override sees everything.
 router.get("/serials", requireAuth, (req, res) => {
   const { material, status, q, customer } = req.query;
-  const scope = customer !== undefined ? (customer || null) : scopeOf(req.user);
   let query = "SELECT * FROM serial_numbers WHERE 1=1";
   const params = [];
   if (material) { query += " AND material = ?"; params.push(material); }
   if (status) { query += " AND status = ?"; params.push(status); }
   if (q) { query += " AND sn LIKE ?"; params.push(`%${q}%`); }
-  if (scope) { query += " AND customer = ?"; params.push(scope); }
+
+  if (customer !== undefined) {
+    if (customer) { query += " AND customer = ?"; params.push(customer); }
+  } else {
+    const scope = scopeOf(req.user);
+    if (scope) {
+      if (scope.length === 0) return res.json([]);
+      query += ` AND customer IN (${scope.map(() => "?").join(",")})`;
+      params.push(...scope);
+    }
+  }
+
   query += " ORDER BY sn";
   if (q) query += " LIMIT 10"; // free-text search only — the SN-picker use case (material+status) needs the full list
   res.json(db.prepare(query).all(...params));
@@ -75,9 +97,9 @@ router.get("/serials", requireAuth, (req, res) => {
 
 router.get("/receipts", requireAuth, (req, res) => {
   const scope = scopeOf(req.user);
-  const rows = scope
-    ? db.prepare("SELECT * FROM receipts WHERE customer = ? ORDER BY id DESC").all(scope)
-    : db.prepare("SELECT * FROM receipts ORDER BY id DESC").all();
+  if (!scope) return res.json(db.prepare("SELECT * FROM receipts ORDER BY id DESC").all());
+  if (scope.length === 0) return res.json([]);
+  const rows = db.prepare(`SELECT * FROM receipts WHERE customer IN (${scope.map(() => "?").join(",")}) ORDER BY id DESC`).all(...scope);
   res.json(rows);
 });
 
@@ -86,27 +108,14 @@ router.get("/receipts", requireAuth, (req, res) => {
 // else is just a quantity. Wrapped in one transaction so the receipt record,
 // the serial rows, the material total, and the stock movement can never
 // partially apply.
-//
-// Every receipt is credited to exactly one division (Customer). A
-// division-scoped user (Logistics Staff) can only ever credit their own
-// division — the body is ignored/overridden for safety. Manager has no
-// fixed division, so they must say which one explicitly.
 router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const { material, serials, qty, note } = req.body;
   const mat = db.prepare("SELECT * FROM materials WHERE name = ?").get(material);
   if (!mat) return res.status(400).json({ error: "Unknown material" });
 
-  let customer;
-  if (req.user.role === MANAGER) {
-    customer = req.body.customer;
-    if (!customer?.trim()) return res.status(400).json({ error: "Pilih Divisi (Customer) tujuan stock ini" });
-    if (!db.prepare("SELECT 1 FROM customers WHERE name = ?").get(customer)) {
-      return res.status(400).json({ error: `Customer "${customer}" tidak ditemukan di Master Customer` });
-    }
-  } else {
-    customer = req.user.customer;
-    if (!customer) return res.status(400).json({ error: "Akun Anda belum di-assign ke Divisi (Customer) manapun — hubungi Manager." });
-  }
+  const resolved = resolveCreateCustomer(req.user, req.body.customer);
+  if (resolved.error) return res.status(400).json({ error: resolved.error });
+  const customer = resolved.customer;
 
   const id = dailySequenceId(db, "receipts", "WR");
   let addedQty = 0;

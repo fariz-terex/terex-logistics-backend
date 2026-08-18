@@ -11,8 +11,18 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   role          TEXT NOT NULL CHECK (role IN ('Admin / Manager Logistics','Logistics Staff','SPV','Technician')),
   assignment    TEXT DEFAULT '',
-  customer      TEXT,   -- division: which Customer this user is scoped to (Logistics Staff/SPV/Technician). NULL = unscoped (Manager sees everything).
+  customer      TEXT,   -- LEGACY single-division field, no longer read by the app — see user_divisions for the current (multi-division) source of truth. Left in place rather than dropped since SQLite column drops require a table rebuild.
   status        TEXT NOT NULL DEFAULT 'Active' CHECK (status IN ('Active','Inactive'))
+);
+
+-- A user (typically Logistics Staff, but any non-Manager role) can be
+-- assigned to more than one division (Customer) — e.g. a staff member who
+-- covers two customers at once. Manager has no rows here and is always
+-- unscoped (sees every division regardless).
+CREATE TABLE IF NOT EXISTS user_divisions (
+  user_id  TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  customer TEXT NOT NULL,
+  PRIMARY KEY (user_id, customer)
 );
 
 CREATE TABLE IF NOT EXISTS areas (

@@ -15,7 +15,8 @@ function reset() {
     "return_serials", "return_items", "return_history", "returns",
     "delivery_items", "delivery_history", "deliveries",
     "serial_numbers", "receipts", "material_stock",
-    "stock_movements", "sites", "customers", "homebases", "areas", "materials", "users",
+    "stock_movements", "sites", "customers", "homebases", "areas", "materials",
+    "user_divisions", "users",
   ];
   tables.forEach((t) => db.prepare(`DELETE FROM ${t}`).run());
 }
@@ -24,11 +25,18 @@ function seedDatabase() {
   reset();
 
   const hash = bcrypt.hashSync(DEMO_PASSWORD, 10);
-  const insertUser = db.prepare(`INSERT INTO users (id, name, username, password_hash, role, assignment, customer, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'Active')`);
-  insertUser.run("USR001", "Fariz Asad", "fariz", hash, "Admin / Manager Logistics", "Semua Area", null);
-  insertUser.run("USR002", "Sari Dewi", "sari", hash, "Logistics Staff", "Warehouse Pusat", "Paramitra");
-  insertUser.run("USR003", "Andi Wijaya", "andi", hash, "SPV", "Merauke", "Paramitra");
-  insertUser.run("USR004", "Yohanes K.", "yohanes", hash, "Technician", "Maumere", "Telkomsel Regional");
+  const insertUser = db.prepare(`INSERT INTO users (id, name, username, password_hash, role, assignment, status) VALUES (?, ?, ?, ?, ?, ?, 'Active')`);
+  const insertDivision = db.prepare("INSERT INTO user_divisions (user_id, customer) VALUES (?, ?)");
+  const addUser = (id, name, username, role, assignment, divisions) => {
+    insertUser.run(id, name, username, hash, role, assignment);
+    divisions.forEach((c) => insertDivision.run(id, c));
+  };
+  addUser("USR001", "Fariz Asad", "fariz", "Admin / Manager Logistics", "Semua Area", []);
+  addUser("USR002", "Sari Dewi", "sari", "Logistics Staff", "Warehouse Pusat", ["Paramitra"]);
+  addUser("USR003", "Andi Wijaya", "andi", "SPV", "Merauke", ["Paramitra"]);
+  addUser("USR004", "Yohanes K.", "yohanes", "Technician", "Maumere", ["Telkomsel Regional"]);
+  // Demo of a staff member covering more than one division at once.
+  addUser("USR005", "Alnodi", "alnodi", "Logistics Staff", "Warehouse Pusat", ["Paramitra", "Telkomsel Regional"]);
 
   const insertArea = db.prepare("INSERT INTO areas (code, name, status) VALUES (?, ?, 'Active')");
   [["AR001", "Papua"], ["AR002", "Kalimantan"], ["AR003", "Nusra"], ["AR004", "Sumatera"]].forEach((a) => insertArea.run(...a));
@@ -102,7 +110,7 @@ function seedDatabase() {
 
   console.log("Seed complete.");
   console.log(`Demo login — any username above with password: ${DEMO_PASSWORD}`);
-  console.log("e.g. fariz / sari / andi / yohanes");
+  console.log("e.g. fariz / sari / andi / yohanes / alnodi (multi-division demo)");
 }
 
 module.exports = { seedDatabase };

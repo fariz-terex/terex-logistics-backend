@@ -2,7 +2,7 @@ const express = require("express");
 const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
-const { scopeOf, getDivisionStock, adjustStock } = require("../utils/stock");
+const { scopeOf, scopeAllows, getDivisionStock, adjustStock, resolveCreateCustomer } = require("../utils/stock");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -35,38 +35,38 @@ function addHistory(id, text) {
 
 router.get("/", requireAuth, (req, res) => {
   const scope = scopeOf(req.user);
-  const ids = scope
-    ? db.prepare("SELECT id FROM deliveries WHERE customer = ? ORDER BY id DESC").all(scope).map((r) => r.id)
-    : db.prepare("SELECT id FROM deliveries ORDER BY id DESC").all().map((r) => r.id);
+  let ids;
+  if (!scope) {
+    ids = db.prepare("SELECT id FROM deliveries ORDER BY id DESC").all().map((r) => r.id);
+  } else if (scope.length === 0) {
+    ids = [];
+  } else {
+    ids = db.prepare(`SELECT id FROM deliveries WHERE customer IN (${scope.map(() => "?").join(",")}) ORDER BY id DESC`).all(...scope).map((r) => r.id);
+  }
   res.json(ids.map(loadDelivery));
 });
 
 router.get("/:id", requireAuth, (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
-  const scope = scopeOf(req.user);
-  if (scope && delivery.customer !== scope) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
+  if (!scopeAllows(scopeOf(req.user), delivery.customer)) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
   res.json(delivery);
 });
 
 // SPV (or Manager) submits a new request. Server re-validates stock
 // sufficiency — the front-end UI check is a convenience, not the guarantee.
-// The request is credited to the SPV's own division; Manager (unscoped)
-// must say explicitly which division it's for.
+// The request is credited to the SPV's own division (or, if they cover more
+// than one, whichever they explicitly picked); Manager (unscoped) must
+// always say explicitly which division it's for.
 router.post("/", requireAuth, requireRole(SPV, MANAGER), (req, res) => {
   const { homebase, site, keperluan, note, items } = req.body;
   if (!homebase || !keperluan || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: "homebase, keperluan, and at least one item are required" });
   }
 
-  let customer;
-  if (req.user.role === MANAGER) {
-    customer = req.body.customer;
-    if (!customer?.trim()) return res.status(400).json({ error: "Pilih Divisi (Customer) untuk request ini" });
-  } else {
-    customer = req.user.customer;
-    if (!customer) return res.status(400).json({ error: "Akun Anda belum di-assign ke Divisi (Customer) manapun — hubungi Manager." });
-  }
+  const resolved = resolveCreateCustomer(req.user, req.body.customer);
+  if (resolved.error) return res.status(400).json({ error: resolved.error });
+  const customer = resolved.customer;
 
   for (const item of items) {
     const material = db.prepare("SELECT 1 FROM materials WHERE name = ?").get(item.material);
@@ -123,13 +123,12 @@ router.post("/:id/approve", requireAuth, requireRole(MANAGER), (req, res) => {
 // Ready units so this endpoint still works for older/simpler clients.
 // Stock and SNs are drawn from the delivery's OWN division regardless of
 // who is performing the action (Manager included) — a Logistics Staff can
-// only act on their own division's requests, enforced below.
+// only act on requests belonging to one of THEIR OWN divisions, enforced below.
 // Everything below is one transaction so a partial reservation can't happen.
 router.post("/:id/assign-stock", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
-  const scope = scopeOf(req.user);
-  if (scope && delivery.customer !== scope) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
+  if (!scopeAllows(scopeOf(req.user), delivery.customer)) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
   if (delivery.status !== "Waiting Stock Assignment") {
     return res.status(409).json({ error: `Cannot assign stock for a request with status "${delivery.status}"` });
   }
@@ -211,8 +210,7 @@ router.post("/:id/reject", requireAuth, requireRole(MANAGER), (req, res) => {
 router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
-  const scope = scopeOf(req.user);
-  if (scope && delivery.customer !== scope) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
+  if (!scopeAllows(scopeOf(req.user), delivery.customer)) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
   if (delivery.status !== "Preparing") {
     return res.status(409).json({ error: `Cannot ship a request with status "${delivery.status}"` });
   }
@@ -265,8 +263,7 @@ router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
   }
   const delivery = db.prepare("SELECT * FROM deliveries WHERE id = ?").get(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
-  const scope = scopeOf(req.user);
-  if (scope && delivery.customer !== scope) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
+  if (!scopeAllows(scopeOf(req.user), delivery.customer)) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
 
   const nextNumber = resiNumber?.trim() || delivery.resi_number;
   const nextPhoto = resiPhoto || delivery.resi_photo;
@@ -283,8 +280,7 @@ router.post("/:id/bast", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
   if (!bastDocument) return res.status(400).json({ error: "Upload dokumen BAST terlebih dahulu" });
   const delivery = db.prepare("SELECT * FROM deliveries WHERE id = ?").get(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
-  const scope = scopeOf(req.user);
-  if (scope && delivery.customer !== scope) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
+  if (!scopeAllows(scopeOf(req.user), delivery.customer)) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
   if (!["Shipped", "Delivered"].includes(delivery.status)) {
     return res.status(409).json({ error: `Tidak bisa upload BAST untuk status "${delivery.status}"` });
   }
@@ -300,8 +296,7 @@ router.post("/:id/bast", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
 router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
-  const scope = scopeOf(req.user);
-  if (scope && delivery.customer !== scope) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
+  if (!scopeAllows(scopeOf(req.user), delivery.customer)) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
   if (delivery.status !== "Shipped") {
     return res.status(409).json({ error: `Cannot advance a request with status "${delivery.status}"` });
   }

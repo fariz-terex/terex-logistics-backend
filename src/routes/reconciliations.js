@@ -2,7 +2,7 @@ const express = require("express");
 const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
-const { scopeOf, adjustStock } = require("../utils/stock");
+const { scopeOf, scopeAllows, adjustStock, resolveCreateCustomer } = require("../utils/stock");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -58,17 +58,21 @@ function addHistory(id, text) {
 
 router.get("/", requireAuth, (req, res) => {
   const scope = scopeOf(req.user);
-  const ids = scope
-    ? db.prepare("SELECT id FROM reconciliations WHERE customer = ? ORDER BY id DESC").all(scope).map((r) => r.id)
-    : db.prepare("SELECT id FROM reconciliations ORDER BY id DESC").all().map((r) => r.id);
+  let ids;
+  if (!scope) {
+    ids = db.prepare("SELECT id FROM reconciliations ORDER BY id DESC").all().map((r) => r.id);
+  } else if (scope.length === 0) {
+    ids = [];
+  } else {
+    ids = db.prepare(`SELECT id FROM reconciliations WHERE customer IN (${scope.map(() => "?").join(",")}) ORDER BY id DESC`).all(...scope).map((r) => r.id);
+  }
   res.json(ids.map(loadReconciliation));
 });
 
 router.get("/:id", requireAuth, (req, res) => {
   const rc = loadReconciliation(req.params.id);
   if (!rc) return res.status(404).json({ error: "Reconciliation not found" });
-  const scope = scopeOf(req.user);
-  if (scope && rc.customer !== scope) return res.status(403).json({ error: "Reconciliation ini bukan milik divisi Anda" });
+  if (!scopeAllows(scopeOf(req.user), rc.customer)) return res.status(403).json({ error: "Reconciliation ini bukan milik divisi Anda" });
   res.json(rc);
 });
 
@@ -107,14 +111,9 @@ router.post("/", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
   const err = validateItems(items, null);
   if (err) return res.status(409).json({ error: err });
 
-  let customer;
-  if (req.user.role === MANAGER) {
-    customer = req.body.customer;
-    if (!customer?.trim()) return res.status(400).json({ error: "Pilih Divisi (Customer) untuk laporan ini" });
-  } else {
-    customer = req.user.customer;
-    if (!customer) return res.status(400).json({ error: "Akun Anda belum di-assign ke Divisi (Customer) manapun — hubungi Manager." });
-  }
+  const resolved = resolveCreateCustomer(req.user, req.body.customer);
+  if (resolved.error) return res.status(400).json({ error: resolved.error });
+  const customer = resolved.customer;
 
   const id = dailySequenceId(db, "reconciliations", "RC");
   const tx = db.transaction(() => {
@@ -132,8 +131,7 @@ router.post("/:id/revise", requireAuth, requireRole(LOGISTICS, MANAGER), (req, r
   if (!note?.trim()) return res.status(400).json({ error: "Revision note is required" });
   const rc = db.prepare("SELECT * FROM reconciliations WHERE id = ?").get(req.params.id);
   if (!rc) return res.status(404).json({ error: "Reconciliation not found" });
-  const scope = scopeOf(req.user);
-  if (scope && rc.customer !== scope) return res.status(403).json({ error: "Reconciliation ini bukan milik divisi Anda" });
+  if (!scopeAllows(scopeOf(req.user), rc.customer)) return res.status(403).json({ error: "Reconciliation ini bukan milik divisi Anda" });
   if (rc.status !== "Waiting Logistics Review") return res.status(409).json({ error: `Cannot request revision on status "${rc.status}"` });
   db.prepare("UPDATE reconciliations SET status = 'Revision Required', revision_note = ? WHERE id = ?").run(note, rc.id);
   addHistory(rc.id, `Revision Required by ${req.user.name} (Logistics)`);
@@ -143,8 +141,7 @@ router.post("/:id/revise", requireAuth, requireRole(LOGISTICS, MANAGER), (req, r
 router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
   const rc = db.prepare("SELECT * FROM reconciliations WHERE id = ?").get(req.params.id);
   if (!rc) return res.status(404).json({ error: "Reconciliation not found" });
-  const scope = scopeOf(req.user);
-  if (scope && rc.customer !== scope) return res.status(403).json({ error: "Reconciliation ini bukan milik divisi Anda" });
+  if (!scopeAllows(scopeOf(req.user), rc.customer)) return res.status(403).json({ error: "Reconciliation ini bukan milik divisi Anda" });
   if (rc.status !== "Revision Required") return res.status(409).json({ error: `Cannot resubmit status "${rc.status}"` });
 
   const { items } = req.body;
@@ -170,8 +167,7 @@ router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), (req, res)
 router.post("/:id/approve", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const rc = loadReconciliation(req.params.id);
   if (!rc) return res.status(404).json({ error: "Reconciliation not found" });
-  const scope = scopeOf(req.user);
-  if (scope && rc.customer !== scope) return res.status(403).json({ error: "Reconciliation ini bukan milik divisi Anda" });
+  if (!scopeAllows(scopeOf(req.user), rc.customer)) return res.status(403).json({ error: "Reconciliation ini bukan milik divisi Anda" });
   if (rc.status !== "Waiting Logistics Review") return res.status(409).json({ error: `Cannot approve status "${rc.status}"` });
 
   const tx = db.transaction(() => {
