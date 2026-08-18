@@ -1,0 +1,25 @@
+From 38733e5deea966f1ecea84d46e10863572cfd664 Mon Sep 17 00:00:00 2001
+From: TEREX Dev <dev@terex.local>
+Date: Tue, 18 Aug 2026 10:12:26 +0000
+Subject: [PATCH] HOTFIX: remove index creation that crashed boot on databases
+ predating the customer column
+
+---
+ src/schema.sql | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/src/schema.sql b/src/schema.sql
+index 5ae1670..5ff0016 100644
+--- a/src/schema.sql
++++ b/src/schema.sql
+@@ -230,7 +230,6 @@ CREATE TABLE IF NOT EXISTS serial_numbers (
+   customer       TEXT      -- division this unit belongs to
+ );
+ CREATE INDEX IF NOT EXISTS idx_serials_material_status ON serial_numbers(material, status);
+-CREATE INDEX IF NOT EXISTS idx_serials_customer ON serial_numbers(customer);
+ 
+ CREATE TABLE IF NOT EXISTS receipts (
+   id         TEXT PRIMARY KEY,
+-- 
+2.43.0
+

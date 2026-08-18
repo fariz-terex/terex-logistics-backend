@@ -230,7 +230,6 @@ CREATE TABLE IF NOT EXISTS serial_numbers (
   customer       TEXT      -- division this unit belongs to
 );
 CREATE INDEX IF NOT EXISTS idx_serials_material_status ON serial_numbers(material, status);
-CREATE INDEX IF NOT EXISTS idx_serials_customer ON serial_numbers(customer);
 
 CREATE TABLE IF NOT EXISTS receipts (
   id         TEXT PRIMARY KEY,
