@@ -22,6 +22,7 @@ function loadDelivery(id) {
     ...delivery, items, history,
     docOverall: delivery.doc_overall, docAfterPacking: delivery.doc_after_packing, resiNumber: delivery.resi_number, resiPhoto: delivery.resi_photo,
     deliveredPhoto: delivery.delivered_photo, receivedBy: delivery.received_by,
+    bastDocument: delivery.bast_document, bastFilename: delivery.bast_filename,
     serialPhotos,
   };
 }
@@ -245,9 +246,22 @@ router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
   res.json(loadDelivery(delivery.id));
 });
 
-// Shipped -> Delivered: the units have left the warehouse for good, so
-// in_transit is cleared for them and their SNs move to a final "Delivered"
-// state. No extra documentation required at this step.
+// BAST (Berita Acara Serah Terima) — the formal handover document, usually
+// scanned/photographed after both parties sign it. Optional and can be
+// added any time after shipping, same pattern as resi. Accepts PDF or image.
+router.post("/:id/bast", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+  const { bastDocument, bastFilename } = req.body;
+  if (!bastDocument) return res.status(400).json({ error: "Upload dokumen BAST terlebih dahulu" });
+  const delivery = db.prepare("SELECT * FROM deliveries WHERE id = ?").get(req.params.id);
+  if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+  if (!["Shipped", "Delivered"].includes(delivery.status)) {
+    return res.status(409).json({ error: `Tidak bisa upload BAST untuk status "${delivery.status}"` });
+  }
+  db.prepare("UPDATE deliveries SET bast_document = ?, bast_filename = ? WHERE id = ?").run(bastDocument, bastFilename || "BAST", delivery.id);
+  addHistory(delivery.id, `Dokumen BAST diupload oleh ${req.user.name}`);
+  res.json(loadDelivery(delivery.id));
+});
+
 // Shipped -> Delivered: the units have left the warehouse for good, so
 // in_transit is cleared for them and their SNs move to a final "Delivered"
 // state. A proof-of-receipt photo is required here — the recipient's name

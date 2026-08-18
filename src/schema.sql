@@ -86,7 +86,9 @@ CREATE TABLE IF NOT EXISTS deliveries (
   resi_number       TEXT,   -- shipping receipt number — optional, often added after shipping
   resi_photo        TEXT,   -- photo of the shipping receipt — also optional, added the same way
   delivered_photo   TEXT,   -- proof-of-receipt photo, required before Shipped -> Delivered
-  received_by       TEXT    -- name of whoever accepted the goods in the field — optional
+  received_by       TEXT,   -- name of whoever accepted the goods in the field — optional
+  bast_document      TEXT,  -- Berita Acara Serah Terima file (PDF or scanned image) — optional, added any time after shipping
+  bast_filename      TEXT   -- original filename, for display purposes
 );
 
 CREATE TABLE IF NOT EXISTS delivery_items (

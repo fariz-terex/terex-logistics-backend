@@ -101,4 +101,10 @@ if (!returnColumns.includes("resi_photo")) {
   db.exec("ALTER TABLE returns ADD COLUMN resi_photo TEXT");
 }
 
+if (!deliveryColumns.includes("bast_document")) {
+  console.log("[db] adding BAST document columns to deliveries");
+  db.exec("ALTER TABLE deliveries ADD COLUMN bast_document TEXT");
+  db.exec("ALTER TABLE deliveries ADD COLUMN bast_filename TEXT");
+}
+
 module.exports = db;

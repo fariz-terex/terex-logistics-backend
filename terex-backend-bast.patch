@@ -1,0 +1,83 @@
+From cb0bd111d04315fa8e1107e0931b7ca4f06b3e47 Mon Sep 17 00:00:00 2001
+From: TEREX Dev <dev@terex.local>
+Date: Wed, 12 Aug 2026 12:34:58 +0000
+Subject: [PATCH] Add optional BAST document upload for Delivery Request (PDF
+ or scanned photo)
+
+---
+ src/db.js                |  6 ++++++
+ src/routes/deliveries.js | 20 +++++++++++++++++---
+ src/schema.sql           |  4 +++-
+ 3 files changed, 26 insertions(+), 4 deletions(-)
+
+diff --git a/src/db.js b/src/db.js
+index 76f335c..f274cd0 100644
+--- a/src/db.js
++++ b/src/db.js
+@@ -107,4 +107,10 @@ if (!returnColumns.includes("resi_photo")) {
+   db.exec("ALTER TABLE returns ADD COLUMN resi_photo TEXT");
+ }
+ 
++if (!deliveryColumns.includes("bast_document")) {
++  console.log("[db] adding BAST document columns to deliveries");
++  db.exec("ALTER TABLE deliveries ADD COLUMN bast_document TEXT");
++  db.exec("ALTER TABLE deliveries ADD COLUMN bast_filename TEXT");
++}
++
+ module.exports = db;
+diff --git a/src/routes/deliveries.js b/src/routes/deliveries.js
+index 4312213..0d21d5e 100644
+--- a/src/routes/deliveries.js
++++ b/src/routes/deliveries.js
+@@ -22,6 +22,7 @@ function loadDelivery(id) {
+     ...delivery, items, history,
+     docOverall: delivery.doc_overall, docAfterPacking: delivery.doc_after_packing, resiNumber: delivery.resi_number, resiPhoto: delivery.resi_photo,
+     deliveredPhoto: delivery.delivered_photo, receivedBy: delivery.received_by,
++    bastDocument: delivery.bast_document, bastFilename: delivery.bast_filename,
+     serialPhotos,
+   };
+ }
+@@ -245,9 +246,22 @@ router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
+   res.json(loadDelivery(delivery.id));
+ });
+ 
+-// Shipped -> Delivered: the units have left the warehouse for good, so
+-// in_transit is cleared for them and their SNs move to a final "Delivered"
+-// state. No extra documentation required at this step.
++// BAST (Berita Acara Serah Terima) — the formal handover document, usually
++// scanned/photographed after both parties sign it. Optional and can be
++// added any time after shipping, same pattern as resi. Accepts PDF or image.
++router.post("/:id/bast", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
++  const { bastDocument, bastFilename } = req.body;
++  if (!bastDocument) return res.status(400).json({ error: "Upload dokumen BAST terlebih dahulu" });
++  const delivery = db.prepare("SELECT * FROM deliveries WHERE id = ?").get(req.params.id);
++  if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
++  if (!["Shipped", "Delivered"].includes(delivery.status)) {
++    return res.status(409).json({ error: `Tidak bisa upload BAST untuk status "${delivery.status}"` });
++  }
++  db.prepare("UPDATE deliveries SET bast_document = ?, bast_filename = ? WHERE id = ?").run(bastDocument, bastFilename || "BAST", delivery.id);
++  addHistory(delivery.id, `Dokumen BAST diupload oleh ${req.user.name}`);
++  res.json(loadDelivery(delivery.id));
++});
++
+ // Shipped -> Delivered: the units have left the warehouse for good, so
+ // in_transit is cleared for them and their SNs move to a final "Delivered"
+ // state. A proof-of-receipt photo is required here — the recipient's name
+diff --git a/src/schema.sql b/src/schema.sql
+index 82d74da..c580b99 100644
+--- a/src/schema.sql
++++ b/src/schema.sql
+@@ -86,7 +86,9 @@ CREATE TABLE IF NOT EXISTS deliveries (
+   resi_number       TEXT,   -- shipping receipt number — optional, often added after shipping
+   resi_photo        TEXT,   -- photo of the shipping receipt — also optional, added the same way
+   delivered_photo   TEXT,   -- proof-of-receipt photo, required before Shipped -> Delivered
+-  received_by       TEXT    -- name of whoever accepted the goods in the field — optional
++  received_by       TEXT,   -- name of whoever accepted the goods in the field — optional
++  bast_document      TEXT,  -- Berita Acara Serah Terima file (PDF or scanned image) — optional, added any time after shipping
++  bast_filename      TEXT   -- original filename, for display purposes
+ );
+ 
+ CREATE TABLE IF NOT EXISTS delivery_items (
+-- 
+2.43.0
+
