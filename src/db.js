@@ -21,6 +21,12 @@ if (!fs.existsSync(dir)) {
 const db = new Database(dbPath);
 db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
+// If a write collides with another in-flight write, retry for up to 5s
+// instead of throwing "database is locked" immediately. SQLite only allows
+// one writer at a time — with WAL mode reads are unaffected, but without
+// this, two users submitting at the same instant could otherwise see one
+// request fail outright rather than just queue briefly.
+db.pragma("busy_timeout = 5000");
 
 const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
 db.exec(schema);
@@ -122,6 +128,11 @@ if (!deliveryColumns.includes("customer")) {
   db.exec("ALTER TABLE deliveries ADD COLUMN customer TEXT");
 }
 
+if (!deliveryColumns.includes("bkb_link")) {
+  console.log("[db] adding bkb_link column to deliveries");
+  db.exec("ALTER TABLE deliveries ADD COLUMN bkb_link TEXT");
+}
+
 const userColumnsForDivision = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
 if (!userColumnsForDivision.includes("customer")) {
   console.log("[db] adding customer (division) column to users");
@@ -184,6 +195,15 @@ if (usersNeedingMigration.length > 0) {
   console.log(`[db] migrating ${usersNeedingMigration.length} user(s) from single-division to user_divisions`);
   const insertDivision = db.prepare("INSERT OR IGNORE INTO user_divisions (user_id, customer) VALUES (?, ?)");
   usersNeedingMigration.forEach((u) => insertDivision.run(u.id, u.customer));
+}
+
+// Delivery Request now carries tool line items alongside materials — old
+// rows get 'material' via the column default, so existing deliveries keep
+// working unchanged.
+const deliveryItemColumns = db.prepare("PRAGMA table_info(delivery_items)").all().map((c) => c.name);
+if (!deliveryItemColumns.includes("item_type")) {
+  console.log("[db] adding item_type column to delivery_items");
+  db.exec("ALTER TABLE delivery_items ADD COLUMN item_type TEXT NOT NULL DEFAULT 'material'");
 }
 
 module.exports = db;

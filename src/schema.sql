@@ -116,14 +116,16 @@ CREATE TABLE IF NOT EXISTS deliveries (
   received_by       TEXT,   -- name of whoever accepted the goods in the field — optional
   bast_document      TEXT,  -- Berita Acara Serah Terima file (PDF or scanned image) — optional, added any time after shipping
   bast_filename      TEXT,  -- original filename, for display purposes
-  customer           TEXT   -- division this request belongs to (the requesting SPV's division)
+  customer           TEXT,  -- division this request belongs to (the requesting SPV's division)
+  bkb_link           TEXT   -- URL to the BKB / Surat Jalan document kept in a separate external system — optional, no API integration exists so this is just a reference link
 );
 
 CREATE TABLE IF NOT EXISTS delivery_items (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   delivery_id TEXT NOT NULL REFERENCES deliveries(id) ON DELETE CASCADE,
   material    TEXT NOT NULL,
-  qty         INTEGER NOT NULL
+  qty         INTEGER NOT NULL,
+  item_type   TEXT NOT NULL DEFAULT 'material'   -- 'material' (one-way, division-scoped) | 'tool' (checked out, shared pool, must be returned)
 );
 
 CREATE TABLE IF NOT EXISTS delivery_history (
