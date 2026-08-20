@@ -251,3 +251,71 @@ CREATE TABLE IF NOT EXISTS receipts (
   customer   TEXT   -- division this receipt's stock was credited to
 );
 
+-- ===================== TOOLS / PERALATAN (Peminjaman Alat) =====================
+-- A completely separate pool from materials/deliveries: tools are borrowed
+-- and returned (round-trip), not delivered and consumed (one-way) — and
+-- unlike materials, they're a shared company asset with no division
+-- (Customer) split; anyone can borrow from the same pool.
+
+CREATE TABLE IF NOT EXISTS tools (
+  id           TEXT PRIMARY KEY,
+  name         TEXT NOT NULL UNIQUE,
+  category     TEXT DEFAULT '',
+  unit         TEXT DEFAULT 'Unit',
+  serialized   INTEGER NOT NULL DEFAULT 1,
+  min_stock    INTEGER NOT NULL DEFAULT 0,
+  status       TEXT NOT NULL DEFAULT 'Active',
+  available    INTEGER NOT NULL DEFAULT 0,
+  checked_out  INTEGER NOT NULL DEFAULT 0,
+  under_repair INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS tool_serials (
+  sn            TEXT PRIMARY KEY,
+  tool          TEXT NOT NULL REFERENCES tools(name),
+  status        TEXT NOT NULL DEFAULT 'Available' CHECK (status IN ('Available','Checked Out','Under Repair')),
+  current_ref   TEXT,     -- id of the tool_checkout currently holding this unit (nullable when Available)
+  received_date TEXT,
+  received_ref  TEXT      -- Terima Alat (tool_receipts) id this unit arrived on
+);
+CREATE INDEX IF NOT EXISTS idx_tool_serials_tool_status ON tool_serials(tool, status);
+
+CREATE TABLE IF NOT EXISTS tool_receipts (
+  id         TEXT PRIMARY KEY,
+  date       TEXT NOT NULL,
+  tool       TEXT NOT NULL,
+  qty        INTEGER NOT NULL,
+  note       TEXT DEFAULT '',
+  created_by TEXT
+);
+
+CREATE TABLE IF NOT EXISTS tool_checkouts (
+  id               TEXT PRIMARY KEY,
+  requester        TEXT NOT NULL,
+  homebase         TEXT NOT NULL,
+  purpose          TEXT NOT NULL,
+  note             TEXT DEFAULT '',
+  status           TEXT NOT NULL DEFAULT 'Waiting Approval',  -- Waiting Approval | Checked Out | Returned | Rejected
+  date             TEXT NOT NULL,
+  expected_return  TEXT,
+  handover_photo   TEXT,
+  return_photo     TEXT,
+  return_condition TEXT,   -- 'Baik' | 'Rusak' — overall condition noted at return
+  return_note      TEXT,
+  returned_date    TEXT
+);
+
+CREATE TABLE IF NOT EXISTS tool_checkout_items (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  checkout_id TEXT NOT NULL REFERENCES tool_checkouts(id) ON DELETE CASCADE,
+  tool        TEXT NOT NULL,
+  qty         INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS tool_checkout_history (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  checkout_id TEXT NOT NULL REFERENCES tool_checkouts(id) ON DELETE CASCADE,
+  time        TEXT NOT NULL,
+  text        TEXT NOT NULL
+);
+
