@@ -22,11 +22,14 @@ function loadDelivery(id) {
     const isTool = item.item_type === "tool";
     const serialRows = isTool
       ? db.prepare("SELECT sn, status FROM tool_serials WHERE current_ref = ? AND tool = ?").all(id, item.material)
-      : db.prepare("SELECT sn, status FROM serial_numbers WHERE current_ref = ? AND material = ?").all(id, item.material);
+      : db.prepare("SELECT sn, status, installed_date, installed_by, install_site, install_photo FROM serial_numbers WHERE current_ref = ? AND material = ?").all(id, item.material);
     return {
       material: item.material, qty: item.qty, type: item.item_type,
       serials: serialRows.map((s) => s.sn),
       serialStatuses: Object.fromEntries(serialRows.map((s) => [s.sn, s.status])),
+      serialInstallInfo: isTool ? undefined : Object.fromEntries(serialRows.map((s) => [
+        s.sn, { installedDate: s.installed_date, installedBy: s.installed_by, installSite: s.install_site, installPhoto: s.install_photo },
+      ])),
     };
   });
   const history = db.prepare("SELECT time, text FROM delivery_history WHERE delivery_id = ? ORDER BY id").all(id);
