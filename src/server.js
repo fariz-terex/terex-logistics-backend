@@ -12,6 +12,7 @@ const deliveryRoutes = require("./routes/deliveries");
 const returnRoutes = require("./routes/returns");
 const reconciliationRoutes = require("./routes/reconciliations");
 const toolRoutes = require("./routes/tools");
+const materialSwapRoutes = require("./routes/materialSwaps");
 
 // First boot on a fresh volume: schema.sql already ran (via db.js) but every
 // table is empty. Seed once, automatically — this never runs again once
@@ -54,6 +55,7 @@ app.use("/api/deliveries", deliveryRoutes);
 app.use("/api/returns", returnRoutes);
 app.use("/api/reconciliations", reconciliationRoutes);
 app.use("/api/tools", toolRoutes); // /api/tools, /api/tools/serials, /api/tools/receipts, /api/tools/checkouts
+app.use("/api/material-swaps", materialSwapRoutes);
 
 // Centralized error handler: anything thrown synchronously inside a route
 // (e.g. a SQLite constraint failure) lands here instead of crashing the process.

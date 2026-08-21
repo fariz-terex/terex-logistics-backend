@@ -257,6 +257,25 @@ CREATE TABLE IF NOT EXISTS receipts (
   customer   TEXT   -- division this receipt's stock was credited to
 );
 
+-- Penggantian Material: swapping a faulty Installed unit at a site for a
+-- new one. Records the history (old unit vs new unit, per site) and is the
+-- trigger point that feeds the old unit into the existing Return Material
+-- Faulty flow — this table doesn't replace that flow, it just links into it.
+CREATE TABLE IF NOT EXISTS material_swaps (
+  id           TEXT PRIMARY KEY,
+  site         TEXT NOT NULL,
+  homebase     TEXT,
+  old_sn       TEXT NOT NULL,
+  old_material TEXT NOT NULL,
+  new_sn       TEXT NOT NULL,
+  new_material TEXT NOT NULL,
+  performed_by TEXT NOT NULL,
+  date         TEXT NOT NULL,
+  photo        TEXT,
+  note         TEXT,
+  return_id    TEXT   -- filled in once the old unit's Return Material Faulty is created, for traceability
+);
+
 -- ===================== TOOLS / PERALATAN (Peminjaman Alat) =====================
 -- A completely separate pool from materials/deliveries: tools are borrowed
 -- and returned (round-trip), not delivered and consumed (one-way) — and
