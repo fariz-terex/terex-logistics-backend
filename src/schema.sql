@@ -265,8 +265,8 @@ CREATE TABLE IF NOT EXISTS material_swaps (
   id           TEXT PRIMARY KEY,
   site         TEXT NOT NULL,
   homebase     TEXT,
-  old_sn       TEXT NOT NULL,
-  old_material TEXT NOT NULL,
+  old_sn       TEXT,   -- optional — the removed/faulty unit may not be tracked in the system at all
+  old_material TEXT,   -- required only when old_sn is given (picked from Master Material, since there's no record to look it up from)
   new_sn       TEXT NOT NULL,
   new_material TEXT NOT NULL,
   performed_by TEXT NOT NULL,

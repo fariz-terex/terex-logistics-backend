@@ -40,19 +40,13 @@ function loadDelivery(id) {
   // the front-end can show a "Kembalikan Alat" panel whenever relevant.
   const outstandingTools = items.filter((i) => i.type === "tool")
     .flatMap((i) => i.serials.filter((sn) => i.serialStatuses[sn] === "Checked Out").map((sn) => ({ tool: i.material, sn })));
-  // Same idea for materials that have arrived (Delivered) but haven't yet
-  // been confirmed as physically installed at site — Logistics can confirm
-  // this any time, independent of the delivery's own status, based on a
-  // field report.
-  const outstandingInstalls = items.filter((i) => i.type !== "tool")
-    .flatMap((i) => i.serials.filter((sn) => i.serialStatuses[sn] === "Delivered").map((sn) => ({ material: i.material, sn })));
   return {
     ...delivery, items, history,
     docOverall: delivery.doc_overall, docAfterPacking: delivery.doc_after_packing, resiNumber: delivery.resi_number, resiPhoto: delivery.resi_photo,
     deliveredPhoto: delivery.delivered_photo, receivedBy: delivery.received_by,
     bastDocument: delivery.bast_document, bastFilename: delivery.bast_filename,
     bkbLink: delivery.bkb_link,
-    serialPhotos, outstandingTools, outstandingInstalls,
+    serialPhotos, outstandingTools,
   };
 }
 
@@ -431,37 +425,11 @@ router.post("/:id/return-tools", requireAuth, requireRole(LOGISTICS, MANAGER, SP
   res.json(loadDelivery(delivery.id));
 });
 
-// Materials only — once units have physically arrived (Delivered), Logistics
-// can further confirm specific units are actually installed at site, based
-// on a field report/confirmation (not a self-report by the technician).
-// A photo is required as proof. Same independent-of-status, partial-OK
-// pattern as return-tools: some units can be confirmed now, more later.
-router.post("/:id/install", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
-  const delivery = db.prepare("SELECT * FROM deliveries WHERE id = ?").get(req.params.id);
-  if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
-  if (!scopeAllows(scopeOf(req.user), delivery.customer)) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
-
-  const { serials, photo, site, note } = req.body || {};
-  if (!Array.isArray(serials) || serials.length === 0) return res.status(400).json({ error: "Pilih minimal satu unit untuk ditandai ter-install" });
-  if (!photo) return res.status(400).json({ error: "Foto bukti instalasi wajib diisi" });
-
-  const rows = serials.map((sn) => db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(sn));
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    if (!row || row.current_ref !== delivery.id || row.status !== "Delivered") {
-      return res.status(409).json({ error: `Unit ${serials[i]} tidak berstatus Delivered pada delivery ini` });
-    }
-  }
-
-  const installSite = site?.trim() || delivery.site || null;
-  const tx = db.transaction(() => {
-    const markInstalled = db.prepare("UPDATE serial_numbers SET status = 'Installed', installed_date = ?, installed_by = ?, install_photo = ?, install_site = ? WHERE sn = ?");
-    serials.forEach((sn) => markInstalled.run(isoDate(), req.user.name, photo, installSite, sn));
-    addHistory(delivery.id, `Ditandai ter-install oleh ${req.user.name} (${serials.join(", ")})${installSite ? ` di ${installSite}` : ""}${note ? ` — catatan: ${note}` : ""}`);
-  });
-  tx();
-
-  res.json(loadDelivery(delivery.id));
-});
+// Note: confirming a unit as "Installed" no longer happens here — Delivery
+// Request now only tracks shipping status through to "Delivered". The
+// actual physical-install confirmation (and swapping out faulty units)
+// lives in Penggantian Material (see routes/materialSwaps.js) instead,
+// since installation is a separate real-world event that can happen much
+// later, by someone else, independent of the shipment itself.
 
 module.exports = router;

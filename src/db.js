@@ -240,4 +240,37 @@ if (snTableInfo && !snTableInfo.sql.includes("'Installed'")) {
   `);
 }
 
+// old_sn/old_material used to be required (a swap always needed a known,
+// already-Installed unit on the other end) — now the removed/faulty unit
+// is optional and doesn't need to be a tracked Serial Number at all, so
+// the NOT NULL constraints need to come off. Table is brand new (this
+// whole feature just shipped), so a rebuild here is low-risk regardless.
+const swapTableInfo = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='material_swaps'").get();
+if (swapTableInfo && swapTableInfo.sql.includes("old_sn       TEXT NOT NULL")) {
+  console.log("[db] rebuilding material_swaps table to make old_sn/old_material optional");
+  db.exec(`
+    ALTER TABLE material_swaps RENAME TO material_swaps_old;
+
+    CREATE TABLE material_swaps (
+      id           TEXT PRIMARY KEY,
+      site         TEXT NOT NULL,
+      homebase     TEXT,
+      old_sn       TEXT,
+      old_material TEXT,
+      new_sn       TEXT NOT NULL,
+      new_material TEXT NOT NULL,
+      performed_by TEXT NOT NULL,
+      date         TEXT NOT NULL,
+      photo        TEXT,
+      note         TEXT,
+      return_id    TEXT
+    );
+
+    INSERT INTO material_swaps (id, site, homebase, old_sn, old_material, new_sn, new_material, performed_by, date, photo, note, return_id)
+      SELECT id, site, homebase, old_sn, old_material, new_sn, new_material, performed_by, date, photo, note, return_id FROM material_swaps_old;
+
+    DROP TABLE material_swaps_old;
+  `);
+}
+
 module.exports = db;

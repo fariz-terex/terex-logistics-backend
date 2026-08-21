@@ -18,11 +18,12 @@ router.get("/", requireAuth, (req, res) => {
   } else if (scope.length === 0) {
     rows = [];
   } else {
-    // A swap has no division of its own — scope it via the old unit's
-    // division at the time of the swap, same as everything else SN-based.
+    // Scope via the NEW unit's division — that's always a real, tracked
+    // serial_numbers row. The old/faulty unit may not be tracked at all,
+    // so it can't reliably be used to scope visibility.
     rows = db.prepare(`
       SELECT ms.* FROM material_swaps ms
-      JOIN serial_numbers sn ON sn.sn = ms.old_sn
+      JOIN serial_numbers sn ON sn.sn = ms.new_sn
       WHERE sn.customer IN (${scope.map(() => "?").join(",")})
       ORDER BY ms.id DESC
     `).all(...scope);
@@ -34,43 +35,55 @@ router.get("/", requireAuth, (req, res) => {
   })));
 });
 
-// The core action: swap a faulty Installed unit at a site for a new one.
-// Old unit -> Faulty (ready to be picked up in a Return Material Faulty
-// submission — this endpoint doesn't do that shipping/paperwork itself,
-// it just flips the status and records the swap for traceability).
-// New unit -> Installed at the same site, same as a normal install
-// confirmation would do.
+// Confirms a Delivered unit as Installed at a site — this is now the ONLY
+// place that happens (it used to also live inside Delivery Request, but
+// that page is meant to track shipping status only, not what happens to
+// the material afterward at the site).
+//
+// The unit being removed (if any) is deliberately NOT looked up or
+// validated against the system: a technician pulling a faulty unit out of
+// a site has no guarantee it was ever tracked here in the first place
+// (could predate this system, or never have gone through a proper Delivery
+// Request). It's recorded as plain text/material choice, and — if it DOES
+// happen to match a known Serial Number — that unit is also flipped to
+// Faulty as a bonus, but its absence from the system is never an error.
 router.post("/", requireAuth, requireRole(TECH, LOGISTICS, MANAGER), (req, res) => {
-  const { oldSn, newSn, site, homebase, photo, note } = req.body || {};
-  if (!oldSn?.trim() || !newSn?.trim()) return res.status(400).json({ error: "Pilih unit lama dan unit pengganti" });
-  if (!photo) return res.status(400).json({ error: "Foto bukti penggantian wajib diisi" });
-
-  const oldRow = db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(oldSn.trim());
-  if (!oldRow) return res.status(404).json({ error: `Serial Number ${oldSn} tidak ditemukan` });
-  if (oldRow.status !== "Installed") return res.status(409).json({ error: `Unit ${oldSn} tidak sedang berstatus Installed (status saat ini: ${oldRow.status})` });
+  const { newSn, site, homebase, oldSn, oldMaterial, photo, note } = req.body || {};
+  if (!newSn?.trim()) return res.status(400).json({ error: "Pilih unit yang akan dipasang" });
+  if (!site?.trim()) return res.status(400).json({ error: "Site wajib diisi" });
+  if (!photo) return res.status(400).json({ error: "Foto bukti pemasangan wajib diisi" });
+  if (oldSn?.trim() && !oldMaterial?.trim()) return res.status(400).json({ error: "Pilih jenis material untuk unit lama yang dicabut" });
 
   const newRow = db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(newSn.trim());
   if (!newRow) return res.status(404).json({ error: `Serial Number ${newSn} tidak ditemukan` });
-  if (newRow.status !== "Delivered") return res.status(409).json({ error: `Unit pengganti ${newSn} harus berstatus Delivered (status saat ini: ${newRow.status})` });
+  if (newRow.status !== "Delivered") return res.status(409).json({ error: `Unit ${newSn} harus berstatus Delivered (status saat ini: ${newRow.status})` });
+  if (!scopeAllows(scopeOf(req.user), newRow.customer)) return res.status(403).json({ error: "Unit ini bukan milik divisi Anda" });
 
-  if (!scopeAllows(scopeOf(req.user), oldRow.customer)) return res.status(403).json({ error: "Unit ini bukan milik divisi Anda" });
-
-  const resolvedSite = site?.trim() || oldRow.install_site || "";
+  const trimmedOldSn = oldSn?.trim() || null;
+  const trimmedOldMaterial = trimmedOldSn ? oldMaterial.trim() : null;
   const id = dailySequenceId(db, "material_swaps", "SW");
 
   const tx = db.transaction(() => {
     db.prepare("UPDATE serial_numbers SET status = 'Installed', installed_date = ?, installed_by = ?, install_photo = ?, install_site = ? WHERE sn = ?")
-      .run(isoDate(), req.user.name, photo, resolvedSite, newRow.sn);
-    db.prepare("UPDATE serial_numbers SET status = 'Faulty', current_ref = ? WHERE sn = ?")
-      .run(id, oldRow.sn);
+      .run(isoDate(), req.user.name, photo, site.trim(), newRow.sn);
+
+    if (trimmedOldSn) {
+      // If this SN happens to already be tracked, close its loop properly.
+      // If not, that's fine — it's still recorded on the swap itself.
+      const existingOld = db.prepare("SELECT 1 FROM serial_numbers WHERE sn = ?").get(trimmedOldSn);
+      if (existingOld) {
+        db.prepare("UPDATE serial_numbers SET status = 'Faulty', current_ref = ?, material = ? WHERE sn = ?").run(id, trimmedOldMaterial, trimmedOldSn);
+      }
+    }
+
     db.prepare(`INSERT INTO material_swaps (id, site, homebase, old_sn, old_material, new_sn, new_material, performed_by, date, photo, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(id, resolvedSite, homebase?.trim() || "", oldRow.sn, oldRow.material, newRow.sn, newRow.material, req.user.name, isoDate(), photo, note || "");
+      .run(id, site.trim(), homebase?.trim() || "", trimmedOldSn, trimmedOldMaterial, newRow.sn, newRow.material, req.user.name, isoDate(), photo, note || "");
   });
   tx();
 
   res.status(201).json({
-    id, site: resolvedSite, homebase: homebase?.trim() || "",
-    oldSn: oldRow.sn, oldMaterial: oldRow.material, newSn: newRow.sn, newMaterial: newRow.material,
+    id, site: site.trim(), homebase: homebase?.trim() || "",
+    oldSn: trimmedOldSn, oldMaterial: trimmedOldMaterial, newSn: newRow.sn, newMaterial: newRow.material,
     performedBy: req.user.name, date: isoDate(), photo, note: note || "",
   });
 });
