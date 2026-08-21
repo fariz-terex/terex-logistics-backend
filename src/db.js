@@ -206,4 +206,38 @@ if (!deliveryItemColumns.includes("item_type")) {
   db.exec("ALTER TABLE delivery_items ADD COLUMN item_type TEXT NOT NULL DEFAULT 'material'");
 }
 
+// Adding "Installed" as a valid serial_numbers status means updating a
+// CHECK constraint, which SQLite can't do via ALTER TABLE — the standard
+// workaround is rename-recreate-copy-drop. Guarded by checking the table's
+// actual CREATE statement for the literal 'Installed', so this only ever
+// runs once, and only when the older constraint (without it) is present.
+const snTableInfo = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='serial_numbers'").get();
+if (snTableInfo && !snTableInfo.sql.includes("'Installed'")) {
+  console.log("[db] rebuilding serial_numbers table to support 'Installed' status and install-tracking columns");
+  db.exec(`
+    ALTER TABLE serial_numbers RENAME TO serial_numbers_old;
+
+    CREATE TABLE serial_numbers (
+      sn             TEXT PRIMARY KEY,
+      material       TEXT NOT NULL REFERENCES materials(name),
+      status         TEXT NOT NULL DEFAULT 'Ready' CHECK (status IN ('Ready','Reserved','In Transit','Delivered','Installed','Faulty')),
+      current_ref    TEXT,
+      received_date  TEXT,
+      received_ref   TEXT,
+      customer       TEXT,
+      installed_date TEXT,
+      installed_by   TEXT,
+      install_photo  TEXT,
+      install_site   TEXT
+    );
+
+    INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref, customer)
+      SELECT sn, material, status, current_ref, received_date, received_ref, customer FROM serial_numbers_old;
+
+    DROP TABLE serial_numbers_old;
+
+    CREATE INDEX IF NOT EXISTS idx_serials_material_status ON serial_numbers(material, status);
+  `);
+}
+
 module.exports = db;

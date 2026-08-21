@@ -235,11 +235,15 @@ CREATE INDEX IF NOT EXISTS idx_stock_movements_material ON stock_movements(mater
 CREATE TABLE IF NOT EXISTS serial_numbers (
   sn             TEXT PRIMARY KEY,
   material       TEXT NOT NULL REFERENCES materials(name),
-  status         TEXT NOT NULL DEFAULT 'Ready' CHECK (status IN ('Ready','Reserved','In Transit','Delivered','Faulty')),
+  status         TEXT NOT NULL DEFAULT 'Ready' CHECK (status IN ('Ready','Reserved','In Transit','Delivered','Installed','Faulty')),
   current_ref    TEXT,     -- id of the delivery/return currently holding this unit (nullable when sitting in Ready stock)
   received_date  TEXT,
   received_ref   TEXT,     -- Goods Receipt id this unit arrived on (nullable for units first seen via a Return Faulty)
-  customer       TEXT      -- division this unit belongs to
+  customer       TEXT,     -- division this unit belongs to
+  installed_date TEXT,     -- when it was confirmed installed at site (Installed status only)
+  installed_by   TEXT,     -- who confirmed it (Logistics Staff, based on field report)
+  install_photo  TEXT,     -- proof-of-installation photo — required to reach Installed
+  install_site   TEXT      -- site it was installed at (falls back to the owning delivery's site if not given explicitly)
 );
 CREATE INDEX IF NOT EXISTS idx_serials_material_status ON serial_numbers(material, status);
 
