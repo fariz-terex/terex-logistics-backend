@@ -29,7 +29,7 @@ router.get("/", requireAuth, (req, res) => {
     `).all(...scope);
   }
   res.json(rows.map((r) => ({
-    id: r.id, site: r.site, homebase: r.homebase, oldSn: r.old_sn, oldMaterial: r.old_material,
+    id: r.id, site: r.site, homebase: r.homebase, oldSn: r.old_sn, oldMaterial: r.old_material, oldPhoto: r.old_photo,
     newSn: r.new_sn, newMaterial: r.new_material, performedBy: r.performed_by, date: r.date,
     photo: r.photo, note: r.note, returnId: r.return_id,
   })));
@@ -48,11 +48,12 @@ router.get("/", requireAuth, (req, res) => {
 // happen to match a known Serial Number — that unit is also flipped to
 // Faulty as a bonus, but its absence from the system is never an error.
 router.post("/", requireAuth, requireRole(TECH, LOGISTICS, MANAGER), (req, res) => {
-  const { newSn, site, homebase, oldSn, oldMaterial, photo, note } = req.body || {};
+  const { newSn, site, homebase, oldSn, oldMaterial, photo, oldPhoto, note } = req.body || {};
   if (!newSn?.trim()) return res.status(400).json({ error: "Pilih unit yang akan dipasang" });
   if (!site?.trim()) return res.status(400).json({ error: "Site wajib diisi" });
   if (!photo) return res.status(400).json({ error: "Foto bukti pemasangan wajib diisi" });
   if (oldSn?.trim() && !oldMaterial?.trim()) return res.status(400).json({ error: "Pilih jenis material untuk unit lama yang dicabut" });
+  if (oldSn?.trim() && !oldPhoto) return res.status(400).json({ error: "Foto bukti material faulty/dicabut wajib diisi" });
 
   const newRow = db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(newSn.trim());
   if (!newRow) return res.status(404).json({ error: `Serial Number ${newSn} tidak ditemukan` });
@@ -61,6 +62,7 @@ router.post("/", requireAuth, requireRole(TECH, LOGISTICS, MANAGER), (req, res) 
 
   const trimmedOldSn = oldSn?.trim() || null;
   const trimmedOldMaterial = trimmedOldSn ? oldMaterial.trim() : null;
+  const trimmedOldPhoto = trimmedOldSn ? oldPhoto : null;
   const id = dailySequenceId(db, "material_swaps", "SW");
 
   const tx = db.transaction(() => {
@@ -76,14 +78,14 @@ router.post("/", requireAuth, requireRole(TECH, LOGISTICS, MANAGER), (req, res) 
       }
     }
 
-    db.prepare(`INSERT INTO material_swaps (id, site, homebase, old_sn, old_material, new_sn, new_material, performed_by, date, photo, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(id, site.trim(), homebase?.trim() || "", trimmedOldSn, trimmedOldMaterial, newRow.sn, newRow.material, req.user.name, isoDate(), photo, note || "");
+    db.prepare(`INSERT INTO material_swaps (id, site, homebase, old_sn, old_material, old_photo, new_sn, new_material, performed_by, date, photo, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(id, site.trim(), homebase?.trim() || "", trimmedOldSn, trimmedOldMaterial, trimmedOldPhoto, newRow.sn, newRow.material, req.user.name, isoDate(), photo, note || "");
   });
   tx();
 
   res.status(201).json({
     id, site: site.trim(), homebase: homebase?.trim() || "",
-    oldSn: trimmedOldSn, oldMaterial: trimmedOldMaterial, newSn: newRow.sn, newMaterial: newRow.material,
+    oldSn: trimmedOldSn, oldMaterial: trimmedOldMaterial, oldPhoto: trimmedOldPhoto, newSn: newRow.sn, newMaterial: newRow.material,
     performedBy: req.user.name, date: isoDate(), photo, note: note || "",
   });
 });

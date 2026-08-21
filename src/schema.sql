@@ -267,11 +267,12 @@ CREATE TABLE IF NOT EXISTS material_swaps (
   homebase     TEXT,
   old_sn       TEXT,   -- optional — the removed/faulty unit may not be tracked in the system at all
   old_material TEXT,   -- required only when old_sn is given (picked from Master Material, since there's no record to look it up from)
+  old_photo    TEXT,   -- proof-of-removal photo for the faulty unit — required only when old_sn is given
   new_sn       TEXT NOT NULL,
   new_material TEXT NOT NULL,
   performed_by TEXT NOT NULL,
   date         TEXT NOT NULL,
-  photo        TEXT,
+  photo        TEXT,   -- proof-of-installation photo for the new unit
   note         TEXT,
   return_id    TEXT   -- filled in once the old unit's Return Material Faulty is created, for traceability
 );

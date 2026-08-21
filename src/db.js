@@ -273,4 +273,10 @@ if (swapTableInfo && swapTableInfo.sql.includes("old_sn       TEXT NOT NULL")) {
   `);
 }
 
+const swapColumns = db.prepare("PRAGMA table_info(material_swaps)").all().map((c) => c.name);
+if (!swapColumns.includes("old_photo")) {
+  console.log("[db] adding old_photo column to material_swaps");
+  db.exec("ALTER TABLE material_swaps ADD COLUMN old_photo TEXT");
+}
+
 module.exports = db;
