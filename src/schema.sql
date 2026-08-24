@@ -117,7 +117,8 @@ CREATE TABLE IF NOT EXISTS deliveries (
   bast_document      TEXT,  -- Berita Acara Serah Terima file (PDF or scanned image) — optional, added any time after shipping
   bast_filename      TEXT,  -- original filename, for display purposes
   customer           TEXT,  -- division this request belongs to (the requesting SPV's division)
-  bkb_link           TEXT   -- URL to the BKB / Surat Jalan document kept in a separate external system — optional, no API integration exists so this is just a reference link
+  bkb_link           TEXT,  -- URL to the BKB / Surat Jalan document kept in a separate external system — optional, no API integration exists so this is just a reference link
+  rejection_reason   TEXT   -- why the Manager rejected this request — shown to the requester so they know what to fix/reconsider
 );
 
 CREATE TABLE IF NOT EXISTS delivery_items (

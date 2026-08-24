@@ -46,6 +46,7 @@ function loadDelivery(id) {
     deliveredPhoto: delivery.delivered_photo, receivedBy: delivery.received_by,
     bastDocument: delivery.bast_document, bastFilename: delivery.bast_filename,
     bkbLink: delivery.bkb_link,
+    rejectionReason: delivery.rejection_reason,
     serialPhotos, outstandingTools,
   };
 }
@@ -247,13 +248,15 @@ router.post("/:id/assign-stock", requireAuth, requireRole(LOGISTICS, MANAGER), (
 });
 
 router.post("/:id/reject", requireAuth, requireRole(MANAGER), (req, res) => {
+  const { reason } = req.body || {};
+  if (!reason?.trim()) return res.status(400).json({ error: "Alasan penolakan wajib diisi" });
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
   if (delivery.status !== "Waiting Logistics Approval") {
     return res.status(409).json({ error: `Cannot reject a request with status "${delivery.status}"` });
   }
-  db.prepare("UPDATE deliveries SET status = 'Rejected' WHERE id = ?").run(delivery.id);
-  addHistory(delivery.id, `Rejected by ${req.user.name} (Manager)`);
+  db.prepare("UPDATE deliveries SET status = 'Rejected', rejection_reason = ? WHERE id = ?").run(reason.trim(), delivery.id);
+  addHistory(delivery.id, `Rejected by ${req.user.name} (Manager) — alasan: ${reason.trim()}`);
   res.json(loadDelivery(delivery.id));
 });
 

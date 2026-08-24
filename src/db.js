@@ -279,4 +279,10 @@ if (!swapColumns.includes("old_photo")) {
   db.exec("ALTER TABLE material_swaps ADD COLUMN old_photo TEXT");
 }
 
+const deliveryColumnsForReject = db.prepare("PRAGMA table_info(deliveries)").all().map((c) => c.name);
+if (!deliveryColumnsForReject.includes("rejection_reason")) {
+  console.log("[db] adding rejection_reason column to deliveries");
+  db.exec("ALTER TABLE deliveries ADD COLUMN rejection_reason TEXT");
+}
+
 module.exports = db;
