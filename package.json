@@ -1,27 +1,20 @@
 {
-  "name": "terex-logistics-frontend",
+  "name": "terex-logistics-backend",
   "version": "0.1.0",
-  "private": true,
-  "type": "module",
+  "description": "TEREX Logistics — real backend API (Express + SQLite via better-sqlite3)",
+  "main": "src/server.js",
+  "type": "commonjs",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
-    "start": "serve -s dist -l ${PORT:-4173}"
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node src/seed.js"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "lucide-react": "^0.383.0",
-    "recharts": "^2.12.7",
-    "papaparse": "^5.4.1",
-    "serve": "^14.2.3",
-    "xlsx": "^0.18.5"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.0",
-    "tailwindcss": "^3.4.10",
-    "postcss": "^8.4.41",
-    "autoprefixer": "^10.4.20"
+    "better-sqlite3": "^11.3.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
   }
 }
