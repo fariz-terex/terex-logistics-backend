@@ -7,6 +7,42 @@ const { paddedSequenceId } = require("../utils/ids");
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
 
+// SQLite's FK enforcement already blocks deleting a row still referenced
+// elsewhere (Area used by a Homebase, Homebase used by a Site, etc.) — this
+// just turns that raw "FOREIGN KEY constraint failed" into something a
+// person can actually act on, instead of a cryptic SQLite message.
+function runDelete(res, sql, param, entityLabel) {
+  try {
+    const result = db.prepare(sql).run(param);
+    if (result.changes === 0) return res.status(404).json({ error: `${entityLabel} not found` });
+    return res.json({ deleted: param });
+  } catch (err) {
+    if (err.code === "SQLITE_CONSTRAINT_FOREIGNKEY" || /FOREIGN KEY/i.test(err.message)) {
+      return res.status(409).json({ error: `Tidak bisa dihapus — ${entityLabel} ini masih dipakai di data lain (mis. Site, Homebase, atau riwayat transaksi)` });
+    }
+    throw err;
+  }
+}
+
+function runBulkDelete(res, sql, codes, entityLabel) {
+  if (!Array.isArray(codes) || codes.length === 0) return res.status(400).json({ error: `Pilih minimal satu ${entityLabel}` });
+  const del = db.prepare(sql);
+  let deleted = 0;
+  const blocked = [];
+  const tx = db.transaction((list) => {
+    list.forEach((c) => {
+      try {
+        deleted += del.run(c).changes;
+      } catch (err) {
+        if (err.code === "SQLITE_CONSTRAINT_FOREIGNKEY" || /FOREIGN KEY/i.test(err.message)) blocked.push(c);
+        else throw err;
+      }
+    });
+  });
+  tx(codes);
+  res.json({ deleted, blocked });
+}
+
 // ---------- Areas ----------
 router.get("/areas", requireAuth, (req, res) => {
   res.json(db.prepare("SELECT * FROM areas ORDER BY name").all());
@@ -43,6 +79,12 @@ router.post("/areas/import", requireAuth, requireRole(MANAGER), (req, res) => {
   const validRows = results.filter((r) => r.errors.length === 0);
   tx(validRows);
   res.json({ imported: validRows.length, total: results.length, results });
+});
+router.delete("/areas/:code", requireAuth, requireRole(MANAGER), (req, res) => {
+  runDelete(res, "DELETE FROM areas WHERE code = ?", req.params.code, "Area");
+});
+router.post("/areas/bulk-delete", requireAuth, requireRole(MANAGER), (req, res) => {
+  runBulkDelete(res, "DELETE FROM areas WHERE code = ?", req.body.codes, "Area");
 });
 
 // ---------- Homebases ----------
@@ -87,6 +129,12 @@ router.post("/homebases/import", requireAuth, requireRole(MANAGER), (req, res) =
   tx(validRows);
   res.json({ imported: validRows.length, total: results.length, results });
 });
+router.delete("/homebases/:code", requireAuth, requireRole(MANAGER), (req, res) => {
+  runDelete(res, "DELETE FROM homebases WHERE code = ?", req.params.code, "Homebase");
+});
+router.post("/homebases/bulk-delete", requireAuth, requireRole(MANAGER), (req, res) => {
+  runBulkDelete(res, "DELETE FROM homebases WHERE code = ?", req.body.codes, "Homebase");
+});
 
 // ---------- Customers ----------
 router.get("/customers", requireAuth, (req, res) => {
@@ -124,6 +172,52 @@ router.post("/customers/import", requireAuth, requireRole(MANAGER), (req, res) =
   const validRows = results.filter((r) => r.errors.length === 0);
   tx(validRows);
   res.json({ imported: validRows.length, total: results.length, results });
+});
+
+// Customer has no formal FK from anywhere (every other table just stores
+// its name as plain text), so SQLite won't protect it automatically the
+// way Area/Homebase/Material/Tools are — this checks the same tables the
+// rest of the app actually scopes by by hand before allowing a delete.
+const CUSTOMER_DEPENDENT_TABLES = [
+  { table: "user_divisions", column: "customer", label: "User" },
+  { table: "sites", column: "customer", label: "Master Site" },
+  { table: "deliveries", column: "customer", label: "Delivery Request" },
+  { table: "returns", column: "customer", label: "Return Material Faulty" },
+  { table: "reconciliations", column: "customer", label: "Reconciliation" },
+  { table: "material_stock", column: "customer", label: "stock material" },
+  { table: "serial_numbers", column: "customer", label: "Serial Number" },
+];
+function customerInUse(name) {
+  for (const { table, column, label } of CUSTOMER_DEPENDENT_TABLES) {
+    const row = db.prepare(`SELECT COUNT(*) AS n FROM ${table} WHERE ${column} = ?`).get(name);
+    if (row.n > 0) return label;
+  }
+  return null;
+}
+router.delete("/customers/:id", requireAuth, requireRole(MANAGER), (req, res) => {
+  const row = db.prepare("SELECT * FROM customers WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "Customer not found" });
+  const usedBy = customerInUse(row.name);
+  if (usedBy) return res.status(409).json({ error: `Tidak bisa dihapus — divisi ini masih dipakai di data ${usedBy}` });
+  db.prepare("DELETE FROM customers WHERE id = ?").run(row.id);
+  res.json({ deleted: row.id });
+});
+router.post("/customers/bulk-delete", requireAuth, requireRole(MANAGER), (req, res) => {
+  const ids = Array.isArray(req.body.codes) ? req.body.codes : [];
+  if (ids.length === 0) return res.status(400).json({ error: "Pilih minimal satu Customer" });
+  let deleted = 0;
+  const blocked = [];
+  const tx = db.transaction((list) => {
+    list.forEach((id) => {
+      const row = db.prepare("SELECT * FROM customers WHERE id = ?").get(id);
+      if (!row) return;
+      if (customerInUse(row.name)) { blocked.push(id); return; }
+      db.prepare("DELETE FROM customers WHERE id = ?").run(id);
+      deleted += 1;
+    });
+  });
+  tx(ids);
+  res.json({ deleted, blocked });
 });
 
 // ---------- Sites (incl. bulk import, matches Master Site CSV import) ----------

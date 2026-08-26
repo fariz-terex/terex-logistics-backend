@@ -39,6 +39,41 @@ router.patch("/:id/toggle-status", requireAuth, requireRole(MANAGER), (req, res)
   res.json(db.prepare("SELECT * FROM tools WHERE id = ?").get(row.id));
 });
 
+// tool_serials.tool REFERENCES tools(name) — SQLite already blocks
+// deleting a tool with any units ever received against it.
+router.delete("/:id", requireAuth, requireRole(MANAGER), (req, res) => {
+  const row = db.prepare("SELECT * FROM tools WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "Tool not found" });
+  try {
+    db.prepare("DELETE FROM tools WHERE id = ?").run(row.id);
+    res.json({ deleted: row.id });
+  } catch (err) {
+    if (err.code === "SQLITE_CONSTRAINT_FOREIGNKEY" || /FOREIGN KEY/i.test(err.message)) {
+      return res.status(409).json({ error: "Tidak bisa dihapus — alat ini sudah punya unit/riwayat peminjaman" });
+    }
+    throw err;
+  }
+});
+router.post("/bulk-delete", requireAuth, requireRole(MANAGER), (req, res) => {
+  const ids = Array.isArray(req.body.ids) ? req.body.ids : [];
+  if (ids.length === 0) return res.status(400).json({ error: "Pilih minimal satu Alat" });
+  let deleted = 0;
+  const blocked = [];
+  const tx = db.transaction((list) => {
+    list.forEach((id) => {
+      try {
+        const result = db.prepare("DELETE FROM tools WHERE id = ?").run(id);
+        deleted += result.changes;
+      } catch (err) {
+        if (err.code === "SQLITE_CONSTRAINT_FOREIGNKEY" || /FOREIGN KEY/i.test(err.message)) blocked.push(id);
+        else throw err;
+      }
+    });
+  });
+  tx(ids);
+  res.json({ deleted, blocked });
+});
+
 router.get("/serials", requireAuth, (req, res) => {
   const { tool, status, q } = req.query;
   let query = "SELECT * FROM tool_serials WHERE 1=1";

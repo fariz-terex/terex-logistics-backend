@@ -61,4 +61,41 @@ router.post("/import", requireAuth, requireRole(MANAGER), (req, res) => {
   res.json({ imported: validRows.length, total: results.length, results });
 });
 
+// SQLite's FK (material_stock/receipts/stock_movements/serial_numbers all
+// REFERENCE materials(name)) already blocks deleting a material with any
+// real history — this just turns that raw constraint error into a message
+// someone can act on.
+router.delete("/:id", requireAuth, requireRole(MANAGER), (req, res) => {
+  const row = db.prepare("SELECT * FROM materials WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "Material not found" });
+  try {
+    db.prepare("DELETE FROM materials WHERE id = ?").run(row.id);
+    res.json({ deleted: row.id });
+  } catch (err) {
+    if (err.code === "SQLITE_CONSTRAINT_FOREIGNKEY" || /FOREIGN KEY/i.test(err.message)) {
+      return res.status(409).json({ error: "Tidak bisa dihapus — material ini sudah punya riwayat stock/transaksi" });
+    }
+    throw err;
+  }
+});
+router.post("/bulk-delete", requireAuth, requireRole(MANAGER), (req, res) => {
+  const ids = Array.isArray(req.body.ids) ? req.body.ids : [];
+  if (ids.length === 0) return res.status(400).json({ error: "Pilih minimal satu Material" });
+  let deleted = 0;
+  const blocked = [];
+  const tx = db.transaction((list) => {
+    list.forEach((id) => {
+      try {
+        const result = db.prepare("DELETE FROM materials WHERE id = ?").run(id);
+        deleted += result.changes;
+      } catch (err) {
+        if (err.code === "SQLITE_CONSTRAINT_FOREIGNKEY" || /FOREIGN KEY/i.test(err.message)) blocked.push(id);
+        else throw err;
+      }
+    });
+  });
+  tx(ids);
+  res.json({ deleted, blocked });
+});
+
 module.exports = router;
