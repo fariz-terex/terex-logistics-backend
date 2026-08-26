@@ -332,16 +332,44 @@ db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
 db.pragma("busy_timeout = 5000");
 
-// Temporary diagnostics: dump every DB object (table/index/trigger) whose
-// name mentions "users", so we can see the database's *actual* on-disk
-// state in the logs — the "no such table: users_old" error persisted even
-// after the reconnect fix, so something more specific than a stale
-// connection cache is going on and needs to be seen directly.
-try {
-  const suspects = db.prepare("SELECT type, name, tbl_name, sql FROM sqlite_master WHERE name LIKE '%user%' ORDER BY type, name").all();
-  console.log("[diag] DB objects matching 'user':", JSON.stringify(suspects, null, 2));
-} catch (diagErr) {
-  console.log("[diag] failed to inspect sqlite_master:", diagErr.message);
+// The users-table rebuild above (ALTER TABLE users RENAME TO users_old)
+// carries a real gotcha: SQLite automatically rewrites every OTHER table's
+// foreign key definitions that pointed at "users" to point at "users_old"
+// instead, since that's literally what the table is now called at that
+// moment. user_divisions.user_id REFERENCES users(id) silently became
+// REFERENCES users_old(id) — and stayed that way even after "users_old"
+// was dropped and "users" was recreated fresh, because nothing told
+// user_divisions to point back at the new table. Every subsequent INSERT
+// into user_divisions then failed FK validation against a table that no
+// longer existed. Fix: rebuild user_divisions with its reference pointed
+// at the correct (current) "users" table.
+const userDivTableInfo = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='user_divisions'").get();
+if (userDivTableInfo && userDivTableInfo.sql.includes('"users_old"')) {
+  console.log("[db] fixing user_divisions foreign key — it was still pointing at the now-dropped 'users_old' table");
+  db.pragma("foreign_keys = OFF");
+  db.exec(`
+    ALTER TABLE user_divisions RENAME TO user_divisions_old;
+
+    CREATE TABLE user_divisions (
+      user_id  TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      customer TEXT NOT NULL,
+      PRIMARY KEY (user_id, customer)
+    );
+
+    INSERT INTO user_divisions (user_id, customer)
+      SELECT user_id, customer FROM user_divisions_old;
+
+    DROP TABLE user_divisions_old;
+  `);
+  db.pragma("foreign_keys = ON");
+
+  // Same stale-reference precaution as above, now that user_divisions has
+  // also gone through a rename/create/drop cycle.
+  db.close();
+  db = new Database(dbPath);
+  db.pragma("journal_mode = WAL");
+  db.pragma("foreign_keys = ON");
+  db.pragma("busy_timeout = 5000");
 }
 
 module.exports = db;
