@@ -31,6 +31,7 @@ const app = express();
 // during local development but locks down once deployed.
 const defaultOrigins = [
   "https://frontend-production-4cc8.up.railway.app",
+  "https://terex-logistics.up.railway.app",
   "http://localhost:5173",
   "http://localhost:4173",
 ];
