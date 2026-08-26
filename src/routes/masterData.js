@@ -253,6 +253,13 @@ router.post("/sites", requireAuth, requireRole(MANAGER), (req, res) => {
     .run(code, terminalId || "", name, customer || "", area || "", homebase, status || "Active");
   res.status(201).json(db.prepare("SELECT * FROM sites WHERE code = ?").get(code));
 });
+router.patch("/sites/:code/toggle-status", requireAuth, requireRole(MANAGER), (req, res) => {
+  const row = db.prepare("SELECT * FROM sites WHERE code = ?").get(req.params.code);
+  if (!row) return res.status(404).json({ error: "Site not found" });
+  const next = row.status === "Active" ? "Inactive" : "Active";
+  db.prepare("UPDATE sites SET status = ? WHERE code = ?").run(next, row.code);
+  res.json(db.prepare("SELECT * FROM sites WHERE code = ?").get(row.code));
+});
 
 // Permanent delete — unlike the rest of Master Data (which only ever
 // toggles Active/Inactive), Site supports a real delete because bulk
