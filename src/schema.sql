@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
   name          TEXT NOT NULL,
   username      TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
-  role          TEXT NOT NULL CHECK (role IN ('Admin / Manager Logistics','Logistics Staff','SPV','Technician')),
+  role          TEXT NOT NULL CHECK (role IN ('Admin / Manager Logistics','Logistics Staff','SPV','Technician','Manager Divisi')),
   assignment    TEXT DEFAULT '',
   customer      TEXT,   -- LEGACY single-division field, no longer read by the app — see user_divisions for the current (multi-division) source of truth. Left in place rather than dropped since SQLite column drops require a table rebuild.
   status        TEXT NOT NULL DEFAULT 'Active' CHECK (status IN ('Active','Inactive'))

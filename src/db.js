@@ -285,4 +285,36 @@ if (!deliveryColumnsForReject.includes("rejection_reason")) {
   db.exec("ALTER TABLE deliveries ADD COLUMN rejection_reason TEXT");
 }
 
+// Adding "Manager Divisi" as a valid role means updating a CHECK
+// constraint, same rebuild pattern as serial_numbers/material_swaps
+// earlier. users.id is referenced by user_divisions via FK, so foreign key
+// enforcement is switched off just for the rebuild (SQLite requires this —
+// PRAGMA foreign_keys can't be toggled inside a transaction) and restored
+// right after.
+const usersTableInfo = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='users'").get();
+if (usersTableInfo && !usersTableInfo.sql.includes("'Manager Divisi'")) {
+  console.log("[db] rebuilding users table to add 'Manager Divisi' role");
+  db.pragma("foreign_keys = OFF");
+  db.exec(`
+    ALTER TABLE users RENAME TO users_old;
+
+    CREATE TABLE users (
+      id            TEXT PRIMARY KEY,
+      name          TEXT NOT NULL,
+      username      TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      role          TEXT NOT NULL CHECK (role IN ('Admin / Manager Logistics','Logistics Staff','SPV','Technician','Manager Divisi')),
+      assignment    TEXT DEFAULT '',
+      customer      TEXT,
+      status        TEXT NOT NULL DEFAULT 'Active' CHECK (status IN ('Active','Inactive'))
+    );
+
+    INSERT INTO users (id, name, username, password_hash, role, assignment, customer, status)
+      SELECT id, name, username, password_hash, role, assignment, customer, status FROM users_old;
+
+    DROP TABLE users_old;
+  `);
+  db.pragma("foreign_keys = ON");
+}
+
 module.exports = db;

@@ -203,7 +203,7 @@ router.patch("/users/:id/toggle-status", requireAuth, requireRole(MANAGER), (req
   res.json({ id: row.id, name: row.name, username: row.username, role: row.role, assignment: row.assignment, customers: divisions, status: next });
 });
 
-const VALID_ROLES = ["Admin / Manager Logistics", "Logistics Staff", "SPV", "Technician"];
+const VALID_ROLES = ["Admin / Manager Logistics", "Logistics Staff", "SPV", "Technician", "Manager Divisi"];
 
 router.patch("/users/:id", requireAuth, requireRole(MANAGER), (req, res) => {
   const row = db.prepare("SELECT * FROM users WHERE id = ?").get(req.params.id);
