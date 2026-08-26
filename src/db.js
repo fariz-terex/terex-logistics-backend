@@ -18,7 +18,7 @@ if (!fs.existsSync(dir)) {
   console.log(`[db] directory ${dir} exists, contents: ${fs.readdirSync(dir).join(", ") || "(empty)"}`);
 }
 
-const db = new Database(dbPath);
+let db = new Database(dbPath);
 db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
 // If a write collides with another in-flight write, retry for up to 5s
@@ -316,5 +316,20 @@ if (usersTableInfo && !usersTableInfo.sql.includes("'Manager Divisi'")) {
   `);
   db.pragma("foreign_keys = ON");
 }
+
+// Closing and reopening the connection here — unconditionally, every boot —
+// is cheap insurance against a real SQLite/better-sqlite3 quirk: a
+// rename -> create -> drop cycle on the same table name within one open
+// connection (exactly what the rebuild migrations above do) can leave the
+// connection holding a stale reference to the old table under its "_old"
+// name, surfacing later as spurious "no such table: X_old" errors on
+// statements prepared afterward in that same process — even though the
+// schema itself is completely correct on disk. A fresh connection has no
+// such stale state.
+db.close();
+db = new Database(dbPath);
+db.pragma("journal_mode = WAL");
+db.pragma("foreign_keys = ON");
+db.pragma("busy_timeout = 5000");
 
 module.exports = db;
