@@ -160,6 +160,32 @@ router.post("/sites", requireAuth, requireRole(MANAGER), (req, res) => {
   res.status(201).json(db.prepare("SELECT * FROM sites WHERE code = ?").get(code));
 });
 
+// Permanent delete — unlike the rest of Master Data (which only ever
+// toggles Active/Inactive), Site supports a real delete because bulk
+// imports are the primary way this table gets populated, and a bad import
+// (wrong column mapping, wrong file) needs a clean way to undo itself
+// rather than leaving hundreds of Inactive junk rows behind.
+router.delete("/sites/:code", requireAuth, requireRole(MANAGER), (req, res) => {
+  const result = db.prepare("DELETE FROM sites WHERE code = ?").run(req.params.code);
+  if (result.changes === 0) return res.status(404).json({ error: "Site not found" });
+  res.json({ deleted: req.params.code });
+});
+
+// Bulk delete by a list of codes — the practical case is undoing an entire
+// bad import in one action instead of hundreds of individual clicks.
+router.post("/sites/bulk-delete", requireAuth, requireRole(MANAGER), (req, res) => {
+  const codes = Array.isArray(req.body.codes) ? req.body.codes : [];
+  if (codes.length === 0) return res.status(400).json({ error: "Pilih minimal satu Site Code" });
+  const del = db.prepare("DELETE FROM sites WHERE code = ?");
+  const tx = db.transaction((list) => {
+    let count = 0;
+    list.forEach((c) => { count += del.run(c).changes; });
+    return count;
+  });
+  const deleted = tx(codes);
+  res.json({ deleted });
+});
+
 // ---------- Users ----------
 router.get("/users", requireAuth, requireRole(MANAGER), (req, res) => {
   const rows = db.prepare("SELECT id, name, username, role, assignment, status FROM users ORDER BY name").all();
