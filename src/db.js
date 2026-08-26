@@ -332,4 +332,16 @@ db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
 db.pragma("busy_timeout = 5000");
 
+// Temporary diagnostics: dump every DB object (table/index/trigger) whose
+// name mentions "users", so we can see the database's *actual* on-disk
+// state in the logs — the "no such table: users_old" error persisted even
+// after the reconnect fix, so something more specific than a stale
+// connection cache is going on and needs to be seen directly.
+try {
+  const suspects = db.prepare("SELECT type, name, tbl_name, sql FROM sqlite_master WHERE name LIKE '%user%' ORDER BY type, name").all();
+  console.log("[diag] DB objects matching 'user':", JSON.stringify(suspects, null, 2));
+} catch (diagErr) {
+  console.log("[diag] failed to inspect sqlite_master:", diagErr.message);
+}
+
 module.exports = db;
