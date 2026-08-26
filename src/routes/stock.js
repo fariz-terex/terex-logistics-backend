@@ -9,7 +9,33 @@ const MANAGER = "Admin / Manager Logistics";
 const LOGISTICS = "Logistics Staff";
 
 router.get("/", requireAuth, (req, res) => {
+  const { customer: customerOverride } = req.query;
   const scope = scopeOf(req.user);
+
+  // An explicit override is for forms that need ONE division's real
+  // numbers instead of a global/summed total — e.g. Manager (unscoped, so
+  // normally sees the grand total across every division) picking materials
+  // for a Delivery Request they're creating on behalf of a specific
+  // division. Showing the aggregate there is actively misleading: it can
+  // show "18 available" while the actual division being requested for has
+  // zero, which only surfaces as a confusing "insufficient stock" error at
+  // submit time. Still respects scope — a scoped user can't peek at a
+  // division that isn't theirs.
+  if (customerOverride) {
+    if (scope && !scope.includes(customerOverride)) {
+      return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
+    }
+    const rows = db.prepare(`
+      SELECT m.id, m.name, m.category, m.unit, m.serialized, m.min_stock, m.status,
+             COALESCE(ms.ready, 0) AS ready, COALESCE(ms.faulty, 0) AS faulty,
+             COALESCE(ms.reserved, 0) AS reserved, COALESCE(ms.in_transit, 0) AS in_transit
+      FROM materials m
+      LEFT JOIN material_stock ms ON ms.material = m.name AND ms.customer = ?
+      ORDER BY m.name
+    `).all(customerOverride);
+    return res.json(rows.map((r) => ({ ...r, serialized: !!r.serialized })));
+  }
+
   if (!scope) {
     const rows = db.prepare("SELECT * FROM materials ORDER BY name").all();
     return res.json(rows.map((r) => ({ ...r, serialized: !!r.serialized })));
