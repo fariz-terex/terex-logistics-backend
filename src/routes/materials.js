@@ -98,4 +98,57 @@ router.post("/bulk-delete", requireAuth, requireRole(MANAGER), (req, res) => {
   res.json({ deleted, blocked });
 });
 
+// Shows exactly what a full cascade wipe would take with it, before
+// anyone commits to it — every Delivery Request / Return / Reconciliation
+// that has ever included this material as a line item, plus its stock
+// history. Delivery/Return/Reconciliation sub-tables (items, history,
+// photos) all cascade automatically via ON DELETE CASCADE once the parent
+// row goes, so this only needs to count the parents themselves plus the
+// standalone stock tables.
+router.get("/:id/cascade-preview", requireAuth, requireRole(MANAGER), (req, res) => {
+  const row = db.prepare("SELECT * FROM materials WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "Material not found" });
+  const name = row.name;
+  const count = (sql) => db.prepare(sql).get(name).n;
+  res.json({
+    material: name,
+    deliveries: count("SELECT COUNT(DISTINCT delivery_id) AS n FROM delivery_items WHERE material = ?"),
+    returns: count("SELECT COUNT(DISTINCT return_id) AS n FROM return_items ri JOIN returns r ON r.id = ri.return_id WHERE ri.material = ?"),
+    reconciliations: count("SELECT COUNT(DISTINCT reconciliation_id) AS n FROM reconciliation_items WHERE material = ?"),
+    serialNumbers: count("SELECT COUNT(*) AS n FROM serial_numbers WHERE material = ?"),
+    receipts: count("SELECT COUNT(*) AS n FROM receipts WHERE material = ?"),
+    stockMovements: count("SELECT COUNT(*) AS n FROM stock_movements WHERE material = ?"),
+  });
+});
+
+// Actually performs the wipe described by the preview above. Deliberately
+// separate from the plain DELETE endpoint (which stays FK-protected) so
+// this destructive path always requires having seen the preview counts
+// first — never a silent surprise.
+router.delete("/:id/force", requireAuth, requireRole(MANAGER), (req, res) => {
+  const row = db.prepare("SELECT * FROM materials WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "Material not found" });
+  const name = row.name;
+
+  const tx = db.transaction(() => {
+    const deliveryIds = db.prepare("SELECT DISTINCT delivery_id AS id FROM delivery_items WHERE material = ?").all(name).map((r) => r.id);
+    deliveryIds.forEach((id) => db.prepare("DELETE FROM deliveries WHERE id = ?").run(id));
+
+    const returnIds = db.prepare("SELECT DISTINCT r.id AS id FROM returns r JOIN return_items ri ON ri.return_id = r.id WHERE ri.material = ?").all(name).map((r) => r.id);
+    returnIds.forEach((id) => db.prepare("DELETE FROM returns WHERE id = ?").run(id));
+
+    const reconIds = db.prepare("SELECT DISTINCT reconciliation_id AS id FROM reconciliation_items WHERE material = ?").all(name).map((r) => r.id);
+    reconIds.forEach((id) => db.prepare("DELETE FROM reconciliations WHERE id = ?").run(id));
+
+    db.prepare("DELETE FROM serial_numbers WHERE material = ?").run(name);
+    db.prepare("DELETE FROM material_stock WHERE material = ?").run(name);
+    db.prepare("DELETE FROM receipts WHERE material = ?").run(name);
+    db.prepare("DELETE FROM stock_movements WHERE material = ?").run(name);
+    db.prepare("DELETE FROM materials WHERE id = ?").run(row.id);
+  });
+  tx();
+
+  res.json({ deleted: row.id });
+});
+
 module.exports = router;
