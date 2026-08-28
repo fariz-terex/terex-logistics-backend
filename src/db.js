@@ -415,6 +415,8 @@ if (transferTablesExist) {
         JOIN deliveries d ON d.id = di.delivery_id
         JOIN materials m ON m.name = di.material
         WHERE d.status = 'Delivered' AND di.item_type = 'material' AND m.serialized = 0
+          AND d.customer IS NOT NULL AND d.customer != ''
+          AND d.homebase IS NOT NULL AND d.homebase != ''
         GROUP BY di.material, d.customer, d.homebase
       `);
     }
