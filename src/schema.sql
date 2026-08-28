@@ -244,9 +244,50 @@ CREATE TABLE IF NOT EXISTS serial_numbers (
   installed_date TEXT,     -- when it was confirmed installed at site (Installed status only)
   installed_by   TEXT,     -- who confirmed it (Logistics Staff, based on field report)
   install_photo  TEXT,     -- proof-of-installation photo — required to reach Installed
-  install_site   TEXT      -- site it was installed at (falls back to the owning delivery's site if not given explicitly)
+  install_site   TEXT,     -- site it was installed at (falls back to the owning delivery's site if not given explicitly)
+  homebase       TEXT      -- current physical homebase location, set once status reaches Delivered (via the owning delivery's homebase) and updated by Transfer Stock from then on. NULL before Delivered — not yet at a specific homebase.
 );
 CREATE INDEX IF NOT EXISTS idx_serials_material_status ON serial_numbers(material, status);
+-- idx_serials_homebase is NOT created here — on an existing database the
+-- `homebase` column doesn't exist yet at this point (schema.sql's CREATE
+-- TABLE IF NOT EXISTS is a no-op for a table that already exists), so this
+-- index is instead created in db.js's migration, right after the ALTER
+-- TABLE that actually adds the column.
+
+-- Per-homebase quantity ledger for NON-serialized materials only (serialized
+-- materials use serial_numbers.homebase directly instead — no duplicate
+-- bookkeeping needed there). Populated when a Delivery Request reaches
+-- Delivered, and adjusted by Transfer Stock afterward. This is layered on
+-- top of material_stock (division-level totals) rather than replacing it —
+-- material_stock keeps meaning "division has this many Ready", while this
+-- table answers the finer-grained "specifically at Homebase X" question
+-- that Delivery Request assignment, Warehouse Stock, and every other
+-- existing flow never needed before Transfer Stock existed.
+CREATE TABLE IF NOT EXISTS material_stock_homebase (
+  material TEXT NOT NULL REFERENCES materials(name),
+  customer TEXT NOT NULL,
+  homebase TEXT NOT NULL,
+  qty      INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (material, customer, homebase)
+);
+
+CREATE TABLE IF NOT EXISTS stock_transfers (
+  id            TEXT PRIMARY KEY,
+  material      TEXT NOT NULL,
+  customer      TEXT NOT NULL,
+  homebase_from TEXT NOT NULL,
+  homebase_to   TEXT NOT NULL,
+  qty           INTEGER NOT NULL,
+  performed_by  TEXT NOT NULL,
+  date          TEXT NOT NULL,
+  note          TEXT DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS stock_transfer_serials (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  transfer_id TEXT NOT NULL REFERENCES stock_transfers(id) ON DELETE CASCADE,
+  sn          TEXT NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS receipts (
   id         TEXT PRIMARY KEY,

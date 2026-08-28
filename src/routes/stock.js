@@ -2,7 +2,7 @@ const express = require("express");
 const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
-const { scopeOf, resolveCreateCustomer } = require("../utils/stock");
+const { scopeOf, scopeAllows, scopeClause, resolveCreateCustomer } = require("../utils/stock");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -98,11 +98,12 @@ router.get("/movements", requireAuth, (req, res) => {
 // picking SNs to fulfill it) — otherwise it defaults to the caller's own
 // division(s), and Manager with no override sees everything.
 router.get("/serials", requireAuth, (req, res) => {
-  const { material, status, q, customer } = req.query;
+  const { material, status, q, customer, homebase } = req.query;
   let query = "SELECT * FROM serial_numbers WHERE 1=1";
   const params = [];
   if (material) { query += " AND material = ?"; params.push(material); }
   if (status) { query += " AND status = ?"; params.push(status); }
+  if (homebase) { query += " AND homebase = ?"; params.push(homebase); }
   if (q) { query += " AND sn LIKE ?"; params.push(`%${q}%`); }
 
   if (customer !== undefined) {
@@ -187,6 +188,118 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
   }
 
   res.status(201).json({ id, material, qty: addedQty, serialized: !!mat.serialized, customer });
+});
+
+// ===================== TRANSFER STOK ANTAR HOMEBASE =====================
+// Warehouse-operations feature (Logistics/Manager only) — moves already-
+// Delivered stock from one homebase's inventory to another's within the
+// same division. Never touches material_stock (the division-level total is
+// unaffected by moving stock between homebases inside that same division)
+// or a delivery's own records — this is purely a relocation, layered on
+// top of what Delivery Request already tracks.
+
+// Per-homebase breakdown for one material+division — what the transfer
+// form needs to know how much is available to move FROM each homebase.
+router.get("/transfer-options", requireAuth, (req, res) => {
+  const { material, customer } = req.query;
+  if (!material || !customer) return res.status(400).json({ error: "material and customer are required" });
+  const scope = scopeOf(req.user);
+  if (!scopeAllows(scope, customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
+
+  const mat = db.prepare("SELECT * FROM materials WHERE name = ?").get(material);
+  if (!mat) return res.status(404).json({ error: "Material not found" });
+
+  if (mat.serialized) {
+    const rows = db.prepare(`
+      SELECT homebase, COUNT(*) AS qty FROM serial_numbers
+      WHERE material = ? AND customer = ? AND status = 'Delivered' AND homebase IS NOT NULL
+      GROUP BY homebase HAVING qty > 0 ORDER BY homebase
+    `).all(material, customer);
+    return res.json({ serialized: true, breakdown: rows });
+  }
+  const rows = db.prepare(`
+    SELECT homebase, qty FROM material_stock_homebase
+    WHERE material = ? AND customer = ? AND qty > 0 ORDER BY homebase
+  `).all(material, customer);
+  res.json({ serialized: false, breakdown: rows });
+});
+
+router.get("/transfers", requireAuth, (req, res) => {
+  const scope = scopeOf(req.user);
+  let rows;
+  if (!scope) {
+    rows = db.prepare("SELECT * FROM stock_transfers ORDER BY date DESC, id DESC").all();
+  } else if (scope.length === 0) {
+    rows = [];
+  } else {
+    rows = db.prepare(`SELECT * FROM stock_transfers WHERE ${scopeClause("customer", scope).sql} ORDER BY date DESC, id DESC`).all(...scope);
+  }
+  const withSerials = rows.map((r) => ({
+    ...r,
+    serials: db.prepare("SELECT sn FROM stock_transfer_serials WHERE transfer_id = ?").all(r.id).map((s) => s.sn),
+  }));
+  res.json(withSerials);
+});
+
+router.post("/transfers", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+  const { material, customer, homebaseFrom, homebaseTo, qty, serials, note } = req.body || {};
+  if (!material || !customer || !homebaseFrom || !homebaseTo) {
+    return res.status(400).json({ error: "material, customer, homebaseFrom, homebaseTo are required" });
+  }
+  if (homebaseFrom === homebaseTo) return res.status(400).json({ error: "Homebase asal dan tujuan tidak boleh sama" });
+  const scope = scopeOf(req.user);
+  if (!scopeAllows(scope, customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
+
+  const mat = db.prepare("SELECT * FROM materials WHERE name = ?").get(material);
+  if (!mat) return res.status(404).json({ error: "Material not found" });
+
+  const id = dailySequenceId(db, "stock_transfers", "TR");
+  const date = isoDate();
+
+  const tx = db.transaction(() => {
+    let finalQty;
+    if (mat.serialized) {
+      if (!Array.isArray(serials) || serials.length === 0) throw new Error("Pilih minimal satu Serial Number untuk dipindahkan");
+      finalQty = serials.length;
+      const rows = serials.map((sn) => db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(sn));
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || row.material !== material || row.customer !== customer || row.status !== "Delivered" || row.homebase !== homebaseFrom) {
+          throw new Error(`Serial Number ${serials[i]} tidak tersedia di homebase ${homebaseFrom}`);
+        }
+      }
+      const update = db.prepare("UPDATE serial_numbers SET homebase = ? WHERE sn = ?");
+      serials.forEach((sn) => update.run(homebaseTo, sn));
+    } else {
+      finalQty = Number(qty);
+      if (!finalQty || finalQty <= 0) throw new Error("Qty harus lebih dari 0");
+      const source = db.prepare("SELECT qty FROM material_stock_homebase WHERE material = ? AND customer = ? AND homebase = ?").get(material, customer, homebaseFrom);
+      if (!source || source.qty < finalQty) throw new Error(`Stock ${material} di ${homebaseFrom} tidak cukup (tersedia: ${source ? source.qty : 0})`);
+      db.prepare("UPDATE material_stock_homebase SET qty = qty - ? WHERE material = ? AND customer = ? AND homebase = ?").run(finalQty, material, customer, homebaseFrom);
+      db.prepare(`
+        INSERT INTO material_stock_homebase (material, customer, homebase, qty) VALUES (?, ?, ?, ?)
+        ON CONFLICT(material, customer, homebase) DO UPDATE SET qty = qty + excluded.qty
+      `).run(material, customer, homebaseTo, finalQty);
+    }
+
+    db.prepare("INSERT INTO stock_transfers (id, material, customer, homebase_from, homebase_to, qty, performed_by, date, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+      .run(id, material, customer, homebaseFrom, homebaseTo, finalQty, req.user.name, date, note || "");
+    if (mat.serialized) {
+      const insertSerial = db.prepare("INSERT INTO stock_transfer_serials (transfer_id, sn) VALUES (?, ?)");
+      serials.forEach((sn) => insertSerial.run(id, sn));
+    }
+  });
+
+  try {
+    tx();
+  } catch (err) {
+    return res.status(409).json({ error: err.message });
+  }
+
+  res.status(201).json({
+    id, material, customer, homebaseFrom, homebaseTo, date,
+    serials: mat.serialized ? serials : [],
+  });
 });
 
 module.exports = router;

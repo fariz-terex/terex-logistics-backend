@@ -376,8 +376,23 @@ router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, 
   const tx = db.transaction(() => {
     materialItems.forEach((item) => {
       adjustStock(item.material, delivery.customer, "in_transit", -item.qty);
-      db.prepare("UPDATE serial_numbers SET status = 'Delivered' WHERE current_ref = ? AND material = ? AND status = 'In Transit'")
-        .run(delivery.id, item.material);
+      const material = db.prepare("SELECT serialized FROM materials WHERE name = ?").get(item.material);
+      if (material && material.serialized) {
+        // Serialized: each unit's current homebase is tracked directly on
+        // its own row — this is also the moment Transfer Stock's history
+        // starts being meaningful for it.
+        db.prepare("UPDATE serial_numbers SET status = 'Delivered', homebase = ? WHERE current_ref = ? AND material = ? AND status = 'In Transit'")
+          .run(delivery.homebase, delivery.id, item.material);
+      } else {
+        db.prepare("UPDATE serial_numbers SET status = 'Delivered' WHERE current_ref = ? AND material = ? AND status = 'In Transit'")
+          .run(delivery.id, item.material);
+        // Non-serialized: no individual rows to tag, so the arrived qty is
+        // credited straight into the per-homebase ledger instead.
+        db.prepare(`
+          INSERT INTO material_stock_homebase (material, customer, homebase, qty) VALUES (?, ?, ?, ?)
+          ON CONFLICT(material, customer, homebase) DO UPDATE SET qty = qty + excluded.qty
+        `).run(item.material, delivery.customer, delivery.homebase, item.qty);
+      }
     });
     db.prepare("UPDATE deliveries SET status = 'Delivered', delivered_photo = ?, received_by = ? WHERE id = ?")
       .run(deliveredPhoto, receivedBy || null, delivery.id);

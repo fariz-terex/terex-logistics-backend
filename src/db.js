@@ -372,4 +372,53 @@ if (userDivTableInfo && userDivTableInfo.sql.includes('"users_old"')) {
   db.pragma("busy_timeout = 5000");
 }
 
+// ===================== TRANSFER STOK ANTAR HOMEBASE =====================
+// Just a plain ADD COLUMN, not a rebuild — no CHECK constraint involved,
+// so none of the rename/create/drop staleness precautions above apply here.
+const serialColumnsForHomebase = db.prepare("PRAGMA table_info(serial_numbers)").all().map((c) => c.name);
+if (!serialColumnsForHomebase.includes("homebase")) {
+  console.log("[db] adding homebase column to serial_numbers");
+  db.exec("ALTER TABLE serial_numbers ADD COLUMN homebase TEXT");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_serials_homebase ON serial_numbers(homebase)");
+
+  // Backfill: every serialized unit that's already Delivered or Installed
+  // has a real physical homebase, we just never recorded it as such before
+  // — it's recoverable from the delivery that shipped it there.
+  console.log("[db] backfilling serial_numbers.homebase from delivery history");
+  db.exec(`
+    UPDATE serial_numbers
+    SET homebase = (
+      SELECT d.homebase FROM deliveries d WHERE d.id = serial_numbers.current_ref
+    )
+    WHERE status IN ('Delivered', 'Installed')
+      AND current_ref IS NOT NULL
+      AND homebase IS NULL
+  `);
+}
+
+// Backfill material_stock_homebase from every historical Delivered
+// delivery's non-serialized material line items — this table didn't exist
+// before Transfer Stock, so without this, all pre-existing delivered
+// quantities would be invisible to it despite genuinely being at a
+// homebase already.
+const transferTablesExist = db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='material_stock_homebase'").get();
+if (transferTablesExist) {
+  const alreadyBackfilled = db.prepare("SELECT COUNT(*) AS n FROM material_stock_homebase").get().n;
+  if (alreadyBackfilled === 0) {
+    const hasAnyDelivered = db.prepare("SELECT COUNT(*) AS n FROM deliveries WHERE status = 'Delivered'").get().n;
+    if (hasAnyDelivered > 0) {
+      console.log("[db] backfilling material_stock_homebase from delivery history");
+      db.exec(`
+        INSERT INTO material_stock_homebase (material, customer, homebase, qty)
+        SELECT di.material, d.customer, d.homebase, SUM(di.qty)
+        FROM delivery_items di
+        JOIN deliveries d ON d.id = di.delivery_id
+        JOIN materials m ON m.name = di.material
+        WHERE d.status = 'Delivered' AND di.item_type = 'material' AND m.serialized = 0
+        GROUP BY di.material, d.customer, d.homebase
+      `);
+    }
+  }
+}
+
 module.exports = db;
