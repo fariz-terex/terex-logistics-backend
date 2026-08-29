@@ -50,12 +50,21 @@ router.get("/", requireAuth, (req, res) => {
   // summed from material_stock across every division this user covers (0
   // when none of them has ever received the material).
   const placeholders = scope.map(() => "?").join(",");
+  // `onlyWithHistory=1` is used specifically by the Warehouse Stock page —
+  // it hides materials that have never had a single material_stock row for
+  // any of this user's divisions (never received/requested there before),
+  // which is just catalog noise from other divisions' materials on that
+  // page. Everywhere else that reads this endpoint — the Delivery Request
+  // material picker above all — needs the FULL catalog regardless of
+  // history, since requesting a material for the very first time is a
+  // completely normal thing to do and must not be hidden.
+  const joinType = req.query.onlyWithHistory === "1" ? "INNER JOIN" : "LEFT JOIN";
   const rows = db.prepare(`
     SELECT m.id, m.name, m.category, m.unit, m.serialized, m.min_stock, m.status,
            COALESCE(SUM(ms.ready), 0) AS ready, COALESCE(SUM(ms.faulty), 0) AS faulty,
            COALESCE(SUM(ms.reserved), 0) AS reserved, COALESCE(SUM(ms.in_transit), 0) AS in_transit
     FROM materials m
-    LEFT JOIN material_stock ms ON ms.material = m.name AND ms.customer IN (${placeholders})
+    ${joinType} material_stock ms ON ms.material = m.name AND ms.customer IN (${placeholders})
     GROUP BY m.id
     ORDER BY m.name
   `).all(...scope);
