@@ -236,7 +236,7 @@ CREATE INDEX IF NOT EXISTS idx_stock_movements_material ON stock_movements(mater
 CREATE TABLE IF NOT EXISTS serial_numbers (
   sn             TEXT PRIMARY KEY,
   material       TEXT NOT NULL REFERENCES materials(name),
-  status         TEXT NOT NULL DEFAULT 'Ready' CHECK (status IN ('Ready','Reserved','In Transit','Delivered','Installed','Faulty')),
+  status         TEXT NOT NULL DEFAULT 'Ready' CHECK (status IN ('Ready','Reserved','In Transit','Delivered','Installed','Faulty','Sent to Customer')),
   current_ref    TEXT,     -- id of the delivery/return currently holding this unit (nullable when sitting in Ready stock)
   received_date  TEXT,
   received_ref   TEXT,     -- Goods Receipt id this unit arrived on (nullable for units first seen via a Return Faulty)
@@ -288,6 +288,32 @@ CREATE TABLE IF NOT EXISTS stock_transfer_serials (
   transfer_id TEXT NOT NULL REFERENCES stock_transfers(id) ON DELETE CASCADE,
   sn          TEXT NOT NULL
 );
+
+-- One row per "sent to the customer's own facility for them to repair"
+-- cycle for a Faulty unit — a unit can go through this more than once over
+-- its lifetime, so this is a proper history table rather than a couple of
+-- single-value columns on serial_numbers that would just get overwritten
+-- on a second cycle. `sn` is intentionally NOT a foreign key to
+-- serial_numbers: that table's CHECK constraint has already needed a
+-- rebuild (rename/create/drop) twice, and tying another table to it via FK
+-- risks the exact "stale reference to a dropped table" bug hit before —
+-- safer to keep this a plain lookup column.
+CREATE TABLE IF NOT EXISTS faulty_customer_returns (
+  id            TEXT PRIMARY KEY,
+  sn            TEXT NOT NULL,
+  material      TEXT NOT NULL,
+  customer      TEXT NOT NULL,
+  sent_date     TEXT NOT NULL,
+  sent_ref      TEXT NOT NULL,   -- surat/BA number for sending it out to the customer
+  sent_by       TEXT NOT NULL,
+  sent_note     TEXT DEFAULT '',
+  received_date TEXT,            -- filled in once it comes back repaired
+  received_ref  TEXT,            -- a NEW surat number for the return trip — never reuses sent_ref
+  received_by   TEXT,
+  received_note TEXT DEFAULT '',
+  status        TEXT NOT NULL DEFAULT 'Sent' CHECK (status IN ('Sent','Received'))
+);
+CREATE INDEX IF NOT EXISTS idx_faulty_customer_returns_sn ON faulty_customer_returns(sn);
 
 CREATE TABLE IF NOT EXISTS receipts (
   id         TEXT PRIMARY KEY,

@@ -423,4 +423,49 @@ if (transferTablesExist) {
   }
 }
 
+// ============= FAULTY -> SENT TO CUSTOMER -> READY CYCLE =============
+// Same CHECK-constraint-rebuild situation as the earlier 'Installed'
+// migration — this one carries every column forward INCLUDING `homebase`,
+// which didn't exist yet at the time of that first rebuild but does now
+// (added by the Transfer Stock feature) and must not be silently dropped.
+const snTableInfoV2 = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='serial_numbers'").get();
+if (snTableInfoV2 && !snTableInfoV2.sql.includes("'Sent to Customer'")) {
+  console.log("[db] rebuilding serial_numbers table to support 'Sent to Customer' status");
+  db.exec(`
+    ALTER TABLE serial_numbers RENAME TO serial_numbers_old;
+
+    CREATE TABLE serial_numbers (
+      sn             TEXT PRIMARY KEY,
+      material       TEXT NOT NULL REFERENCES materials(name),
+      status         TEXT NOT NULL DEFAULT 'Ready' CHECK (status IN ('Ready','Reserved','In Transit','Delivered','Installed','Faulty','Sent to Customer')),
+      current_ref    TEXT,
+      received_date  TEXT,
+      received_ref   TEXT,
+      customer       TEXT,
+      installed_date TEXT,
+      installed_by   TEXT,
+      install_photo  TEXT,
+      install_site   TEXT,
+      homebase       TEXT
+    );
+
+    INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref, customer, installed_date, installed_by, install_photo, install_site, homebase)
+      SELECT sn, material, status, current_ref, received_date, received_ref, customer, installed_date, installed_by, install_photo, install_site, homebase FROM serial_numbers_old;
+
+    DROP TABLE serial_numbers_old;
+
+    CREATE INDEX IF NOT EXISTS idx_serials_material_status ON serial_numbers(material, status);
+    CREATE INDEX IF NOT EXISTS idx_serials_homebase ON serial_numbers(homebase);
+  `);
+
+  // Same stale-reference precaution used for every prior rebuild — cheap
+  // insurance against the connection holding on to state from a table
+  // that technically no longer exists under that name.
+  db.close();
+  db = new Database(dbPath);
+  db.pragma("journal_mode = WAL");
+  db.pragma("foreign_keys = ON");
+  db.pragma("busy_timeout = 5000");
+}
+
 module.exports = db;
