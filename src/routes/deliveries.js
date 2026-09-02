@@ -2,7 +2,7 @@ const express = require("express");
 const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
-const { scopeOf, scopeAllows, getDivisionStock, adjustStock, getConsumableDivisionStock, adjustConsumableStock, resolveCreateCustomer } = require("../utils/stock");
+const { scopeOf, scopeAllows, getDivisionStock, adjustStock, adjustConsumable, resolveCreateCustomer } = require("../utils/stock");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -96,11 +96,10 @@ router.post("/", requireAuth, requireRole(SPV, MANAGER), (req, res) => {
       if (!t) return res.status(400).json({ error: `Unknown tool: ${item.material}` });
       if (item.qty > t.available) return res.status(409).json({ error: `Stock alat ${item.material} tidak cukup: diminta ${item.qty}, tersedia ${t.available}` });
     } else if (item.type === "consumable") {
-      const c = db.prepare("SELECT 1 FROM consumables WHERE name = ?").get(item.material);
+      const c = db.prepare("SELECT * FROM consumables WHERE name = ?").get(item.material);
       if (!c) return res.status(400).json({ error: `Unknown consumable: ${item.material}` });
-      const stock = getConsumableDivisionStock(item.material, customer);
-      if (item.qty > stock.ready) {
-        return res.status(409).json({ error: `Insufficient stock for ${item.material}: requested ${item.qty}, available ${stock.ready} (divisi ${customer})` });
+      if (item.qty > c.ready) {
+        return res.status(409).json({ error: `Insufficient stock for ${item.material}: requested ${item.qty}, available ${c.ready}` });
       }
     } else {
       const material = db.prepare("SELECT 1 FROM materials WHERE name = ?").get(item.material);
@@ -139,9 +138,9 @@ router.post("/:id/approve", requireAuth, requireRole(MANAGER), (req, res) => {
       const t = db.prepare("SELECT * FROM tools WHERE name = ?").get(item.material);
       if (!t || item.qty > t.available) return res.status(409).json({ error: `Stock alat ${item.material} berubah dan tidak lagi cukup` });
     } else if (item.type === "consumable") {
-      const stock = getConsumableDivisionStock(item.material, delivery.customer);
-      if (item.qty > stock.ready) {
-        return res.status(409).json({ error: `Stock for ${item.material} changed and is no longer sufficient (divisi ${delivery.customer})` });
+      const c = db.prepare("SELECT ready FROM consumables WHERE name = ?").get(item.material);
+      if (!c || item.qty > c.ready) {
+        return res.status(409).json({ error: `Stock for ${item.material} changed and is no longer sufficient` });
       }
     } else {
       const stock = getDivisionStock(item.material, delivery.customer);
@@ -193,9 +192,9 @@ router.post("/:id/assign-stock", requireAuth, requireRole(LOGISTICS, MANAGER), (
   // Consumables are never serialized — this is purely a qty check, no
   // per-unit selection step like materials/tools go through below.
   for (const item of consumableItems) {
-    const stock = getConsumableDivisionStock(item.material, delivery.customer);
-    if (item.qty > stock.ready) {
-      return res.status(409).json({ error: `Stock for ${item.material} changed and is no longer sufficient (divisi ${delivery.customer})` });
+    const c = db.prepare("SELECT ready FROM consumables WHERE name = ?").get(item.material);
+    if (!c || item.qty > c.ready) {
+      return res.status(409).json({ error: `Stock for ${item.material} changed and is no longer sufficient` });
     }
   }
 
@@ -258,8 +257,8 @@ router.post("/:id/assign-stock", requireAuth, requireRole(LOGISTICS, MANAGER), (
       }
     });
     consumableItems.forEach((item) => {
-      adjustConsumableStock(item.material, delivery.customer, "ready", -item.qty);
-      adjustConsumableStock(item.material, delivery.customer, "reserved", item.qty);
+      adjustConsumable(item.material, "ready", -item.qty);
+      adjustConsumable(item.material, "reserved", item.qty);
     });
     db.prepare("UPDATE deliveries SET status = 'Preparing' WHERE id = ?").run(delivery.id);
     const parts = [];
@@ -331,8 +330,8 @@ router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
     // (below) plus consumable_stock's own reserved/in_transit numbers are
     // enough of an audit trail for something this low-stakes.
     consumableItems.forEach((item) => {
-      adjustConsumableStock(item.material, delivery.customer, "reserved", -item.qty);
-      adjustConsumableStock(item.material, delivery.customer, "in_transit", item.qty);
+      adjustConsumable(item.material, "reserved", -item.qty);
+      adjustConsumable(item.material, "in_transit", item.qty);
     });
 
     const insertPhoto = db.prepare("INSERT INTO delivery_serial_photos (delivery_id, sn, photo) VALUES (?, ?, ?)");
@@ -436,7 +435,7 @@ router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, 
     // afterward (no Delivered bucket, no homebase ledger, no Installed
     // step — unlike Materials, there's no further lifecycle here).
     consumableItems.forEach((item) => {
-      adjustConsumableStock(item.material, delivery.customer, "in_transit", -item.qty);
+      adjustConsumable(item.material, "in_transit", -item.qty);
     });
     db.prepare("UPDATE deliveries SET status = 'Delivered', delivered_photo = ?, received_by = ? WHERE id = ?")
       .run(deliveredPhoto, receivedBy || null, delivery.id);

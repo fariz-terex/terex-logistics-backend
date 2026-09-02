@@ -2,55 +2,20 @@ const express = require("express");
 const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { paddedSequenceId, dailySequenceId, isoDate } = require("../utils/ids");
-const { scopeOf, scopeAllows, resolveCreateCustomer, adjustConsumableStock } = require("../utils/stock");
+const { adjustConsumable } = require("../utils/stock");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
 const LOGISTICS = "Logistics Staff";
 
-// Master Consumable — CRUD, mirrors Master Material but with no
-// "serialized" concept (consumables are never individually tracked).
+// Master Consumable — a shared, un-divisioned pool across every customer,
+// same reasoning as Tools: connectors/isolasi/rubber etc. aren't owned by
+// one division's stock the way Material is, so there's no per-division
+// breakdown, no scoping by the requester's division, no customer field on
+// receipts. Every authenticated user sees the same numbers.
 
 router.get("/", requireAuth, (req, res) => {
-  const scope = scopeOf(req.user);
-
-  // Mirrors /api/stock's `customer` override: Manager (unscoped) picking a
-  // division in the Delivery Request form needs THAT division's real
-  // numbers, not the grand total across every division — same reasoning
-  // as materials, just for the separate consumables tables.
-  const { customer: customerOverride } = req.query;
-  if (customerOverride) {
-    if (scope && !scopeAllows(scope, customerOverride)) {
-      return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
-    }
-    const rows = db.prepare(`
-      SELECT c.id, c.name, c.category, c.unit, c.min_stock, c.status,
-             COALESCE(cs.ready, 0) AS ready, COALESCE(cs.reserved, 0) AS reserved, COALESCE(cs.in_transit, 0) AS in_transit
-      FROM consumables c
-      LEFT JOIN consumable_stock cs ON cs.consumable = c.name AND cs.customer = ?
-      ORDER BY c.name
-    `).all(customerOverride);
-    return res.json(rows);
-  }
-
-  if (!scope) {
-    return res.json(db.prepare("SELECT * FROM consumables ORDER BY name").all());
-  }
-  if (scope.length === 0) {
-    const rows = db.prepare("SELECT id, name, category, unit, min_stock, status FROM consumables ORDER BY name").all();
-    return res.json(rows.map((r) => ({ ...r, ready: 0, reserved: 0, in_transit: 0 })));
-  }
-  const placeholders = scope.map(() => "?").join(",");
-  const joinType = req.query.onlyWithHistory === "1" ? "INNER JOIN" : "LEFT JOIN";
-  const rows = db.prepare(`
-    SELECT c.id, c.name, c.category, c.unit, c.min_stock, c.status,
-           COALESCE(SUM(cs.ready), 0) AS ready, COALESCE(SUM(cs.reserved), 0) AS reserved, COALESCE(SUM(cs.in_transit), 0) AS in_transit
-    FROM consumables c
-    ${joinType} consumable_stock cs ON cs.consumable = c.name AND cs.customer IN (${placeholders})
-    GROUP BY c.id
-    ORDER BY c.name
-  `).all(...scope);
-  res.json(rows);
+  res.json(db.prepare("SELECT * FROM consumables ORDER BY name").all());
 });
 
 router.post("/", requireAuth, requireRole(MANAGER), (req, res) => {
@@ -125,21 +90,14 @@ router.post("/bulk-delete", requireAuth, requireRole(MANAGER), (req, res) => {
 });
 
 // ---------- Receipts (Terima Consumable) ----------
+// No division/customer involved at all — same as Tools' receipts.
 
 router.get("/receipts", requireAuth, (req, res) => {
-  const scope = scopeOf(req.user);
-  if (!scope) return res.json(db.prepare("SELECT * FROM consumable_receipts ORDER BY date DESC, id DESC").all());
-  if (scope.length === 0) return res.json([]);
-  const placeholders = scope.map(() => "?").join(",");
-  res.json(db.prepare(`SELECT * FROM consumable_receipts WHERE customer IN (${placeholders}) ORDER BY date DESC, id DESC`).all(...scope));
+  res.json(db.prepare("SELECT * FROM consumable_receipts ORDER BY date DESC, id DESC").all());
 });
 
 router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const { consumable, qty, note } = req.body;
-  const resolved = resolveCreateCustomer(req.user, req.body.customer);
-  if (resolved.error) return res.status(400).json({ error: resolved.error });
-  const customer = resolved.customer;
-
   const item = db.prepare("SELECT * FROM consumables WHERE name = ?").get(consumable);
   if (!item) return res.status(400).json({ error: "Unknown consumable" });
   const addedQty = Number(qty);
@@ -148,12 +106,12 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
   const id = dailySequenceId(db, "consumable_receipts", "CR");
   const tx = db.transaction(() => {
     db.prepare("INSERT INTO consumable_receipts (id, date, consumable, qty, note, created_by, customer) VALUES (?, ?, ?, ?, ?, ?, ?)")
-      .run(id, isoDate(), consumable, addedQty, note || "", req.user.name, customer);
-    adjustConsumableStock(consumable, customer, "ready", addedQty);
+      .run(id, isoDate(), consumable, addedQty, note || "", req.user.name, "");
+    adjustConsumable(consumable, "ready", addedQty);
   });
   tx();
 
-  res.status(201).json({ id, consumable, qty: addedQty, customer });
+  res.status(201).json({ id, consumable, qty: addedQty });
 });
 
 module.exports = router;

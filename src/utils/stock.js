@@ -47,17 +47,13 @@ function adjustStock(material, customer, field, delta) {
 }
 
 // Same idea as getDivisionStock/adjustStock above, but for the separate
-// consumables/consumable_stock tables — kept as distinct functions rather
-// than parameterizing the table name, since consumables only ever has
+// consumables table — kept as distinct functions rather than
+// parameterizing the table name, since consumables only ever has
 // ready/reserved/in_transit (no faulty) and mixing the two models would
-// make both harder to reason about.
-function getConsumableDivisionStock(consumable, customer) {
-  return db.prepare("SELECT * FROM consumable_stock WHERE consumable = ? AND customer = ?").get(consumable, customer)
-    || { ready: 0, reserved: 0, in_transit: 0 };
-}
-function adjustConsumableStock(consumable, customer, field, delta) {
-  db.prepare(`INSERT INTO consumable_stock (consumable, customer) VALUES (?, ?) ON CONFLICT(consumable, customer) DO NOTHING`).run(consumable, customer);
-  db.prepare(`UPDATE consumable_stock SET ${field} = MAX(0, ${field} + ?) WHERE consumable = ? AND customer = ?`).run(delta, consumable, customer);
+// make both harder to reason about. Consumable is a SHARED, un-divisioned
+// pool (same reasoning as Tools) — there is no per-division breakdown at
+// all, so this just touches the consumables row directly.
+function adjustConsumable(consumable, field, delta) {
   db.prepare(`UPDATE consumables SET ${field} = MAX(0, ${field} + ?) WHERE name = ?`).run(delta, consumable);
 }
 
@@ -91,4 +87,4 @@ function resolveCreateCustomer(user, bodyCustomer) {
   return { customer: bodyCustomer };
 }
 
-module.exports = { scopeOf, scopeAllows, scopeClause, getDivisionStock, adjustStock, getConsumableDivisionStock, adjustConsumableStock, getUserDivisions, resolveCreateCustomer, MANAGER };
+module.exports = { scopeOf, scopeAllows, scopeClause, getDivisionStock, adjustStock, adjustConsumable, getUserDivisions, resolveCreateCustomer, MANAGER };
