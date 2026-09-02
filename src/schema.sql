@@ -315,6 +315,44 @@ CREATE TABLE IF NOT EXISTS faulty_customer_returns (
 );
 CREATE INDEX IF NOT EXISTS idx_faulty_customer_returns_sn ON faulty_customer_returns(sn);
 
+-- ===================== CONSUMABLE MATERIALS =====================
+-- A third item category alongside Material and Alat (Tools), for one-time-
+-- use items (connectors, isolasi, rubber, etc.) needed for field
+-- maintenance. Never serialized, never Faulty, never borrowed/returned —
+-- once a Delivery Request carrying one reaches Delivered, it's considered
+-- consumed and tracking simply stops there (no per-unit history like
+-- Materials, no Reconciliation, no Return workflow).
+CREATE TABLE IF NOT EXISTS consumables (
+  id         TEXT PRIMARY KEY,
+  name       TEXT NOT NULL UNIQUE,
+  category   TEXT NOT NULL,
+  unit       TEXT NOT NULL,
+  min_stock  INTEGER NOT NULL DEFAULT 0,
+  status     TEXT NOT NULL DEFAULT 'Active' CHECK (status IN ('Active','Inactive')),
+  ready      INTEGER NOT NULL DEFAULT 0,
+  reserved   INTEGER NOT NULL DEFAULT 0,
+  in_transit INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS consumable_stock (
+  consumable TEXT NOT NULL REFERENCES consumables(name),
+  customer   TEXT NOT NULL,
+  ready      INTEGER NOT NULL DEFAULT 0,
+  reserved   INTEGER NOT NULL DEFAULT 0,
+  in_transit INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (consumable, customer)
+);
+
+CREATE TABLE IF NOT EXISTS consumable_receipts (
+  id         TEXT PRIMARY KEY,
+  date       TEXT NOT NULL,
+  consumable TEXT NOT NULL,
+  qty        INTEGER NOT NULL,
+  note       TEXT DEFAULT '',
+  created_by TEXT NOT NULL,
+  customer   TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS receipts (
   id         TEXT PRIMARY KEY,
   date       TEXT NOT NULL,

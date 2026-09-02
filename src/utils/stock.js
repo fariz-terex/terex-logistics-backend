@@ -46,6 +46,21 @@ function adjustStock(material, customer, field, delta) {
   db.prepare(`UPDATE materials SET ${field} = MAX(0, ${field} + ?) WHERE name = ?`).run(delta, material);
 }
 
+// Same idea as getDivisionStock/adjustStock above, but for the separate
+// consumables/consumable_stock tables — kept as distinct functions rather
+// than parameterizing the table name, since consumables only ever has
+// ready/reserved/in_transit (no faulty) and mixing the two models would
+// make both harder to reason about.
+function getConsumableDivisionStock(consumable, customer) {
+  return db.prepare("SELECT * FROM consumable_stock WHERE consumable = ? AND customer = ?").get(consumable, customer)
+    || { ready: 0, reserved: 0, in_transit: 0 };
+}
+function adjustConsumableStock(consumable, customer, field, delta) {
+  db.prepare(`INSERT INTO consumable_stock (consumable, customer) VALUES (?, ?) ON CONFLICT(consumable, customer) DO NOTHING`).run(consumable, customer);
+  db.prepare(`UPDATE consumable_stock SET ${field} = MAX(0, ${field} + ?) WHERE consumable = ? AND customer = ?`).run(delta, consumable, customer);
+  db.prepare(`UPDATE consumables SET ${field} = MAX(0, ${field} + ?) WHERE name = ?`).run(delta, consumable);
+}
+
 // A user's assigned divisions, straight from the DB (used at login time to
 // build the JWT payload, and anywhere else the current list is needed).
 function getUserDivisions(userId) {
@@ -76,4 +91,4 @@ function resolveCreateCustomer(user, bodyCustomer) {
   return { customer: bodyCustomer };
 }
 
-module.exports = { scopeOf, scopeAllows, scopeClause, getDivisionStock, adjustStock, getUserDivisions, resolveCreateCustomer, MANAGER };
+module.exports = { scopeOf, scopeAllows, scopeClause, getDivisionStock, adjustStock, getConsumableDivisionStock, adjustConsumableStock, getUserDivisions, resolveCreateCustomer, MANAGER };

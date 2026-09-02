@@ -6,6 +6,7 @@ const { seedDatabase } = require("./seed");
 
 const authRoutes = require("./routes/auth");
 const materialRoutes = require("./routes/materials");
+const consumableRoutes = require("./routes/consumables");
 const masterDataRoutes = require("./routes/masterData");
 const stockRoutes = require("./routes/stock");
 const deliveryRoutes = require("./routes/deliveries");
@@ -50,6 +51,7 @@ app.get("/api/health", (req, res) => res.json({ ok: true, service: "terex-logist
 
 app.use("/api/auth", authRoutes);
 app.use("/api/materials", materialRoutes);
+app.use("/api/consumables", consumableRoutes);
 app.use("/api", masterDataRoutes); // /api/areas, /api/homebases, /api/customers, /api/sites, /api/users
 app.use("/api/stock", stockRoutes);
 app.use("/api/deliveries", deliveryRoutes);
