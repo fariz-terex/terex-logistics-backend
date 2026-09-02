@@ -315,6 +315,24 @@ CREATE TABLE IF NOT EXISTS faulty_customer_returns (
 );
 CREATE INDEX IF NOT EXISTS idx_faulty_customer_returns_sn ON faulty_customer_returns(sn);
 
+-- Every automation call is logged here — successes AND rejections — so
+-- there's a durable record independent of Telegram (which could fail to
+-- send, get deleted, etc). This is what the Telegram "lihat detail" link
+-- and the web app's automation activity view (if ever added) both read.
+CREATE TABLE IF NOT EXISTS automation_log (
+  id          TEXT PRIMARY KEY,
+  source      TEXT NOT NULL DEFAULT 'google-sheet-sync',
+  division    TEXT,
+  action      TEXT NOT NULL,   -- 'mark-faulty' | 'send-to-customer' | 'receive-from-customer'
+  sn          TEXT,
+  material    TEXT,
+  result      TEXT NOT NULL CHECK (result IN ('success','rejected')),
+  detail      TEXT DEFAULT '',
+  raw_payload TEXT DEFAULT '',
+  created_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_automation_log_created ON automation_log(created_at);
+
 -- ===================== CONSUMABLE MATERIALS =====================
 -- A third item category alongside Material and Alat (Tools), for one-time-
 -- use items (connectors, isolasi, rubber, etc.) needed for field

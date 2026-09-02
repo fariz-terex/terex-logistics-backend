@@ -3,6 +3,7 @@ const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
 const { scopeOf, scopeAllows, scopeClause, resolveCreateCustomer, adjustStock } = require("../utils/stock");
+const { sendToCustomer, receiveFromCustomer } = require("../utils/faultyCycle");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -324,52 +325,34 @@ router.get("/serials/:sn/customer-return-history", requireAuth, (req, res) => {
 
 router.post("/serials/:sn/send-to-customer", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const { ref, note } = req.body || {};
-  if (!ref || !ref.trim()) return res.status(400).json({ error: "Nomor surat/BA wajib diisi" });
   const row = db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(req.params.sn);
-  if (!row) return res.status(404).json({ error: "Serial Number not found" });
-  if (row.status !== "Faulty") return res.status(409).json({ error: `Unit ini berstatus "${row.status}", harus Faulty untuk dikirim ke customer` });
-  const scope = scopeOf(req.user);
-  if (!scopeAllows(scope, row.customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
-
-  const id = dailySequenceId(db, "faulty_customer_returns", "FCR");
-  const date = isoDate();
-  const tx = db.transaction(() => {
-    db.prepare("UPDATE serial_numbers SET status = 'Sent to Customer' WHERE sn = ?").run(row.sn);
-    db.prepare(`
-      INSERT INTO faulty_customer_returns (id, sn, material, customer, sent_date, sent_ref, sent_by, sent_note, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Sent')
-    `).run(id, row.sn, row.material, row.customer, date, ref.trim(), req.user.name, note || "");
-  });
-  tx();
-  res.status(201).json({ id, sn: row.sn, status: "Sent to Customer" });
+  if (row) {
+    const scope = scopeOf(req.user);
+    if (!scopeAllows(scope, row.customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
+  }
+  try {
+    const result = sendToCustomer({ sn: req.params.sn, ref, note, performedBy: req.user.name });
+    res.status(201).json(result);
+  } catch (err) {
+    const status = /not found/i.test(err.message) ? 404 : /wajib diisi/i.test(err.message) ? 400 : 409;
+    res.status(status).json({ error: err.message });
+  }
 });
 
 router.post("/serials/:sn/receive-from-customer", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const { ref, note } = req.body || {};
-  if (!ref || !ref.trim()) return res.status(400).json({ error: "Nomor surat/BA wajib diisi" });
   const row = db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(req.params.sn);
-  if (!row) return res.status(404).json({ error: "Serial Number not found" });
-  if (row.status !== "Sent to Customer") return res.status(409).json({ error: `Unit ini berstatus "${row.status}", harus "Sent to Customer" untuk diterima kembali` });
-  const scope = scopeOf(req.user);
-  if (!scopeAllows(scope, row.customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
-
-  const openCycle = db.prepare("SELECT * FROM faulty_customer_returns WHERE sn = ? AND status = 'Sent' ORDER BY sent_date DESC, id DESC LIMIT 1").get(row.sn);
-  if (!openCycle) return res.status(409).json({ error: "Tidak ditemukan catatan pengiriman ke customer yang masih terbuka untuk unit ini" });
-  if (ref.trim() === openCycle.sent_ref) return res.status(400).json({ error: "Nomor surat penerimaan harus berbeda dari nomor surat pengiriman sebelumnya" });
-
-  const date = isoDate();
-  const tx = db.transaction(() => {
-    db.prepare("UPDATE serial_numbers SET status = 'Ready' WHERE sn = ?").run(row.sn);
-    db.prepare(`
-      UPDATE faulty_customer_returns
-      SET received_date = ?, received_ref = ?, received_by = ?, received_note = ?, status = 'Received'
-      WHERE id = ?
-    `).run(date, ref.trim(), req.user.name, note || "", openCycle.id);
-    adjustStock(row.material, row.customer, "faulty", -1);
-    adjustStock(row.material, row.customer, "ready", 1);
-  });
-  tx();
-  res.json({ id: openCycle.id, sn: row.sn, status: "Ready" });
+  if (row) {
+    const scope = scopeOf(req.user);
+    if (!scopeAllows(scope, row.customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
+  }
+  try {
+    const result = receiveFromCustomer({ sn: req.params.sn, ref, note, performedBy: req.user.name });
+    res.json(result);
+  } catch (err) {
+    const status = /not found/i.test(err.message) ? 404 : /wajib diisi|berbeda dari/i.test(err.message) ? 400 : 409;
+    res.status(status).json({ error: err.message });
+  }
 });
 
 module.exports = router;
