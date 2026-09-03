@@ -26,12 +26,17 @@ router.get("/", requireAuth, (req, res) => {
     if (scope && !scope.includes(customerOverride)) {
       return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
     }
+    // Same `onlyWithHistory` support as the scoped branch further down —
+    // this branch was missing it entirely, so Warehouse Stock's division
+    // filter (which always passes onlyWithHistory=1) silently ignored it
+    // here and fell back to LEFT JOIN's "show everything, zeros included".
+    const joinType = req.query.onlyWithHistory === "1" ? "INNER JOIN" : "LEFT JOIN";
     const rows = db.prepare(`
       SELECT m.id, m.name, m.category, m.unit, m.serialized, m.min_stock, m.status,
              COALESCE(ms.ready, 0) AS ready, COALESCE(ms.faulty, 0) AS faulty,
              COALESCE(ms.reserved, 0) AS reserved, COALESCE(ms.in_transit, 0) AS in_transit
       FROM materials m
-      LEFT JOIN material_stock ms ON ms.material = m.name AND ms.customer = ?
+      ${joinType} material_stock ms ON ms.material = m.name AND ms.customer = ?
       ORDER BY m.name
     `).all(customerOverride);
     return res.json(rows.map((r) => ({ ...r, serialized: !!r.serialized })));
