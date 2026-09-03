@@ -356,3 +356,55 @@ router.post("/serials/:sn/receive-from-customer", requireAuth, requireRole(LOGIS
 });
 
 module.exports = router;
+
+// ===================== DATA HYGIENE: PHANTOM STOCK ROWS =====================
+// A material_stock row can end up sitting at all-zeros for reasons that
+// don't actually mean "this division has touched this material" — e.g. a
+// Delivery Request that got approved then rejected/cancelled after
+// assign-stock already ran adjustStock, or leftover rows from early
+// testing before real data existed. Since Warehouse Stock's division
+// filter treats "a row exists" as "this division has history with it",
+// those leftover zero rows leak through as materials a division never
+// actually had. This finds rows with NO real evidence anywhere (receipts,
+// stock_movements, serial_numbers, or any Delivery/Return/Reconciliation
+// line item) backing their existence, and optionally removes them.
+function findPhantomStockRows(db) {
+  const zeroRows = db.prepare(`
+    SELECT material, customer FROM material_stock
+    WHERE ready = 0 AND faulty = 0 AND reserved = 0 AND in_transit = 0
+  `).all();
+
+  const hasEvidence = (material, customer) => {
+    const checks = [
+      db.prepare("SELECT 1 FROM receipts WHERE material = ? AND customer = ? LIMIT 1").get(material, customer),
+      db.prepare("SELECT 1 FROM stock_movements WHERE material = ? AND customer = ? LIMIT 1").get(material, customer),
+      db.prepare("SELECT 1 FROM serial_numbers WHERE material = ? AND customer = ? LIMIT 1").get(material, customer),
+      db.prepare(`SELECT 1 FROM delivery_items di JOIN deliveries d ON d.id = di.delivery_id WHERE di.material = ? AND d.customer = ? LIMIT 1`).get(material, customer),
+      db.prepare(`SELECT 1 FROM return_items ri JOIN returns r ON r.id = ri.return_id WHERE ri.material = ? AND r.customer = ? LIMIT 1`).get(material, customer),
+      db.prepare(`SELECT 1 FROM reconciliation_items rci JOIN reconciliations rc ON rc.id = rci.reconciliation_id WHERE rci.material = ? AND rc.customer = ? LIMIT 1`).get(material, customer),
+    ];
+    return checks.some(Boolean);
+  };
+
+  const phantoms = [];
+  for (const row of zeroRows) {
+    if (!hasEvidence(row.material, row.customer)) phantoms.push(row);
+  }
+  return phantoms;
+}
+
+router.get("/phantom-check", requireAuth, requireRole(MANAGER), (req, res) => {
+  const phantoms = findPhantomStockRows(db);
+  res.json({ count: phantoms.length, rows: phantoms });
+});
+
+router.post("/phantom-cleanup", requireAuth, requireRole(MANAGER), (req, res) => {
+  // Re-runs the same check server-side rather than trusting whatever list
+  // the client sends — a row that looked phantom moments ago could have
+  // since gained real activity, and this must never delete real history.
+  const phantoms = findPhantomStockRows(db);
+  const del = db.prepare("DELETE FROM material_stock WHERE material = ? AND customer = ?");
+  const tx = db.transaction((rows) => rows.forEach((r) => del.run(r.material, r.customer)));
+  tx(phantoms);
+  res.json({ deleted: phantoms.length, rows: phantoms });
+});
