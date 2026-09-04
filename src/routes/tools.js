@@ -25,7 +25,7 @@ router.post("/", requireAuth, requireRole(MANAGER), (req, res) => {
   const { name, category, unit, serialized, minStock } = req.body;
   if (!name?.trim()) return res.status(400).json({ error: "name is required" });
   if (db.prepare("SELECT 1 FROM tools WHERE name = ?").get(name)) return res.status(409).json({ error: "Nama alat sudah ada" });
-  const id = paddedSequenceId(db, "tools", "TL");
+  const id = paddedSequenceId(db, "tools", "TL", "id");
   db.prepare(`INSERT INTO tools (id, name, category, unit, serialized, min_stock, status, available, checked_out, under_repair) VALUES (?, ?, ?, ?, ?, ?, 'Active', 0, 0, 0)`)
     .run(id, name.trim(), category || "", unit || "Unit", serialized ? 1 : 0, Number(minStock) || 0);
   res.status(201).json(db.prepare("SELECT * FROM tools WHERE id = ?").get(id));

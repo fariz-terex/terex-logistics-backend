@@ -143,7 +143,7 @@ router.get("/customers", requireAuth, (req, res) => {
 router.post("/customers", requireAuth, requireRole(MANAGER), (req, res) => {
   const { name } = req.body;
   if (!name) return res.status(400).json({ error: "name is required" });
-  const id = paddedSequenceId(db, "customers", "CUST");
+  const id = paddedSequenceId(db, "customers", "CUST", "id");
   db.prepare("INSERT INTO customers (id, name, status) VALUES (?, ?, 'Active')").run(id, name);
   res.status(201).json(db.prepare("SELECT * FROM customers WHERE id = ?").get(id));
 });
@@ -364,7 +364,7 @@ router.post("/users", requireAuth, requireRole(MANAGER), (req, res) => {
       if (!db.prepare("SELECT 1 FROM customers WHERE name = ?").get(c)) return res.status(400).json({ error: `Customer "${c}" tidak ditemukan di Master Customer` });
     }
   }
-  const id = paddedSequenceId(db, "users", "USR");
+  const id = paddedSequenceId(db, "users", "USR", "id");
   const hash = bcrypt.hashSync(password, 10);
   const finalDivisions = role === MANAGER ? [] : divisionList;
   const tx = db.transaction(() => {
