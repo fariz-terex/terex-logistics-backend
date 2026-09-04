@@ -16,6 +16,7 @@ function reset() {
     "delivery_items", "delivery_history", "deliveries",
     "serial_numbers", "receipts", "material_stock",
     "stock_movements", "sites", "customers", "homebases", "areas", "materials",
+    "cluster_transfers", "clusters",
     "user_divisions", "users",
   ];
   tables.forEach((t) => db.prepare(`DELETE FROM ${t}`).run());
@@ -53,7 +54,20 @@ function seedDatabase() {
   ].forEach((h) => insertHomebase.run(...h));
 
   const insertCustomer = db.prepare("INSERT INTO customers (id, name, status) VALUES (?, ?, 'Active')");
-  [["CUST001", "Paramitra"], ["CUST002", "Telkomsel Regional"], ["CUST003", "XL Axiata"]].forEach((c) => insertCustomer.run(...c));
+  [["CUST001", "Paramitra"], ["CUST002", "Telkomsel Regional"], ["CUST003", "XL Axiata"], ["CUST004", "PIM"]].forEach((c) => insertCustomer.run(...c));
+
+  // The six PIM clusters. Also seeded idempotently on every boot by db.js
+  // (INSERT OR IGNORE) so a live deploy gets them without a reseed — this
+  // block just restores them after `npm run seed` wipes the table.
+  const insertCluster = db.prepare("INSERT OR IGNORE INTO clusters (code, name, customer, pic, status) VALUES (?, ?, 'PIM', ?, 'Active')");
+  [
+    ["CL-PIM-01", "ACEH-1", "Fajar"],
+    ["CL-PIM-02", "ACEH-2", "Fajar"],
+    ["CL-PIM-03", "ACEH-3", "Fajar"],
+    ["CL-PIM-04", "BANTEN-1", "Fajar"],
+    ["CL-PIM-05", "JABAR-1B", "Sjahnell"],
+    ["CL-PIM-06", "KALTENG-1", "Sjahnell"],
+  ].forEach((c) => insertCluster.run(...c));
 
   const insertSite = db.prepare(`INSERT INTO sites (code, terminal_id, name, customer, area, homebase, status) VALUES (?, ?, ?, ?, ?, ?, 'Active')`);
   [

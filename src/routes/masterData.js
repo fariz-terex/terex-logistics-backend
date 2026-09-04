@@ -220,6 +220,61 @@ router.post("/customers/bulk-delete", requireAuth, requireRole(MANAGER), (req, r
   res.json({ deleted, blocked });
 });
 
+// ---------- Clusters (PIM sub-allocations within a division) ----------
+// Read is open to any authenticated user (the Goods Receipt form needs the
+// list to populate its dropdown); writes are Manager-only, same as every
+// other master. Optional ?customer= filter so the receipt form can ask for
+// just the active clusters of the division being received into.
+router.get("/clusters", requireAuth, (req, res) => {
+  const { customer, status } = req.query;
+  let sql = "SELECT * FROM clusters WHERE 1=1";
+  const params = [];
+  if (customer) { sql += " AND customer = ?"; params.push(customer); }
+  if (status) { sql += " AND status = ?"; params.push(status); }
+  sql += " ORDER BY name";
+  res.json(db.prepare(sql).all(...params));
+});
+router.post("/clusters", requireAuth, requireRole(MANAGER), (req, res) => {
+  const { name, customer, pic } = req.body;
+  if (!name || !customer) return res.status(400).json({ error: "name and customer are required" });
+  if (!db.prepare("SELECT 1 FROM customers WHERE name = ?").get(customer)) {
+    return res.status(400).json({ error: `Customer "${customer}" tidak ditemukan di Master Customer` });
+  }
+  if (db.prepare("SELECT 1 FROM clusters WHERE name = ? AND customer = ?").get(name, customer)) {
+    return res.status(409).json({ error: `Cluster "${name}" sudah ada untuk divisi ${customer}` });
+  }
+  const code = paddedSequenceId(db, "clusters", "CL");
+  db.prepare("INSERT INTO clusters (code, name, customer, pic, status) VALUES (?, ?, ?, ?, 'Active')")
+    .run(code, name, customer, pic || "");
+  res.status(201).json(db.prepare("SELECT * FROM clusters WHERE code = ?").get(code));
+});
+router.patch("/clusters/:code/toggle-status", requireAuth, requireRole(MANAGER), (req, res) => {
+  const row = db.prepare("SELECT * FROM clusters WHERE code = ?").get(req.params.code);
+  if (!row) return res.status(404).json({ error: "Cluster not found" });
+  const next = row.status === "Active" ? "Inactive" : "Active";
+  db.prepare("UPDATE clusters SET status = ? WHERE code = ?").run(next, row.code);
+  res.json(db.prepare("SELECT * FROM clusters WHERE code = ?").get(row.code));
+});
+
+// Like Customer, cluster has no formal FK from serial_numbers (it's a plain
+// text column there), so guard the delete by hand: a cluster that's tagged
+// on any unit, or referenced by any transfer, can't be removed.
+function clusterInUse(name, customer) {
+  const onUnit = db.prepare("SELECT COUNT(*) AS n FROM serial_numbers WHERE cluster = ? AND customer = ?").get(name, customer).n;
+  if (onUnit > 0) return "Serial Number";
+  const onTransfer = db.prepare("SELECT COUNT(*) AS n FROM cluster_transfers WHERE (cluster_from = ? OR cluster_to = ?) AND customer = ?").get(name, name, customer).n;
+  if (onTransfer > 0) return "Transfer Antar Cluster";
+  return null;
+}
+router.delete("/clusters/:code", requireAuth, requireRole(MANAGER), (req, res) => {
+  const row = db.prepare("SELECT * FROM clusters WHERE code = ?").get(req.params.code);
+  if (!row) return res.status(404).json({ error: "Cluster not found" });
+  const usedBy = clusterInUse(row.name, row.customer);
+  if (usedBy) return res.status(409).json({ error: `Tidak bisa dihapus — cluster ini masih dipakai di data ${usedBy}` });
+  db.prepare("DELETE FROM clusters WHERE code = ?").run(row.code);
+  res.json({ deleted: row.code });
+});
+
 // ---------- Sites (incl. bulk import, matches Master Site CSV import) ----------
 router.get("/sites", requireAuth, (req, res) => {
   res.json(db.prepare("SELECT * FROM sites ORDER BY name").all());

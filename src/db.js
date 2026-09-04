@@ -468,4 +468,69 @@ if (snTableInfoV2 && !snTableInfoV2.sql.includes("'Sent to Customer'")) {
   db.pragma("busy_timeout = 5000");
 }
 
+// ===================== PIM CLUSTERS =====================
+// Add the per-unit `cluster` tag to serial_numbers. Deliberately a plain
+// ADD COLUMN with NO CHECK constraint — exactly like the `homebase` column
+// added by Transfer Stock — so it never triggers the rename/create/drop
+// rebuild cycle that serial_numbers' CHECK constraint has needed twice
+// before (and which caused the stale-FK-to-dropped-table bug). Valid
+// cluster values are enforced in the application layer against the clusters
+// table, not by the database. NULL for every existing unit and for every
+// non-PIM unit — only PIM units ever carry a cluster.
+const serialColumnsForCluster = db.prepare("PRAGMA table_info(serial_numbers)").all().map((c) => c.name);
+if (!serialColumnsForCluster.includes("cluster")) {
+  console.log("[db] adding cluster column to serial_numbers");
+  db.exec("ALTER TABLE serial_numbers ADD COLUMN cluster TEXT");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_serials_cluster ON serial_numbers(cluster)");
+}
+
+// The clusters master and cluster_transfers tables are created by schema.sql
+// on a fresh volume, but an already-deployed database won't have them yet —
+// CREATE TABLE IF NOT EXISTS here is a no-op when they already exist and
+// creates them when they don't.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS clusters (
+    code     TEXT PRIMARY KEY,
+    name     TEXT NOT NULL,
+    customer TEXT NOT NULL,
+    pic      TEXT DEFAULT '',
+    status   TEXT NOT NULL DEFAULT 'Active',
+    UNIQUE (name, customer)
+  );
+  CREATE TABLE IF NOT EXISTS cluster_transfers (
+    id             TEXT PRIMARY KEY,
+    material       TEXT NOT NULL,
+    customer       TEXT NOT NULL,
+    sn             TEXT NOT NULL,
+    cluster_from   TEXT NOT NULL,
+    cluster_to     TEXT NOT NULL,
+    status         TEXT NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending','Approved','Rejected')),
+    requested_by   TEXT NOT NULL,
+    requested_date TEXT NOT NULL,
+    request_note   TEXT DEFAULT '',
+    decided_by     TEXT,
+    decided_date   TEXT,
+    decision_note  TEXT DEFAULT ''
+  );
+  CREATE INDEX IF NOT EXISTS idx_cluster_transfers_sn ON cluster_transfers(sn);
+  CREATE INDEX IF NOT EXISTS idx_cluster_transfers_status ON cluster_transfers(status);
+`);
+
+// Seed the six PIM clusters idempotently — INSERT OR IGNORE keyed on the
+// UNIQUE(name, customer) constraint, so this only ever inserts a cluster
+// that isn't already there (a Manager renaming/deactivating one later won't
+// get it silently re-added, since the name stays the same). Runs every boot
+// but does nothing once all six exist.
+const PIM_DIVISION = "PIM";
+const PIM_CLUSTERS = [
+  { code: "CL-PIM-01", name: "ACEH-1",    pic: "Fajar" },
+  { code: "CL-PIM-02", name: "ACEH-2",    pic: "Fajar" },
+  { code: "CL-PIM-03", name: "ACEH-3",    pic: "Fajar" },
+  { code: "CL-PIM-04", name: "BANTEN-1",  pic: "Fajar" },
+  { code: "CL-PIM-05", name: "JABAR-1B",  pic: "Sjahnell" },
+  { code: "CL-PIM-06", name: "KALTENG-1", pic: "Sjahnell" },
+];
+const insertCluster = db.prepare("INSERT OR IGNORE INTO clusters (code, name, customer, pic, status) VALUES (?, ?, ?, ?, 'Active')");
+PIM_CLUSTERS.forEach((c) => insertCluster.run(c.code, c.name, PIM_DIVISION, c.pic));
+
 module.exports = db;

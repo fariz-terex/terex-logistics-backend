@@ -159,6 +159,31 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
   if (resolved.error) return res.status(400).json({ error: resolved.error });
   const customer = resolved.customer;
 
+  // Cluster is only meaningful for divisions that actually have clusters
+  // (today: PIM only) AND only for serialized materials, since it's tagged
+  // per-unit on serial_numbers. A division with any Active cluster requires
+  // one to be picked; a division with none must not receive a cluster at
+  // all. This keeps every non-PIM Goods Receipt working exactly as before.
+  const cluster = (req.body.cluster || "").trim();
+  const divisionClusters = db.prepare("SELECT name FROM clusters WHERE customer = ? AND status = 'Active'").all(customer).map((c) => c.name);
+  const divisionUsesClusters = divisionClusters.length > 0;
+  if (divisionUsesClusters) {
+    if (mat.serialized) {
+      // Serialized material in a clustered division: a cluster is required
+      // and must be one of that division's Active clusters.
+      if (!cluster) return res.status(400).json({ error: `Cluster wajib dipilih untuk divisi ${customer}` });
+      if (!divisionClusters.includes(cluster)) return res.status(400).json({ error: `Cluster "${cluster}" tidak valid untuk divisi ${customer}` });
+    } else if (cluster) {
+      // A clustered division can still hold non-serialized materials — they
+      // just can't carry a per-unit cluster tag. Reject an accidentally-sent
+      // cluster rather than silently dropping it.
+      return res.status(400).json({ error: "Material non-serialized tidak bisa diberi cluster" });
+    }
+  } else if (cluster) {
+    return res.status(400).json({ error: `Divisi ${customer} tidak menggunakan cluster` });
+  }
+  const clusterToStore = divisionUsesClusters && mat.serialized ? cluster : null;
+
   const id = dailySequenceId(db, "receipts", "WR");
   let addedQty = 0;
 
@@ -173,8 +198,8 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
         seen.add(sn);
         if (db.prepare("SELECT 1 FROM serial_numbers WHERE sn = ?").get(sn)) throw new Error(`Serial Number sudah terdaftar di sistem: ${sn}`);
       });
-      const insertSn = db.prepare("INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref, customer) VALUES (?, ?, 'Ready', NULL, ?, ?, ?)");
-      serials.forEach((raw) => insertSn.run(raw.trim(), material, isoDate(), id, customer));
+      const insertSn = db.prepare("INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref, customer, cluster) VALUES (?, ?, 'Ready', NULL, ?, ?, ?, ?)");
+      serials.forEach((raw) => insertSn.run(raw.trim(), material, isoDate(), id, customer, clusterToStore));
       addedQty = serials.length;
     } else {
       addedQty = Number(qty) || 0;
@@ -315,6 +340,134 @@ router.post("/transfers", requireAuth, requireRole(LOGISTICS, MANAGER), (req, re
     id, material, customer, homebaseFrom, homebaseTo, date,
     serials: mat.serialized ? serials : [],
   });
+});
+
+// ===================== TRANSFER ANTAR CLUSTER =====================
+// Move ownership of a specific serialized unit from one PIM cluster to
+// another, WITHIN the same division. Requires the owning cluster's SPV to
+// approve before serial_numbers.cluster is actually changed. No BKB / physical
+// handover is involved — this is a pure ownership reallocation, so the unit's
+// status, homebase, customer, and everything else stay untouched; only its
+// `cluster` tag changes on approval.
+const SPV = "SPV";
+
+// Units the requester could ask to borrow: Ready units in this division that
+// belong to some OTHER cluster (you don't request your own). Scope-checked so
+// an SPV can only see their own division's stock.
+router.get("/cluster-transfer-options", requireAuth, (req, res) => {
+  const { customer, clusterTo, material } = req.query;
+  if (!customer || !clusterTo) return res.status(400).json({ error: "customer and clusterTo are required" });
+  const scope = scopeOf(req.user);
+  if (!scopeAllows(scope, customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
+
+  let sql = `
+    SELECT sn, material, cluster, homebase, status FROM serial_numbers
+    WHERE customer = ? AND status = 'Ready' AND cluster IS NOT NULL AND cluster != ?
+  `;
+  const params = [customer, clusterTo];
+  if (material) { sql += " AND material = ?"; params.push(material); }
+  sql += " ORDER BY material, cluster, sn";
+  res.json(db.prepare(sql).all(...params));
+});
+
+// Transfers this user can see. An SPV sees requests they raised (outgoing)
+// and requests awaiting THEIR clusters' approval (incoming). Manager/Logistics
+// (unscoped) see all; a division-scoped non-SPV sees their division's.
+router.get("/cluster-transfers", requireAuth, (req, res) => {
+  const scope = scopeOf(req.user);
+  let rows;
+  if (!scope) {
+    rows = db.prepare("SELECT * FROM cluster_transfers ORDER BY requested_date DESC, id DESC").all();
+  } else if (scope.length === 0) {
+    rows = [];
+  } else {
+    rows = db.prepare(`SELECT * FROM cluster_transfers WHERE ${scopeClause("customer", scope).sql} ORDER BY requested_date DESC, id DESC`).all(...scope);
+  }
+  res.json(rows);
+});
+
+// Raise a request: SPV of cluster_to asks for a specific unit owned by
+// cluster_from. Validated: the SN must exist, be Ready, be in this division,
+// and currently belong to cluster_from (not already cluster_to). Only the
+// tag is checked here — nothing changes until approval.
+router.post("/cluster-transfers", requireAuth, requireRole(SPV, LOGISTICS, MANAGER), (req, res) => {
+  const { sn, clusterTo, note } = req.body || {};
+  if (!sn || !clusterTo) return res.status(400).json({ error: "sn dan clusterTo wajib diisi" });
+
+  const unit = db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(sn);
+  if (!unit) return res.status(404).json({ error: `Serial Number ${sn} tidak ditemukan` });
+
+  const scope = scopeOf(req.user);
+  if (!scopeAllows(scope, unit.customer)) return res.status(403).json({ error: "Divisi unit ini bukan divisi Anda" });
+
+  if (unit.status !== "Ready") return res.status(409).json({ error: `Unit ${sn} tidak berstatus Ready (status saat ini: ${unit.status})` });
+  if (!unit.cluster) return res.status(409).json({ error: `Unit ${sn} belum punya cluster` });
+  if (unit.cluster === clusterTo) return res.status(409).json({ error: `Unit ${sn} sudah milik cluster ${clusterTo}` });
+
+  // Target cluster must be a real Active cluster of this division.
+  const validTo = db.prepare("SELECT 1 FROM clusters WHERE name = ? AND customer = ? AND status = 'Active'").get(clusterTo, unit.customer);
+  if (!validTo) return res.status(400).json({ error: `Cluster tujuan "${clusterTo}" tidak valid untuk divisi ${unit.customer}` });
+
+  // Block a second pending request for the same unit — avoids two clusters
+  // both getting approved for the same physical unit.
+  const existingPending = db.prepare("SELECT 1 FROM cluster_transfers WHERE sn = ? AND status = 'Pending'").get(sn);
+  if (existingPending) return res.status(409).json({ error: `Sudah ada permintaan transfer yang menunggu persetujuan untuk unit ${sn}` });
+
+  const id = dailySequenceId(db, "cluster_transfers", "CT");
+  db.prepare(`
+    INSERT INTO cluster_transfers (id, material, customer, sn, cluster_from, cluster_to, status, requested_by, requested_date, request_note)
+    VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?, ?, ?)
+  `).run(id, unit.material, unit.customer, sn, unit.cluster, clusterTo, req.user.name, isoDate(), note || "");
+
+  res.status(201).json(db.prepare("SELECT * FROM cluster_transfers WHERE id = ?").get(id));
+});
+
+// Approve: the owning cluster (cluster_from) SPV agrees. This is the ONLY
+// place serial_numbers.cluster changes. Re-validates the unit is still Ready
+// and still owned by cluster_from at approval time (it could have moved or
+// shipped since the request was raised).
+router.post("/cluster-transfers/:id/approve", requireAuth, requireRole(SPV, LOGISTICS, MANAGER), (req, res) => {
+  const { note } = req.body || {};
+  const tr = db.prepare("SELECT * FROM cluster_transfers WHERE id = ?").get(req.params.id);
+  if (!tr) return res.status(404).json({ error: "Transfer tidak ditemukan" });
+  if (tr.status !== "Pending") return res.status(409).json({ error: `Transfer ini sudah ${tr.status === "Approved" ? "disetujui" : "ditolak"}` });
+
+  const scope = scopeOf(req.user);
+  if (!scopeAllows(scope, tr.customer)) return res.status(403).json({ error: "Divisi transfer ini bukan divisi Anda" });
+
+  const tx = db.transaction(() => {
+    const unit = db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(tr.sn);
+    if (!unit) throw new Error(`Unit ${tr.sn} tidak ditemukan`);
+    if (unit.status !== "Ready") throw new Error(`Unit ${tr.sn} tidak lagi Ready (status: ${unit.status})`);
+    if (unit.cluster !== tr.cluster_from) throw new Error(`Unit ${tr.sn} tidak lagi milik cluster ${tr.cluster_from}`);
+
+    db.prepare("UPDATE serial_numbers SET cluster = ? WHERE sn = ?").run(tr.cluster_to, tr.sn);
+    db.prepare("UPDATE cluster_transfers SET status = 'Approved', decided_by = ?, decided_date = ?, decision_note = ? WHERE id = ?")
+      .run(req.user.name, isoDate(), note || "", tr.id);
+  });
+
+  try {
+    tx();
+  } catch (err) {
+    return res.status(409).json({ error: err.message });
+  }
+  res.json(db.prepare("SELECT * FROM cluster_transfers WHERE id = ?").get(tr.id));
+});
+
+// Reject: owning cluster SPV declines. Nothing on the unit changes; the
+// reason is recorded for the requester.
+router.post("/cluster-transfers/:id/reject", requireAuth, requireRole(SPV, LOGISTICS, MANAGER), (req, res) => {
+  const { note } = req.body || {};
+  const tr = db.prepare("SELECT * FROM cluster_transfers WHERE id = ?").get(req.params.id);
+  if (!tr) return res.status(404).json({ error: "Transfer tidak ditemukan" });
+  if (tr.status !== "Pending") return res.status(409).json({ error: `Transfer ini sudah ${tr.status === "Approved" ? "disetujui" : "ditolak"}` });
+
+  const scope = scopeOf(req.user);
+  if (!scopeAllows(scope, tr.customer)) return res.status(403).json({ error: "Divisi transfer ini bukan divisi Anda" });
+
+  db.prepare("UPDATE cluster_transfers SET status = 'Rejected', decided_by = ?, decided_date = ?, decision_note = ? WHERE id = ?")
+    .run(req.user.name, isoDate(), note || "", tr.id);
+  res.json(db.prepare("SELECT * FROM cluster_transfers WHERE id = ?").get(tr.id));
 });
 
 // ================= FAULTY -> SENT TO CUSTOMER -> READY CYCLE =================

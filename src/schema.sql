@@ -469,3 +469,47 @@ CREATE TABLE IF NOT EXISTS tool_checkout_history (
   text        TEXT NOT NULL
 );
 
+-- ===================== PIM CLUSTERS =====================
+-- A cluster is a sub-allocation WITHIN a single division (Customer) — used
+-- only by the PIM division, whose customer requires every received unit to
+-- be earmarked for a specific cluster (ACEH-1, JABAR-1B, etc). Master list
+-- kept as a table (not hardcoded) so it mirrors areas/customers and can be
+-- edited from the UI later. `customer` scopes each cluster to the division
+-- it belongs to, so this generalizes cleanly if another division ever needs
+-- clusters too — today only PIM has rows here.
+CREATE TABLE IF NOT EXISTS clusters (
+  code     TEXT PRIMARY KEY,
+  name     TEXT NOT NULL,
+  customer TEXT NOT NULL,
+  pic      TEXT DEFAULT '',
+  status   TEXT NOT NULL DEFAULT 'Active',
+  UNIQUE (name, customer)
+);
+
+-- Ownership transfer of a specific serialized unit from one cluster to
+-- another, WITHIN the same division. Requires the owning cluster's SPV to
+-- approve before the unit's serial_numbers.cluster is actually changed. This
+-- is deliberately separate from stock_transfers (which moves units between
+-- homebases, no approval) — different axis (cluster, not homebase), and a
+-- required approval step. `sn` is a plain lookup column, NOT an FK to
+-- serial_numbers, following the same precedent as faulty_customer_returns:
+-- serial_numbers has already needed CHECK-constraint rebuilds, and an FK
+-- into it risks the "stale reference to a dropped table" bug hit before.
+CREATE TABLE IF NOT EXISTS cluster_transfers (
+  id             TEXT PRIMARY KEY,
+  material       TEXT NOT NULL,
+  customer       TEXT NOT NULL,     -- division (always PIM today) — both clusters belong to it
+  sn             TEXT NOT NULL,     -- the specific unit being requested
+  cluster_from   TEXT NOT NULL,     -- current owning cluster (must approve)
+  cluster_to     TEXT NOT NULL,     -- requesting cluster
+  status         TEXT NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending','Approved','Rejected')),
+  requested_by   TEXT NOT NULL,
+  requested_date TEXT NOT NULL,
+  request_note   TEXT DEFAULT '',
+  decided_by     TEXT,              -- SPV of cluster_from who approved/rejected
+  decided_date   TEXT,
+  decision_note  TEXT DEFAULT ''    -- reason, shown to requester (esp. on reject)
+);
+CREATE INDEX IF NOT EXISTS idx_cluster_transfers_sn ON cluster_transfers(sn);
+CREATE INDEX IF NOT EXISTS idx_cluster_transfers_status ON cluster_transfers(status);
+
