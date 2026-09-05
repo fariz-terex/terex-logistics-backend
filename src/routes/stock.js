@@ -77,6 +77,92 @@ router.get("/", requireAuth, (req, res) => {
   res.json(rows.map((r) => ({ ...r, serialized: !!r.serialized })));
 });
 
+// Dashboard breakdown: per-cluster (for divisions that use clusters — PIM)
+// or per-homebase (everyone else) counts of on-hand and faulty serialized
+// units, plus the division-level totals the summary cards show. All derived
+// from serial_numbers, so it only covers serialized materials (non-serialized
+// have no per-unit location) — that's an intentional, agreed limitation.
+//
+// Location semantics, straight from how the delivery flow fills these:
+//   - Ready units live at the central warehouse; their homebase is NULL until
+//     a delivery is completed (then status flips to Delivered + homebase set).
+//   - So "on-hand at homebase X" = Delivered units whose homebase = X.
+//   - Ready units (homebase NULL) are grouped under a "Warehouse Pusat" card.
+//   - For PIM, cluster is set at Goods Receipt and is always present, so its
+//     breakdown is by cluster and includes Ready units directly.
+router.get("/dashboard-breakdown", requireAuth, (req, res) => {
+  const scope = scopeOf(req.user);
+  // Unscoped Manager may target one division via ?customer=; scoped users are
+  // pinned to their own. Default: first division in scope.
+  let customer = req.query.customer;
+  if (scope) {
+    if (scope.length === 0) return res.json({ customer: null, mode: "none", totals: emptyTotals(), groups: [] });
+    if (customer && !scope.includes(customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
+    if (!customer) customer = scope[0];
+  }
+  if (!customer) {
+    // Truly unscoped and no division picked — nothing sensible to break down.
+    return res.json({ customer: null, mode: "none", totals: emptyTotals(), groups: [] });
+  }
+
+  // Division-level totals (match the summary cards). in_transit comes from
+  // material_stock (per-division only); the rest from serial_numbers so they
+  // agree with the per-group sums below.
+  const readyTotal = db.prepare("SELECT COUNT(*) n FROM serial_numbers WHERE customer = ? AND status = 'Ready'").get(customer).n;
+  const deliveredTotal = db.prepare("SELECT COUNT(*) n FROM serial_numbers WHERE customer = ? AND status = 'Delivered'").get(customer).n;
+  const faultyTotal = db.prepare("SELECT COUNT(*) n FROM serial_numbers WHERE customer = ? AND status = 'Faulty'").get(customer).n;
+  const inTransitRow = db.prepare("SELECT COALESCE(SUM(in_transit),0) n FROM material_stock WHERE customer = ?").get(customer);
+  const faultyOnDelivery = db.prepare(`
+    SELECT COALESCE(SUM(ri.qty),0) n
+    FROM returns r JOIN return_items ri ON ri.return_id = r.id
+    WHERE r.customer = ? AND r.status = 'On Delivery'
+  `).get(customer).n;
+
+  const totals = {
+    onHand: readyTotal + deliveredTotal, // Ready (central) + Delivered (at homebases)
+    inTransit: inTransitRow.n,
+    faultyOnDelivery,
+    faultyWarehouse: faultyTotal,
+  };
+
+  const usesClusters = db.prepare("SELECT COUNT(*) n FROM clusters WHERE customer = ? AND status = 'Active'").get(customer).n > 0;
+
+  let groups;
+  if (usesClusters) {
+    // PIM: group by cluster. Ready + Faulty per cluster (Ready units already
+    // carry their cluster from Goods Receipt).
+    const rows = db.prepare(`
+      SELECT COALESCE(cluster, '(Tanpa Cluster)') AS grp,
+             SUM(CASE WHEN status IN ('Ready','Delivered') THEN 1 ELSE 0 END) AS onHand,
+             SUM(CASE WHEN status = 'Faulty' THEN 1 ELSE 0 END) AS faulty
+      FROM serial_numbers WHERE customer = ?
+      GROUP BY COALESCE(cluster, '(Tanpa Cluster)')
+      HAVING onHand > 0 OR faulty > 0
+      ORDER BY grp
+    `).all(customer);
+    groups = rows.map((r) => ({ name: r.grp, onHand: r.onHand, faulty: r.faulty }));
+  } else {
+    // Other divisions: group by homebase. Ready units (homebase NULL) fall
+    // under "Warehouse Pusat"; Delivered units sit at their homebase.
+    const rows = db.prepare(`
+      SELECT COALESCE(NULLIF(homebase, ''), 'Warehouse Pusat') AS grp,
+             SUM(CASE WHEN status IN ('Ready','Delivered') THEN 1 ELSE 0 END) AS onHand,
+             SUM(CASE WHEN status = 'Faulty' THEN 1 ELSE 0 END) AS faulty
+      FROM serial_numbers WHERE customer = ?
+      GROUP BY COALESCE(NULLIF(homebase, ''), 'Warehouse Pusat')
+      HAVING onHand > 0 OR faulty > 0
+      ORDER BY (grp = 'Warehouse Pusat') DESC, grp
+    `).all(customer);
+    groups = rows.map((r) => ({ name: r.grp, onHand: r.onHand, faulty: r.faulty }));
+  }
+
+  res.json({ customer, mode: usesClusters ? "cluster" : "homebase", totals, groups });
+});
+
+function emptyTotals() {
+  return { onHand: 0, inTransit: 0, faultyOnDelivery: 0, faultyWarehouse: 0 };
+}
+
 router.get("/movements", requireAuth, (req, res) => {
   const { material } = req.query;
   const scope = scopeOf(req.user);
