@@ -4,6 +4,7 @@ const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
 const { scopeOf, scopeAllows, scopeClause, resolveCreateCustomer, adjustStock } = require("../utils/stock");
 const { sendToCustomer, receiveFromCustomer } = require("../utils/faultyCycle");
+const { notifyWebhook } = require("../utils/webhook");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -576,6 +577,7 @@ router.post("/serials/:sn/send-to-customer", requireAuth, requireRole(LOGISTICS,
   }
   try {
     const result = sendToCustomer({ sn: req.params.sn, ref, note, performedBy: req.user.name });
+    notifyWebhook("sent_to_customer", { sn: result.sn, material: result.material, division: result.customer, ref, performedBy: req.user.name });
     res.status(201).json(result);
   } catch (err) {
     const status = /not found/i.test(err.message) ? 404 : /wajib diisi/i.test(err.message) ? 400 : 409;
@@ -592,6 +594,7 @@ router.post("/serials/:sn/receive-from-customer", requireAuth, requireRole(LOGIS
   }
   try {
     const result = receiveFromCustomer({ sn: req.params.sn, ref, note, performedBy: req.user.name });
+    notifyWebhook("received_from_customer", { sn: result.sn, material: result.material, division: result.customer, ref, performedBy: req.user.name });
     res.json(result);
   } catch (err) {
     const status = /not found/i.test(err.message) ? 404 : /wajib diisi|berbeda dari/i.test(err.message) ? 400 : 409;

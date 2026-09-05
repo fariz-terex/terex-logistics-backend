@@ -3,6 +3,7 @@ const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
 const { scopeOf, scopeAllows, adjustStock, resolveCreateCustomer } = require("../utils/stock");
+const { notifyWebhook } = require("../utils/webhook");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -265,6 +266,16 @@ router.post("/:id/complete", requireAuth, requireRole(LOGISTICS, MANAGER), (req,
     addHistory(ret.id, `Completed by ${req.user.name} — stock warehouse diperbarui`);
   });
   tx();
+
+  // Fire only from this normal, JWT-authenticated path — never from the
+  // automation-key routes, which is exactly the case where this same
+  // status change just arrived FROM the Sheet and echoing it back would
+  // be a pointless (if harmless) round trip.
+  ret.items.forEach((item) => {
+    item.serials.forEach((s) => {
+      notifyWebhook("faulty_confirmed", { sn: s.sn, material: item.material, division: ret.customer, performedBy: req.user.name });
+    });
+  });
 
   res.json(loadReturn(ret.id));
 });

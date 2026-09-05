@@ -67,7 +67,7 @@ function sendToCustomer({ sn, ref, note, performedBy }) {
     `).run(id, row.sn, row.material, row.customer, date, ref.trim(), performedBy, note || "");
   });
   tx();
-  return { id, sn: row.sn, customer: row.customer, status: "Sent to Customer" };
+  return { id, sn: row.sn, material: row.material, customer: row.customer, status: "Sent to Customer" };
 }
 
 function receiveFromCustomer({ sn, ref, note, performedBy }) {
@@ -92,7 +92,7 @@ function receiveFromCustomer({ sn, ref, note, performedBy }) {
     adjustStock(row.material, row.customer, "ready", 1);
   });
   tx();
-  return { id: openCycle.id, sn: row.sn, customer: row.customer, status: "Ready" };
+  return { id: openCycle.id, sn: row.sn, material: row.material, customer: row.customer, status: "Ready" };
 }
 
 module.exports = { markFaulty, sendToCustomer, receiveFromCustomer };
