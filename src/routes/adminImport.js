@@ -69,4 +69,49 @@ router.post("/import-msg", requireAuth, requireRole(MANAGER), (req, res) => {
   res.json({ mode: "committed", wiped: wipe.changes, inserted, skipped, summary });
 });
 
+// Recompute material_stock for a division from its serial_numbers, so
+// Warehouse Stock (which reads material_stock) matches the imported units.
+// Per decision: ready = Ready + Delivered (units the division owns, incl.
+// installed), faulty = Faulty. in_transit/reserved forced to 0 (no such data
+// in the historical import). Overwrites the division's material_stock rows
+// entirely. Dry-run unless commit=true.
+router.post("/sync-stock", requireAuth, requireRole(MANAGER), (req, res) => {
+  const { customer, commit } = req.body || {};
+  if (!customer) return res.status(400).json({ error: "customer wajib diisi (mis. 'MSG')" });
+
+  // Aggregate per material from serial_numbers.
+  const rows = db.prepare(`
+    SELECT material,
+           SUM(CASE WHEN status IN ('Ready','Delivered') THEN 1 ELSE 0 END) AS ready,
+           SUM(CASE WHEN status = 'Faulty' THEN 1 ELSE 0 END) AS faulty
+    FROM serial_numbers
+    WHERE customer = ?
+    GROUP BY material
+  `).all(customer);
+
+  // Validate every material exists in master (material_stock has an FK to it).
+  const masterMaterials = new Set(db.prepare("SELECT name FROM materials").all().map((r) => r.name));
+  const missing = rows.map((r) => r.material).filter((m) => !masterMaterials.has(m));
+
+  const preview = rows.map((r) => ({ material: r.material, ready: r.ready, faulty: r.faulty }))
+    .sort((a, b) => a.material.localeCompare(b.material));
+
+  if (!commit) {
+    return res.json({ mode: "dry-run", customer, materials: preview.length, missing, preview });
+  }
+  if (missing.length) {
+    return res.status(409).json({ mode: "blocked", error: "Ada material yang tidak ada di master", missing });
+  }
+
+  // Overwrite: clear this division's rows, then insert fresh aggregates.
+  const clear = db.prepare("DELETE FROM material_stock WHERE customer = ?").run(customer);
+  const ins = db.prepare(`INSERT INTO material_stock (material, customer, ready, faulty, reserved, in_transit)
+    VALUES (@material, @customer, @ready, @faulty, 0, 0)`);
+  let n = 0;
+  const tx = db.transaction((list) => { for (const r of list) { ins.run({ material: r.material, customer, ready: r.ready, faulty: r.faulty }); n++; } });
+  tx(rows);
+
+  res.json({ mode: "committed", customer, cleared: clear.changes, inserted: n, preview });
+});
+
 module.exports = router;
