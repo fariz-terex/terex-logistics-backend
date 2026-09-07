@@ -484,6 +484,21 @@ if (!serialColumnsForCluster.includes("cluster")) {
   db.exec("CREATE INDEX IF NOT EXISTS idx_serials_cluster ON serial_numbers(cluster)");
 }
 
+// Historical lifecycle dates carried per unit (populated by the MSG data
+// import; NULL for units created through the normal flow, which tracks these
+// via transaction records instead). Plain ADD COLUMN, same gap-safe pattern
+// as cluster — no CHECK, no rebuild.
+//   replacement_date          — when the unit was swapped out at site
+//   shipped_to_warehouse_date — when it left the homebase back to Terex WH
+//   returned_to_customer_date — planned/actual return-to-customer date
+const serialCols2 = db.prepare("PRAGMA table_info(serial_numbers)").all().map((c) => c.name);
+["replacement_date", "shipped_to_warehouse_date", "returned_to_customer_date"].forEach((col) => {
+  if (!serialCols2.includes(col)) {
+    console.log(`[db] adding ${col} column to serial_numbers`);
+    db.exec(`ALTER TABLE serial_numbers ADD COLUMN ${col} TEXT`);
+  }
+});
+
 // The clusters master and cluster_transfers tables are created by schema.sql
 // on a fresh volume, but an already-deployed database won't have them yet —
 // CREATE TABLE IF NOT EXISTS here is a no-op when they already exist and
