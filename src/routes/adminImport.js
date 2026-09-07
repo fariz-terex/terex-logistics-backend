@@ -4,9 +4,9 @@
 // Remove this route from server.js once the import is done.
 
 const express = require("express");
-const db = require("./db");
-const { requireAuth, requireRole } = require("./middleware/auth");
-const { buildUnits } = require("./importMsgCore");
+const db = require("../db");
+const { requireAuth, requireRole } = require("../middleware/auth");
+const { buildUnits } = require("../importMsgCore");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
