@@ -53,7 +53,8 @@
       "parameters": {
         "resource": "fileFolder",
         "operation": "search",
-        "queryString": "={{ \"name contains '\" + $json.monthName + \"' and '\" + $json.folderId + \"' in parents and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false\" }}",
+        "searchMethod": "query",
+        "queryString": "=name contains '{{ $json.monthName }}' and '{{ $json.folderId }}' in parents and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false",
         "returnAll": false,
         "limit": 1,
         "options": {}
