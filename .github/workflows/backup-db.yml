@@ -1,0 +1,98 @@
+name: Backup terex.db
+
+# Backup harian database produksi ke repo privat terpisah.
+# Ambil snapshot dari GET /api/backup/db (auth X-Automation-Key), validasi,
+# kompres, lalu commit ke repo backup. Riwayat git = retensi tak terbatas.
+#
+# Secrets yang dibutuhkan di repo ini (Settings -> Secrets and variables -> Actions):
+#   AUTOMATION_API_KEY  - sama dengan env var di Railway (dipakai n8n juga)
+#   BACKUP_REPO         - "owner/nama-repo" repo backup privat, mis. fariz-terex/terex-db-backups
+#   BACKUP_REPO_TOKEN   - Personal Access Token (scope: repo / contents:write) untuk push ke BACKUP_REPO
+
+on:
+  schedule:
+    - cron: "17 19 * * *" # 19:17 UTC = 02:17 WIB, tiap hari
+  workflow_dispatch: {} # tombol "Run workflow" untuk jalan manual
+
+concurrency:
+  group: backup-db
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (untuk file RESTORE.md seed)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/backup-RESTORE.md
+          sparse-checkout-cone-mode: false
+
+      - name: Ambil snapshot dari backend
+        env:
+          BACKUP_URL: https://backend-production-5543.up.railway.app/api/backup/db
+          AUTOMATION_API_KEY: ${{ secrets.AUTOMATION_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${AUTOMATION_API_KEY}" ]; then
+            echo "::error::Secret AUTOMATION_API_KEY belum di-set"; exit 1
+          fi
+          curl -fsSL --retry 3 --retry-delay 15 --max-time 300 \
+            -H "X-Automation-Key: ${AUTOMATION_API_KEY}" \
+            -o terex.db "${BACKUP_URL}"
+
+      - name: Validasi snapshot
+        run: |
+          set -euo pipefail
+          SIZE=$(stat -c%s terex.db)
+          echo "Ukuran snapshot: $SIZE bytes"
+          if [ "$SIZE" -lt 100000 ]; then
+            echo "::error::File terlalu kecil ($SIZE bytes) — kemungkinan error page / gagal"
+            head -c 400 terex.db || true
+            exit 1
+          fi
+          HEADER=$(head -c 16 terex.db)
+          case "$HEADER" in
+            "SQLite format 3"*) echo "Header SQLite OK" ;;
+            *) echo "::error::Bukan file SQLite yang valid"; head -c 400 terex.db || true; exit 1 ;;
+          esac
+
+      - name: Kompres
+        run: |
+          set -euo pipefail
+          STAMP=$(date -u +%Y-%m-%d)
+          gzip -9 -n -c terex.db > terex.db.gz
+          echo "STAMP=${STAMP}" >> "$GITHUB_ENV"
+          ls -lh terex.db.gz
+
+      - name: Commit ke repo backup
+        env:
+          BACKUP_REPO: ${{ secrets.BACKUP_REPO }}
+          BACKUP_REPO_TOKEN: ${{ secrets.BACKUP_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BACKUP_REPO}" ] || [ -z "${BACKUP_REPO_TOKEN}" ]; then
+            echo "::error::Secret BACKUP_REPO / BACKUP_REPO_TOKEN belum di-set"; exit 1
+          fi
+          git clone --depth 1 "https://x-access-token:${BACKUP_REPO_TOKEN}@github.com/${BACKUP_REPO}.git" backup-repo
+          cd backup-repo
+          cp ../terex.db.gz terex-latest.db.gz
+          SHA=$(sha256sum terex-latest.db.gz | cut -d' ' -f1)
+          SIZE=$(stat -c%s terex-latest.db.gz)
+          if [ ! -f RESTORE.md ] && [ -f ../.github/backup-RESTORE.md ]; then
+            cp ../.github/backup-RESTORE.md RESTORE.md
+          fi
+          git config user.name "terex-backup-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "DB tidak berubah sejak backup terakhir — tidak ada commit."
+          else
+            git commit -m "Backup ${STAMP} — ${SIZE} bytes — sha256:${SHA}"
+            git push
+            echo "Backup ${STAMP} ter-commit ke ${BACKUP_REPO}."
+          fi
