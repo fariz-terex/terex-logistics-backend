@@ -1,0 +1,274 @@
+{
+  "name": "TEREX → Sheet (Push STATUS PERANGKAT)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "terex-push-update",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "n-webhook",
+      "name": "Webhook (dari TEREX)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-40, 300],
+      "webhookId": "terex-push-update"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============ KONFIGURASI — EDIT DI SINI ============\n// ID folder Google Drive tempat file bulanan tiap divisi disimpan.\nconst FOLDER_ID = {\n  MSG: \"GANTI_FOLDER_ID_DRIVE_MSG\",\n  RGR: \"GANTI_FOLDER_ID_DRIVE_RGR\",\n};\n// Nilai yang ditulis ke kolom STATUS PERANGKAT untuk tiap event TEREX.\nconst STATUS_BY_EVENT = {\n  faulty_confirmed:       \"Faulty\",\n  sent_to_customer:       \"Return\",\n  received_from_customer:  \"Ready\",\n};\n// ===================================================\n\n// n8n Webhook v2 menaruh body POST di $json.body\nconst b = $json.body || $json;\nconst division = String(b.division || \"\").trim().toUpperCase();\nconst event = String(b.event || \"\").trim();\nconst sn = String(b.sn || \"\").trim();\n\nconst statusValue = STATUS_BY_EVENT[event] || null;\nconst folderId = FOLDER_ID[division] || null;\n\nconst BULAN = [\"Januari\",\"Februari\",\"Maret\",\"April\",\"Mei\",\"Juni\",\"Juli\",\n               \"Agustus\",\"September\",\"Oktober\",\"November\",\"Desember\"];\nconst now = new Date();\n\nreturn [{\n  json: {\n    // true hanya kalau divisi didukung, event dikenal, dan ada SN.\n    supported: Boolean(folderId && statusValue && sn),\n    division,\n    event,\n    sn,\n    material: b.material || \"\",\n    performedBy: b.performedBy || \"\",\n    ref: b.ref || \"\",\n    folderId: folderId || \"\",\n    statusValue: statusValue || \"\",\n    monthName: BULAN[now.getMonth()],\n    year: now.getFullYear(),\n  },\n}];"
+      },
+      "id": "n-setup",
+      "name": "Setup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [180, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "loose" },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cond-supported",
+              "leftValue": "={{ $json.supported }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "n-if-supported",
+      "name": "Divisi & event didukung?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [420, 300],
+      "notesInFlow": true,
+      "notes": "FALSE = event lain (mis. stock-drift) atau divisi selain MSG/RGR → diabaikan."
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "operation": "search",
+        "queryString": "={{ \"name contains '\" + $json.monthName + \"' and '\" + $json.folderId + \"' in parents and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false\" }}",
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "id": "n-drive-search",
+      "name": "Cari File Bulan Ini",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [660, 240],
+      "alwaysOutputData": true,
+      "notesInFlow": true,
+      "notes": "Cari spreadsheet yang namanya MENGANDUNG nama bulan sekarang (mis. 'Juni') di folder divisi — jadi tahan terhadap 'Week 2' vs tanpa week. Pilih Credential Google Drive setelah import. Kalau ada >1 file per bulan, rapikan Drive atau tambah node Sort by modifiedTime."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "loose" },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cond-file-found",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty", "singleValue": true }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "n-if-file",
+      "name": "File ketemu?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [900, 240]
+    },
+    {
+      "parameters": {
+        "chatId": "GANTI_CHAT_ID_GRUP_LOGISTIK",
+        "text": "={{ \"\\u26A0\\uFE0F *Sync Sheet gagal — file tidak ada*\\n\\nDivisi: \" + $('Setup').item.json.division + \"\\nFile bulan \" + $('Setup').item.json.monthName + \" \" + $('Setup').item.json.year + \" tidak ditemukan di folder Drive divisi ini.\\n\\nUpdate manual: SN \" + $('Setup').item.json.sn + \" \\u2192 *\" + $('Setup').item.json.statusValue + \"* (\" + $('Setup').item.json.event + \")\" }}",
+        "additionalFields": { "parse_mode": "Markdown", "appendAttribution": false }
+      },
+      "id": "n-tg-nofile",
+      "name": "Telegram: file tidak ada",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1160, 380],
+      "notesInFlow": true,
+      "notes": "Pilih Credential Telegram + isi Chat ID grup Logistik."
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": { "__rl": true, "value": "={{ $('Cari File Bulan Ini').item.json.id }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "03. Data Barang Keluar", "mode": "name" },
+        "filtersUI": {
+          "values": [
+            { "lookupColumn": "NO SN", "lookupValue": "={{ $('Setup').item.json.sn }}" }
+          ]
+        },
+        "options": { "dataLocationOnSheet": { "values": { "rangeDefinition": "specifyRange", "headerRow": 6 } } }
+      },
+      "id": "n-read-keluar",
+      "name": "Cek di Data Barang Keluar",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1160, 160],
+      "alwaysOutputData": true,
+      "notesInFlow": true,
+      "notes": "Header di baris 6. Pilih Credential Google Sheets setelah import. Kalau 'Header Row' tidak di Options, cari di bagian 'Data Location on Sheet'."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "loose" },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cond-in-keluar",
+              "leftValue": "={{ $json[\"NO SN\"] }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty", "singleValue": true }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "n-if-keluar",
+      "name": "Ada di Barang Keluar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1380, 160]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $('Cari File Bulan Ini').item.json.id }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "03. Data Barang Keluar", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": ["NO SN"],
+          "value": {
+            "NO SN": "={{ $('Setup').item.json.sn }}",
+            "STATUS PERANGKAT": "={{ $('Setup').item.json.statusValue }}"
+          }
+        },
+        "options": { "dataLocationOnSheet": { "values": { "rangeDefinition": "specifyRange", "headerRow": 6 } } }
+      },
+      "id": "n-update-keluar",
+      "name": "Update STATUS (Barang Keluar)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1600, 100]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": { "__rl": true, "value": "={{ $('Cari File Bulan Ini').item.json.id }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "02.Data Barang Masuk", "mode": "name" },
+        "filtersUI": {
+          "values": [
+            { "lookupColumn": "NO SN", "lookupValue": "={{ $('Setup').item.json.sn }}" }
+          ]
+        },
+        "options": { "dataLocationOnSheet": { "values": { "rangeDefinition": "specifyRange", "headerRow": 6 } } }
+      },
+      "id": "n-read-masuk",
+      "name": "Cek di Data Barang Masuk",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1600, 260],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "loose" },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cond-in-masuk",
+              "leftValue": "={{ $json[\"NO SN\"] }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty", "singleValue": true }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "n-if-masuk",
+      "name": "Ada di Barang Masuk?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1820, 260]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $('Cari File Bulan Ini').item.json.id }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "02.Data Barang Masuk", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": ["NO SN"],
+          "value": {
+            "NO SN": "={{ $('Setup').item.json.sn }}",
+            "STATUS PERANGKAT": "={{ $('Setup').item.json.statusValue }}"
+          }
+        },
+        "options": { "dataLocationOnSheet": { "values": { "rangeDefinition": "specifyRange", "headerRow": 6 } } }
+      },
+      "id": "n-update-masuk",
+      "name": "Update STATUS (Barang Masuk)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [2040, 200]
+    },
+    {
+      "parameters": {
+        "chatId": "GANTI_CHAT_ID_GRUP_LOGISTIK",
+        "text": "={{ \"\\u26A0\\uFE0F *Sync Sheet gagal — SN tidak ditemukan*\\n\\nDivisi: \" + $('Setup').item.json.division + \"\\nFile: \" + $('Cari File Bulan Ini').item.json.name + \"\\n\\nSN \" + $('Setup').item.json.sn + \" (\" + $('Setup').item.json.material + \") tidak ada di tab '02.Data Barang Masuk' maupun '03. Data Barang Keluar'.\\n\\nUpdate manual STATUS PERANGKAT \\u2192 *\" + $('Setup').item.json.statusValue + \"*  \\u00b7 oleh \" + $('Setup').item.json.performedBy }}",
+        "additionalFields": { "parse_mode": "Markdown", "appendAttribution": false }
+      },
+      "id": "n-tg-notfound",
+      "name": "Telegram: SN tidak ketemu",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [2040, 360]
+    }
+  ],
+  "connections": {
+    "Webhook (dari TEREX)": { "main": [[{ "node": "Setup", "type": "main", "index": 0 }]] },
+    "Setup": { "main": [[{ "node": "Divisi & event didukung?", "type": "main", "index": 0 }]] },
+    "Divisi & event didukung?": { "main": [[{ "node": "Cari File Bulan Ini", "type": "main", "index": 0 }], []] },
+    "Cari File Bulan Ini": { "main": [[{ "node": "File ketemu?", "type": "main", "index": 0 }]] },
+    "File ketemu?": {
+      "main": [
+        [{ "node": "Cek di Data Barang Keluar", "type": "main", "index": 0 }],
+        [{ "node": "Telegram: file tidak ada", "type": "main", "index": 0 }]
+      ]
+    },
+    "Cek di Data Barang Keluar": { "main": [[{ "node": "Ada di Barang Keluar?", "type": "main", "index": 0 }]] },
+    "Ada di Barang Keluar?": {
+      "main": [
+        [{ "node": "Update STATUS (Barang Keluar)", "type": "main", "index": 0 }],
+        [{ "node": "Cek di Data Barang Masuk", "type": "main", "index": 0 }]
+      ]
+    },
+    "Cek di Data Barang Masuk": { "main": [[{ "node": "Ada di Barang Masuk?", "type": "main", "index": 0 }]] },
+    "Ada di Barang Masuk?": {
+      "main": [
+        [{ "node": "Update STATUS (Barang Masuk)", "type": "main", "index": 0 }],
+        [{ "node": "Telegram: SN tidak ketemu", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}
