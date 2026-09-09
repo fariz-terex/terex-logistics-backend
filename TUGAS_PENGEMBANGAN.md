@@ -7,6 +7,18 @@ push ke `main` → Railway auto-deploy. Cek deploy log tiap kali: ada
 
 Legenda repo: **[BE]** `terex-backend` · **[FE]** `terex-frontend`
 
+## Progress
+
+- ✅ **#1** Backup otomatis harian — endpoint `/api/backup/db` + GitHub Actions ke repo `terex-db-backups`.
+- ✅ **#2** Pin Node — `.node-version` / `engines` = 22.x.
+- 🟡 **#3** Konsistensi stok — **fase 1 (cek read-only + alert) & fase 2a (perbaiki agregat global) SELESAI**.
+  Endpoint `/api/stock/consistency` (Manager), `/api/automation/stock-consistency` (terjadwal),
+  `/api/stock/rebuild-global` (Manager, dry-run+commit), UI di Settings, workflow harian, test.
+  **Tersisa (fase 2b)**: perbaikan selisih `serial_numbers` ↔ `material_stock` — butuh keputusan
+  semantik "ready" (apakah unit `Delivered` dihitung sebagai ready). Lihat 4 opsi di riwayat chat.
+- ✅ **#4 (sebagian)** Test — `npm test` (`node --test`) + CI `test.yml` sudah jalan; baru meng-cover
+  logika konsistensi stok. Perlu diperluas ke jalur transaksi (login, delivery, return, reconciliation).
+
 ---
 
 # P0 — Keandalan & keamanan data
