@@ -1,0 +1,56 @@
+{
+  "name": "TEREX - Notifikasi Status Delivery ke Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "terex-delivery-status",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "b1a1b1a1-0001-0001-0001-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "webhookId": "terex-delivery-status"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Payload dari backend TEREX. Di n8n webhook v2 body ada di .body,\n// di versi lain langsung di root — tangani dua-duanya.\nconst d = $input.first().json.body || $input.first().json;\n\nconst emoji = {\n  'Menunggu Approval': '\\u23F3',\n  'Disetujui': '\\u2705',\n  'Sedang Disiapkan': '\\uD83D\\uDCE6',\n  'Dalam Pengiriman': '\\uD83D\\uDE9A',\n  'Sampai (Delivered)': '\\uD83C\\uDF89',\n  'Ditolak': '\\u274C',\n  'Dibatalkan': '\\u26D4',\n};\nconst e = emoji[d.status] || '\\uD83D\\uDCCB';\n\nconst esc = (s) => String(s == null ? '' : s)\n  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n\nconst lines = [\n  `${e} <b>Delivery ${esc(d.deliveryId)}</b> \\u2014 ${esc(d.status)}`,\n  '',\n  `Divisi: <b>${esc(d.customer)}</b>`,\n  `Tujuan: ${esc(d.homebase)}${d.site ? ' \\u00B7 ' + esc(d.site) : ''}`,\n];\nif (d.keperluan) lines.push(`Keperluan: ${esc(d.keperluan)}`);\nif (d.itemCount) lines.push(`Item: ${esc(d.itemCount)}`);\nlines.push(`Diminta oleh: ${esc(d.requester)}`);\nif (d.actor && d.actor !== d.requester) lines.push(`Diproses oleh: ${esc(d.actor)}`);\nif (d.note) lines.push(`Catatan: ${esc(d.note)}`);\nlines.push('', 'https://terex-logistics.up.railway.app');\n\nreturn [{ json: { message: lines.join('\\n'), status: d.status, deliveryId: d.deliveryId } }];"
+      },
+      "id": "b1a1b1a1-0001-0001-0001-000000000002",
+      "name": "Susun Pesan",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "GANTI_DENGAN_CHAT_ID",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "HTML",
+          "disable_web_page_preview": true
+        }
+      },
+      "id": "b1a1b1a1-0001-0001-0001-000000000003",
+      "name": "Kirim Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [680, 300],
+      "credentials": {
+        "telegramApi": {
+          "id": "GANTI",
+          "name": "Telegram TEREX Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": { "main": [[{ "node": "Susun Pesan", "type": "main", "index": 0 }]] },
+    "Susun Pesan": { "main": [[{ "node": "Kirim Telegram", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": false
+}
