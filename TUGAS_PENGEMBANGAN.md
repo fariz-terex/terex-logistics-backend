@@ -14,8 +14,14 @@ Legenda repo: **[BE]** `terex-backend` · **[FE]** `terex-frontend`
 - 🟡 **#3** Konsistensi stok — **fase 1 (cek read-only + alert) & fase 2a (perbaiki agregat global) SELESAI**.
   Endpoint `/api/stock/consistency` (Manager), `/api/automation/stock-consistency` (terjadwal),
   `/api/stock/rebuild-global` (Manager, dry-run+commit), UI di Settings, workflow harian, test.
-  **Tersisa (fase 2b)**: perbaikan selisih `serial_numbers` ↔ `material_stock` — butuh keputusan
-  semantik "ready" (apakah unit `Delivered` dihitung sebagai ready). Lihat 4 opsi di riwayat chat.
+  Agregat global sudah diperbaiki di produksi (47 → 2 selisih).
+  **Sisa 2 selisih yang sengaja dibiarkan** (baseline di `.github/stock-consistency-baseline.json`):
+  `Adaptor Modem Hughes HT2010 · MSG · reserved` (1 vs 0) dan `PoE · MSG · in_transit` (10 vs 0) —
+  akibat `sync-stock` MSG dulu memaksa reserved/in_transit = 0.
+  **Tersisa (fase 2b, opsional)**: recompute `material_stock.{reserved,in_transit,faulty}` dari
+  `serial_numbers` (aman, 1:1 dari status) — kolom `ready` tetap ditunda (butuh keputusan
+  semantik: apakah unit `Delivered` dihitung sebagai ready).
+  Juga: 7 material stok "Unassigned" perlu di-*Terima Barang* ulang ke divisi asli (tugas operasional).
 - ✅ **#4 (sebagian)** Test — `npm test` (`node --test`) + CI `test.yml` sudah jalan; baru meng-cover
   logika konsistensi stok. Perlu diperluas ke jalur transaksi (login, delivery, return, reconciliation).
 

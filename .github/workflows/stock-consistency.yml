@@ -1,8 +1,10 @@
 name: Cek konsistensi stok
 
 # Panggil endpoint read-only /api/automation/stock-consistency tiap hari.
-# Kalau ada drift (serial_numbers vs material_stock vs agregat global),
-# workflow jadi merah + GitHub kirim email. Tidak menulis apa pun ke DB.
+# Workflow jadi MERAH (+ email) hanya kalau jumlah selisih NYATA melebihi
+# baseline di .github/stock-consistency-baseline.json — jadi 2 selisih lama
+# yang sengaja dibiarkan tidak bikin alert palsu tiap hari, tapi drift BARU
+# tetap ketahuan. Tidak menulis apa pun ke DB.
 #
 # Secret yang dibutuhkan (sama seperti workflow backup):
 #   AUTOMATION_API_KEY - sama dengan env var di Railway
@@ -23,6 +25,11 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/stock-consistency-baseline.json
+          sparse-checkout-cone-mode: false
+
       - name: Panggil endpoint & evaluasi
         env:
           URL: https://backend-production-5543.up.railway.app/api/automation/stock-consistency
@@ -39,12 +46,20 @@ jobs:
           echo "----- ringkasan -----"
           jq '.summary' result.json
 
-          OK=$(jq -r '.ok' result.json)
-          if [ "$OK" != "true" ]; then
-            echo "::error::Stok tidak konsisten — cek detail di bawah"
+          BASELINE=$(jq -r '.acceptedRealMismatches' .github/stock-consistency-baseline.json)
+          REAL=$(jq -r '[.summary.globalVsDivisionSum, .summary.serialVsMaterialStock, .summary.negatives, .summary.orphans] | add' result.json)
+          echo "Selisih nyata: ${REAL}  |  baseline yang diterima: ${BASELINE}"
+
+          if [ "$REAL" -gt "$BASELINE" ]; then
+            echo "::error::Ada drift stok BARU (${REAL} > baseline ${BASELINE})"
             jq '{globalVsDivisionSum, serialVsMaterialStock, negatives, orphans}' result.json
             echo ""
-            echo "Buka Warehouse Stock -> tombol \"Periksa Konsistensi Stok\" (login Manager) untuk lihat versi lengkap."
+            echo "Settings -> \"Periksa Konsistensi Stok\" (login Manager) untuk detail lengkap."
+            echo "Kalau drift baru ini memang mau diterima, naikkan acceptedRealMismatches di .github/stock-consistency-baseline.json."
             exit 1
           fi
-          echo "Stok konsisten ✓"
+
+          if [ "$REAL" -lt "$BASELINE" ]; then
+            echo "::warning::Selisih nyata (${REAL}) lebih kecil dari baseline (${BASELINE}) — turunkan acceptedRealMismatches di baseline file."
+          fi
+          echo "Tidak ada drift baru ✓"
