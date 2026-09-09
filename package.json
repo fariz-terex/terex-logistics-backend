@@ -4,6 +4,9 @@
   "description": "TEREX Logistics — real backend API (Express + SQLite via better-sqlite3)",
   "main": "src/server.js",
   "type": "commonjs",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
