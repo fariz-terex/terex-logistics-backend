@@ -5,7 +5,7 @@ const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids"
 const { scopeOf, scopeAllows, scopeClause, resolveCreateCustomer, adjustStock } = require("../utils/stock");
 const { sendToCustomer, receiveFromCustomer } = require("../utils/faultyCycle");
 const { notifyWebhook } = require("../utils/webhook");
-const { computeStockConsistency, planGlobalAggregateRebuild } = require("../utils/stockConsistency");
+const { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild } = require("../utils/stockConsistency");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -673,6 +673,29 @@ router.post("/rebuild-global", requireAuth, requireRole(MANAGER), (req, res) => 
 
   console.log(`[stock] rebuild-global by ${req.user.name}: ${changes.length} field(s) across ${Object.keys(desired).length} material(s)`);
   res.json({ mode: "committed", count: changes.length, materialsUpdated: Object.keys(desired).length, changes });
+});
+
+// Recompute material_stock.{reserved, in_transit, faulty} from serial_numbers
+// status counts (serialized materials, real divisions). Does NOT touch `ready`
+// (disputed MSG semantics) or serial_numbers. Dry-run unless { commit: true }.
+// Manager only. Run rebuild-global afterwards to refresh the global aggregate.
+router.post("/rebuild-serial-buckets", requireAuth, requireRole(MANAGER), (req, res) => {
+  const commit = req.body?.commit === true;
+  const { changes, desired } = planSerialBucketRebuild(db);
+
+  if (!commit || changes.length === 0) {
+    return res.json({ mode: changes.length === 0 ? "already-consistent" : "dry-run", count: changes.length, changes });
+  }
+
+  const ensure = db.prepare("INSERT INTO material_stock (material, customer) VALUES (@material, @customer) ON CONFLICT(material, customer) DO NOTHING");
+  const upd = db.prepare("UPDATE material_stock SET reserved = @reserved, in_transit = @in_transit, faulty = @faulty WHERE material = @material AND customer = @customer");
+  const tx = db.transaction(() => {
+    for (const row of desired) { ensure.run(row); upd.run(row); }
+  });
+  tx();
+
+  console.log(`[stock] rebuild-serial-buckets by ${req.user.name}: ${changes.length} field(s) across ${desired.length} (material,divisi)`);
+  res.json({ mode: "committed", count: changes.length, rowsUpdated: desired.length, changes });
 });
 
 router.post("/phantom-cleanup", requireAuth, requireRole(MANAGER), (req, res) => {

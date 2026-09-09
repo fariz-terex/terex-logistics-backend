@@ -285,6 +285,48 @@ router.post("/:id/reject", requireAuth, requireRole(MANAGER), (req, res) => {
   res.json(loadDelivery(delivery.id));
 });
 
+// Cancel a request that has NOT shipped yet. From "Preparing" this also
+// unwinds whatever assign-stock reserved: material serials Reserved -> Ready
+// (with the reserved->ready stock reversal), tool units Checked Out ->
+// Available, consumable reserved -> ready. From the earlier states nothing is
+// reserved yet, so it just closes the request. Shipped/In Transit/Delivered
+// can't be cancelled here — the goods are physically on the move.
+const CANCELLABLE_STATUSES = ["Waiting Logistics Approval", "Waiting Stock Assignment", "Preparing"];
+router.post("/:id/cancel", requireAuth, requireRole(MANAGER), (req, res) => {
+  const { reason } = req.body || {};
+  if (!reason?.trim()) return res.status(400).json({ error: "Alasan pembatalan wajib diisi" });
+  const delivery = loadDelivery(req.params.id);
+  if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
+  if (!CANCELLABLE_STATUSES.includes(delivery.status)) {
+    return res.status(409).json({ error: `Tidak bisa membatalkan request berstatus "${delivery.status}" — hanya sebelum dikirim.` });
+  }
+
+  const releasedStock = delivery.status === "Preparing";
+  const tx = db.transaction(() => {
+    if (releasedStock) {
+      for (const item of delivery.items) {
+        if (item.type === "tool") {
+          adjustToolStock(item.material, "checked_out", -item.qty);
+          adjustToolStock(item.material, "available", item.qty);
+          db.prepare("UPDATE tool_serials SET status = 'Available', current_ref = NULL WHERE current_ref = ? AND tool = ? AND status = 'Checked Out'").run(delivery.id, item.material);
+        } else if (item.type === "consumable") {
+          adjustConsumable(item.material, "reserved", -item.qty);
+          adjustConsumable(item.material, "ready", item.qty);
+        } else {
+          adjustStock(item.material, delivery.customer, "reserved", -item.qty);
+          adjustStock(item.material, delivery.customer, "ready", item.qty);
+          db.prepare("UPDATE serial_numbers SET status = 'Ready', current_ref = NULL WHERE current_ref = ? AND material = ? AND status = 'Reserved'").run(delivery.id, item.material);
+        }
+      }
+    }
+    db.prepare("UPDATE deliveries SET status = 'Cancelled', rejection_reason = ? WHERE id = ?").run(reason.trim(), delivery.id);
+    addHistory(delivery.id, `Dibatalkan oleh ${req.user.name} (Manager) — alasan: ${reason.trim()}${releasedStock ? " · stock yang sudah direservasi dikembalikan ke Ready" : ""}`);
+  });
+  tx();
+
+  res.json(loadDelivery(delivery.id));
+});
+
 // Preparing -> Shipped requires shipment documentation: one photo per
 // Serial Number being sent (materials AND tools alike, for accountability),
 // plus an overall photo and a post-packing photo. Only material stock moves

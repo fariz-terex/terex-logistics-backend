@@ -2,7 +2,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { DatabaseSync } = require("node:sqlite");
-const { computeStockConsistency, planGlobalAggregateRebuild } = require("../src/utils/stockConsistency");
+const { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild } = require("../src/utils/stockConsistency");
 
 function freshDb() {
   const db = new DatabaseSync(":memory:");
@@ -93,6 +93,29 @@ test("non-serialized material is not checked against serial_numbers", () => {
   db.exec("INSERT INTO material_stock VALUES ('Kabel','PIM', 100,0,0,0)");
   const r = computeStockConsistency(db);
   assert.equal(r.summary.clean, true);
+});
+
+test("planSerialBucketRebuild fixes reserved/in_transit/faulty from serials, never touches ready", () => {
+  const db = freshDb();
+  // PoE: 10 units In Transit, material_stock says 0
+  db.exec("INSERT INTO materials VALUES ('PoE',1, 0,0,0,0)");
+  db.exec("INSERT INTO material_stock VALUES ('PoE','MSG', 5,0,0,0)"); // ready=5 must stay 5
+  for (let i = 0; i < 10; i++) db.exec(`INSERT INTO serial_numbers VALUES ('p${i}','PoE','In Transit','MSG')`);
+  // 'Unassigned' serialized stock must be ignored
+  db.exec("INSERT INTO materials VALUES ('Old',1, 0,0,0,0)");
+  db.exec("INSERT INTO material_stock VALUES ('Old','Unassigned', 0,0,3,0)");
+
+  const { changes, desired } = planSerialBucketRebuild(db);
+  assert.equal(changes.length, 1);
+  assert.deepEqual(changes[0], { material: "PoE", customer: "MSG", field: "in_transit", from: 0, to: 10, delta: 10 });
+  assert.ok(!changes.some((c) => c.field === "ready"));
+  assert.ok(!changes.some((c) => c.customer === "Unassigned"));
+  assert.deepEqual(desired, [{ material: "PoE", customer: "MSG", reserved: 0, in_transit: 10, faulty: 0 }]);
+
+  // apply and confirm the check no longer flags in_transit, ready untouched
+  const upd = db.prepare("UPDATE material_stock SET reserved=@reserved, in_transit=@in_transit, faulty=@faulty WHERE material=@material AND customer=@customer");
+  for (const row of desired) upd.run(row);
+  assert.equal(db.prepare("SELECT ready FROM material_stock WHERE material='PoE' AND customer='MSG'").get().ready, 5);
 });
 
 test("planGlobalAggregateRebuild produces changes that make the global check clean", () => {

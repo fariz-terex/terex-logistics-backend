@@ -188,4 +188,63 @@ function planGlobalAggregateRebuild(db) {
   return { changes, desired };
 }
 
-module.exports = { computeStockConsistency, planGlobalAggregateRebuild };
+// Plan (read-only) for recomputing material_stock.{reserved, in_transit,
+// faulty} from serial_numbers status counts, for serialized materials in a
+// real division (not 'Unassigned'). `ready` is deliberately NOT included —
+// it's the one field with a disputed definition (MSG counts Delivered units
+// as ready, the rest of the app doesn't). Returns field-level changes plus
+// `desired`: the full {reserved,in_transit,faulty} target for each
+// (material, customer) that needs it. Caller applies inside a transaction.
+const SERIAL_BUCKETS = { reserved: "Reserved", in_transit: "In Transit", faulty: "Faulty" };
+
+function planSerialBucketRebuild(db) {
+  db = db || require("../db");
+  const serialized = new Set(db.prepare("SELECT name FROM materials WHERE serialized = 1").all().map((r) => r.name));
+  const counts = db.prepare(`
+    SELECT material, customer, status, COUNT(*) AS n FROM serial_numbers
+    WHERE customer IS NOT NULL AND customer != 'Unassigned'
+    GROUP BY material, customer, status
+  `).all();
+  const stockRows = db.prepare(
+    "SELECT material, customer, reserved, in_transit, faulty FROM material_stock WHERE customer != 'Unassigned'"
+  ).all();
+
+  const serialBy = new Map(); // material -> customer -> { status: n }
+  for (const r of counts) {
+    if (!serialized.has(r.material)) continue;
+    if (!serialBy.has(r.material)) serialBy.set(r.material, new Map());
+    const cm = serialBy.get(r.material);
+    if (!cm.has(r.customer)) cm.set(r.customer, {});
+    cm.get(r.customer)[r.status] = r.n;
+  }
+  const stockBy = new Map(); // material -> customer -> row
+  for (const r of stockRows) {
+    if (!serialized.has(r.material)) continue;
+    if (!stockBy.has(r.material)) stockBy.set(r.material, new Map());
+    stockBy.get(r.material).set(r.customer, r);
+  }
+
+  const changes = [];
+  const desired = []; // [{ material, customer, reserved, in_transit, faulty }]
+  for (const material of new Set([...serialBy.keys(), ...stockBy.keys()])) {
+    const sc = serialBy.get(material) || new Map();
+    const kc = stockBy.get(material) || new Map();
+    for (const customer of new Set([...sc.keys(), ...kc.keys()])) {
+      const counts = sc.get(customer) || {};
+      const stored = kc.get(customer) || { reserved: 0, in_transit: 0, faulty: 0 };
+      const target = {};
+      let differs = false;
+      for (const [field, status] of Object.entries(SERIAL_BUCKETS)) {
+        target[field] = counts[status] || 0;
+        if ((stored[field] || 0) !== target[field]) {
+          changes.push({ material, customer, field, from: stored[field] || 0, to: target[field], delta: target[field] - (stored[field] || 0) });
+          differs = true;
+        }
+      }
+      if (differs) desired.push({ material, customer, ...target });
+    }
+  }
+  return { changes, desired };
+}
+
+module.exports = { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild };
