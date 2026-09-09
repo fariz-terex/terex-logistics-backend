@@ -3,6 +3,9 @@
 // a dry run (returns the summary, writes nothing). With commit=true it inserts.
 // Remove this route from server.js once the import is done.
 
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
 const express = require("express");
 const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
@@ -10,6 +13,29 @@ const { buildUnits } = require("../importMsgCore");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
+
+// TEMP one-off: download a local backup of the SQLite database. Manager-only.
+// Uses better-sqlite3's .backup() to write a consistent snapshot to a temp
+// file first (so WAL/-wal contents are folded in — copying terex.db raw could
+// miss recent writes), streams it as a download, then deletes the temp copy.
+// Remove this route together with the other /api/admin routes (see TUGAS 3).
+router.get("/backup-db", requireAuth, requireRole(MANAGER), async (req, res) => {
+  const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+  const name = `terex-backup-${stamp}.db`;
+  const tmp = path.join(os.tmpdir(), name);
+  try {
+    await db.backup(tmp);
+  } catch (err) {
+    if (fs.existsSync(tmp)) fs.unlink(tmp, () => {});
+    return res.status(500).json({ error: "Gagal membuat snapshot backup: " + err.message });
+  }
+  res.download(tmp, name, (err) => {
+    fs.unlink(tmp, () => {});
+    if (err && !res.headersSent) {
+      res.status(500).json({ error: "Gagal mengirim file backup: " + err.message });
+    }
+  });
+});
 
 router.post("/import-msg", requireAuth, requireRole(MANAGER), (req, res) => {
   const { masukCsv, keluarCsv, commit } = req.body || {};
