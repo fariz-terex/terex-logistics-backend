@@ -22,8 +22,17 @@ Legenda repo: **[BE]** `terex-backend` · **[FE]** `terex-frontend`
   `serial_numbers` (aman, 1:1 dari status) — kolom `ready` tetap ditunda (butuh keputusan
   semantik: apakah unit `Delivered` dihitung sebagai ready).
   Juga: 7 material stok "Unassigned" perlu di-*Terima Barang* ulang ke divisi asli (tugas operasional).
-- ✅ **#4 (sebagian)** Test — `npm test` (`node --test`) + CI `test.yml` sudah jalan; baru meng-cover
-  logika konsistensi stok. Perlu diperluas ke jalur transaksi (login, delivery, return, reconciliation).
+- ✅ **#4 (sebagian)** Test — `npm test` (`node --test`) + CI `test.yml` sudah jalan; meng-cover
+  logika konsistensi stok + notifikasi (15 test). Perlu diperluas ke jalur transaksi
+  (login, delivery approve/complete, reconciliation).
+- ✅ **Notifikasi delivery (Lapis 1)** — tabel `notifications`, `utils/notify.js`,
+  `routes/notifications.js` (GET/read/read-all), di-fire di 7 transisi delivery
+  (create/approve/assign-stock/ship/advance/reject/cancel). Frontend: polling 45 dtk +
+  on-focus, dropdown bell dengan unread & "tandai semua dibaca". **Lapis 2 (push Telegram
+  via n8n)** belum — tinggal pasang `notifyWebhook("delivery.status_changed", …)` di titik
+  yang sama + workflow n8n.
+- ✅ **Fitur baru: `POST /api/deliveries/:id/cancel`** (Manager) — batalkan request sebelum
+  dikirim, kembalikan stock yang direservasi.
 
 ---
 
