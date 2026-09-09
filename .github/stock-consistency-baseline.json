@@ -1,9 +1,6 @@
 {
   "note": "Selisih konsistensi stok yang SUDAH DIKETAHUI dan sengaja dibiarkan. Workflow 'Cek konsistensi stok' hanya jadi merah kalau jumlah selisih nyata MELEBIHI angka ini (artinya ada drift BARU). Turunkan angkanya setiap kali selisih lama diperbaiki.",
-  "acceptedRealMismatches": 2,
-  "detail": [
-    "Adaptor Modem Hughes HT2010 · MSG · reserved: serial 1 vs material_stock 0",
-    "PoE · MSG · in_transit: serial 10 vs material_stock 0"
-  ],
+  "acceptedRealMismatches": 0,
+  "detail": [],
   "lastReviewed": "2026-09-09"
 }
