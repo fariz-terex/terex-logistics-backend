@@ -61,7 +61,6 @@ app.use("/api/reconciliations", reconciliationRoutes);
 app.use("/api/tools", toolRoutes); // /api/tools, /api/tools/serials, /api/tools/receipts, /api/tools/checkouts
 app.use("/api/material-swaps", materialSwapRoutes);
 app.use("/api/automation", automationRoutes);
-app.use("/api/admin", require("./routes/adminImport")); // TEMP: one-off MSG data import — remove after use
 
 // Centralized error handler: anything thrown synchronously inside a route
 // (e.g. a SQLite constraint failure) lands here instead of crashing the process.
