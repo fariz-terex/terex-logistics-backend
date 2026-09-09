@@ -2,7 +2,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { DatabaseSync } = require("node:sqlite");
-const { computeStockConsistency } = require("../src/utils/stockConsistency");
+const { computeStockConsistency, planGlobalAggregateRebuild } = require("../src/utils/stockConsistency");
 
 function freshDb() {
   const db = new DatabaseSync(":memory:");
@@ -93,4 +93,28 @@ test("non-serialized material is not checked against serial_numbers", () => {
   db.exec("INSERT INTO material_stock VALUES ('Kabel','PIM', 100,0,0,0)");
   const r = computeStockConsistency(db);
   assert.equal(r.summary.clean, true);
+});
+
+test("planGlobalAggregateRebuild produces changes that make the global check clean", () => {
+  const db = freshDb();
+  // global says ready 5 / faulty 0, divisions actually sum to ready 4 / faulty 7
+  db.exec("INSERT INTO materials VALUES ('Modem H',0, 5,0,0,0)");
+  db.exec("INSERT INTO material_stock VALUES ('Modem H','PIM', 3,4,0,0), ('Modem H','MSG', 1,3,0,0)");
+  // a material with a global aggregate but no division rows at all -> should go to 0
+  db.exec("INSERT INTO materials VALUES ('Ghost Mat',0, 9,0,0,0)");
+
+  const before = computeStockConsistency(db);
+  assert.ok(before.summary.globalVsDivisionSum >= 3);
+
+  const { changes, desired } = planGlobalAggregateRebuild(db);
+  assert.ok(changes.some((c) => c.material === "Modem H" && c.field === "ready" && c.from === 5 && c.to === 4));
+  assert.ok(changes.some((c) => c.material === "Modem H" && c.field === "faulty" && c.to === 7));
+  assert.ok(changes.some((c) => c.material === "Ghost Mat" && c.field === "ready" && c.to === 0));
+  assert.deepEqual(desired["Modem H"], { ready: 4, faulty: 7, reserved: 0, in_transit: 0 });
+
+  // apply the plan and re-check
+  const upd = db.prepare("UPDATE materials SET ready=@ready, faulty=@faulty, reserved=@reserved, in_transit=@in_transit WHERE name=@name");
+  for (const [name, row] of Object.entries(desired)) upd.run({ name, ...row });
+  const after = computeStockConsistency(db);
+  assert.equal(after.summary.globalVsDivisionSum, 0);
 });

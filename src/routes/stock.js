@@ -5,7 +5,7 @@ const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids"
 const { scopeOf, scopeAllows, scopeClause, resolveCreateCustomer, adjustStock } = require("../utils/stock");
 const { sendToCustomer, receiveFromCustomer } = require("../utils/faultyCycle");
 const { notifyWebhook } = require("../utils/webhook");
-const { computeStockConsistency } = require("../utils/stockConsistency");
+const { computeStockConsistency, planGlobalAggregateRebuild } = require("../utils/stockConsistency");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -651,6 +651,28 @@ router.get("/phantom-check", requireAuth, requireRole(MANAGER), (req, res) => {
 // recompute/overwrite action is deliberately NOT here (TUGAS_PENGEMBANGAN.md #3).
 router.get("/consistency", requireAuth, requireRole(MANAGER), (req, res) => {
   res.json(computeStockConsistency(db));
+});
+
+// Rebuild the materials.* global aggregate from material_stock (= sum across
+// every division, which is the column's definition). Fixes "global != division
+// sum" drift. Dry-run unless body { commit: true }. Manager only. One
+// transaction. Does NOT touch material_stock or serial_numbers.
+router.post("/rebuild-global", requireAuth, requireRole(MANAGER), (req, res) => {
+  const commit = req.body?.commit === true;
+  const { changes, desired } = planGlobalAggregateRebuild(db);
+
+  if (!commit || changes.length === 0) {
+    return res.json({ mode: changes.length === 0 ? "already-consistent" : "dry-run", count: changes.length, changes });
+  }
+
+  const upd = db.prepare("UPDATE materials SET ready = @ready, faulty = @faulty, reserved = @reserved, in_transit = @in_transit WHERE name = @name");
+  const tx = db.transaction(() => {
+    for (const [name, row] of Object.entries(desired)) upd.run({ name, ...row });
+  });
+  tx();
+
+  console.log(`[stock] rebuild-global by ${req.user.name}: ${changes.length} field(s) across ${Object.keys(desired).length} material(s)`);
+  res.json({ mode: "committed", count: changes.length, materialsUpdated: Object.keys(desired).length, changes });
 });
 
 router.post("/phantom-cleanup", requireAuth, requireRole(MANAGER), (req, res) => {

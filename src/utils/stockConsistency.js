@@ -155,4 +155,37 @@ function computeStockConsistency(db) {
   };
 }
 
-module.exports = { computeStockConsistency };
+// Plan (read-only) for rebuilding the materials.* global aggregate columns
+// from material_stock — their definition is "the sum across every division",
+// so this is a cache refresh, not a business decision. Returns the list of
+// field-level changes plus `desired`: the full target row for each material
+// that needs updating. The caller applies `desired` inside a transaction.
+function planGlobalAggregateRebuild(db) {
+  db = db || require("../db");
+  const materials = db.prepare("SELECT name, ready, faulty, reserved, in_transit FROM materials").all();
+  const sums = db.prepare(`
+    SELECT material,
+      SUM(ready) AS ready, SUM(faulty) AS faulty,
+      SUM(reserved) AS reserved, SUM(in_transit) AS in_transit
+    FROM material_stock GROUP BY material
+  `).all();
+  const sumByName = new Map(sums.map((s) => [s.material, s]));
+
+  const changes = [];
+  const desired = {};
+  for (const m of materials) {
+    const s = sumByName.get(m.name) || { ready: 0, faulty: 0, reserved: 0, in_transit: 0 };
+    let differs = false;
+    for (const f of FIELDS) {
+      const to = s[f] || 0;
+      if (m[f] !== to) {
+        changes.push({ material: m.name, field: f, from: m[f], to, delta: to - m[f] });
+        differs = true;
+      }
+    }
+    if (differs) desired[m.name] = { ready: s.ready || 0, faulty: s.faulty || 0, reserved: s.reserved || 0, in_transit: s.in_transit || 0 };
+  }
+  return { changes, desired };
+}
+
+module.exports = { computeStockConsistency, planGlobalAggregateRebuild };
