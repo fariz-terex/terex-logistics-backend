@@ -1,0 +1,50 @@
+name: Cek konsistensi stok
+
+# Panggil endpoint read-only /api/automation/stock-consistency tiap hari.
+# Kalau ada drift (serial_numbers vs material_stock vs agregat global),
+# workflow jadi merah + GitHub kirim email. Tidak menulis apa pun ke DB.
+#
+# Secret yang dibutuhkan (sama seperti workflow backup):
+#   AUTOMATION_API_KEY - sama dengan env var di Railway
+
+on:
+  schedule:
+    - cron: "0 20 * * *" # 20:00 UTC = 03:00 WIB, tiap hari
+  workflow_dispatch: {}
+
+concurrency:
+  group: stock-consistency
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Panggil endpoint & evaluasi
+        env:
+          URL: https://backend-production-5543.up.railway.app/api/automation/stock-consistency
+          AUTOMATION_API_KEY: ${{ secrets.AUTOMATION_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${AUTOMATION_API_KEY}" ]; then
+            echo "::error::Secret AUTOMATION_API_KEY belum di-set"; exit 1
+          fi
+          curl -fsSL --retry 3 --retry-delay 15 --max-time 120 \
+            -H "X-Automation-Key: ${AUTOMATION_API_KEY}" \
+            -o result.json "${URL}"
+
+          echo "----- ringkasan -----"
+          jq '.summary' result.json
+
+          OK=$(jq -r '.ok' result.json)
+          if [ "$OK" != "true" ]; then
+            echo "::error::Stok tidak konsisten — cek detail di bawah"
+            jq '{globalVsDivisionSum, serialVsMaterialStock, negatives, orphans}' result.json
+            echo ""
+            echo "Buka Warehouse Stock -> tombol \"Periksa Konsistensi Stok\" (login Manager) untuk lihat versi lengkap."
+            exit 1
+          fi
+          echo "Stok konsisten ✓"

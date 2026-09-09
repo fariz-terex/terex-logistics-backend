@@ -3,6 +3,8 @@ const db = require("../db");
 const { requireAutomationKey } = require("../middleware/automationAuth");
 const { dailySequenceId, isoDate } = require("../utils/ids");
 const { markFaulty, sendToCustomer, receiveFromCustomer } = require("../utils/faultyCycle");
+const { computeStockConsistency } = require("../utils/stockConsistency");
+const { notifyWebhook } = require("../utils/webhook");
 
 const router = express.Router();
 router.use(requireAutomationKey);
@@ -47,6 +49,18 @@ router.post("/receive-from-customer", (req, res) => {
   logAndRespond(res, { action: "receive-from-customer", division, sn, payload: req.body }, () =>
     receiveFromCustomer({ sn, ref, note, performedBy: req.user.name })
   );
+});
+
+// Scheduled read-only stock-consistency check, for GitHub Actions / n8n to
+// poll daily. Writes nothing. Fires the n8n webhook when drift is found so
+// the alert reaches Telegram even if the poller only looks at HTTP status.
+// `ok: false` => something drifted; see the `report` for details.
+router.get("/stock-consistency", (req, res) => {
+  const report = computeStockConsistency(db);
+  if (!report.summary.clean) {
+    notifyWebhook("stock-drift", { summary: report.summary });
+  }
+  res.json({ ok: report.summary.clean, summary: report.summary, report });
 });
 
 // Lets n8n (or anyone debugging) pull recent activity — successes and

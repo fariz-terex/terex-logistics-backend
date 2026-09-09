@@ -5,6 +5,7 @@ const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids"
 const { scopeOf, scopeAllows, scopeClause, resolveCreateCustomer, adjustStock } = require("../utils/stock");
 const { sendToCustomer, receiveFromCustomer } = require("../utils/faultyCycle");
 const { notifyWebhook } = require("../utils/webhook");
+const { computeStockConsistency } = require("../utils/stockConsistency");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -643,6 +644,13 @@ function findPhantomStockRows(db) {
 router.get("/phantom-check", requireAuth, requireRole(MANAGER), (req, res) => {
   const phantoms = findPhantomStockRows(db);
   res.json({ count: phantoms.length, rows: phantoms });
+});
+
+// Read-only cross-check of serial_numbers vs material_stock vs the global
+// materials aggregate. Writes nothing — see utils/stockConsistency.js. The
+// recompute/overwrite action is deliberately NOT here (TUGAS_PENGEMBANGAN.md #3).
+router.get("/consistency", requireAuth, requireRole(MANAGER), (req, res) => {
+  res.json(computeStockConsistency(db));
 });
 
 router.post("/phantom-cleanup", requireAuth, requireRole(MANAGER), (req, res) => {
