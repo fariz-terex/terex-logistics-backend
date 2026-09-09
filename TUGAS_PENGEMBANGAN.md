@@ -37,6 +37,10 @@ Legenda repo: **[BE]** `terex-backend` · **[FE]** `terex-frontend`
   di Settings (semua user). Feed grup via n8n tetap opsional (`N8N_DELIVERY_WEBHOOK_URL`).
   Setup: `docs/NOTIFIKASI_TELEGRAM.md`. Env: `TELEGRAM_BOT_TOKEN`,
   `TELEGRAM_BOT_USERNAME`, `TELEGRAM_WEBHOOK_SECRET` + 1× `setWebhook`.
+  **Scoping**: semua notifikasi (in-app + Telegram) di-scope per divisi via
+  `user_divisions`. SPV & Manager Divisi dapat event milestone (dibuat / sampai /
+  ditolak / dibatalkan) untuk semua DR di divisi yang di-assign; Logistics Staff
+  per-divisi; Manager Logistics semua. Pelaku aksi tidak di-notify aksinya sendiri.
 - ✅ **Fitur baru: `POST /api/deliveries/:id/cancel`** (Manager) — batalkan request sebelum
   dikirim, kembalikan stock yang direservasi.
 

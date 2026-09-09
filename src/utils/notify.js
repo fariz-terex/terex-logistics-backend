@@ -10,14 +10,26 @@ function activeManagerIds(db) {
   return getDb(db).prepare("SELECT id FROM users WHERE role = ? AND status = 'Active'").all(MANAGER).map((r) => r.id);
 }
 
-// Logistics Staff assigned to a given division (via user_divisions).
-function activeLogisticsIdsForDivision(customer, db) {
-  if (!customer) return [];
+// Active users with any of `roles` assigned to `customer` (via user_divisions).
+function activeIdsForDivision(customer, roles, db) {
+  if (!customer || !roles || roles.length === 0) return [];
+  const placeholders = roles.map(() => "?").join(",");
   return getDb(db).prepare(`
-    SELECT u.id FROM users u
+    SELECT DISTINCT u.id FROM users u
     JOIN user_divisions ud ON ud.user_id = u.id
-    WHERE u.role = ? AND u.status = 'Active' AND ud.customer = ?
-  `).all(LOGISTICS, customer).map((r) => r.id);
+    WHERE u.status = 'Active' AND ud.customer = ? AND u.role IN (${placeholders})
+  `).all(customer, ...roles).map((r) => r.id);
+}
+
+// Logistics Staff assigned to a given division.
+function activeLogisticsIdsForDivision(customer, db) {
+  return activeIdsForDivision(customer, [LOGISTICS], db);
+}
+
+// SPV / Manager Divisi assigned to a given division — "division watchers"
+// who see milestone events for every DR in their division, not just their own.
+function activeDivisionWatcherIds(customer, db) {
+  return activeIdsForDivision(customer, ["SPV", "Manager Divisi"], db);
 }
 
 // The delivery's requester is stored as a display name, not an id. Name
@@ -58,4 +70,4 @@ function notify(userIds, { type, title, body = "", refType = null, refId = null,
   }
 }
 
-module.exports = { notify, activeManagerIds, activeLogisticsIdsForDivision, userIdsByName };
+module.exports = { notify, activeManagerIds, activeIdsForDivision, activeLogisticsIdsForDivision, activeDivisionWatcherIds, userIdsByName };

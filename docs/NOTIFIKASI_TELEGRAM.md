@@ -8,14 +8,21 @@ Lapis 1 (notifikasi in-app di lonceng) tetap jalan independen.
 
 ## Siapa dapat notifikasi apa
 
+Semua scoped per divisi lewat `user_divisions` (kecuali Manager Logistics yang
+memang lihat semua). Pelaku aksi tidak dapat notifikasi untuk aksinya sendiri.
+
 | Event | Penerima |
 |---|---|
-| Request dibuat | semua Manager |
-| Disetujui | requester + Logistics Staff divisi itu |
-| Sedang disiapkan / dikirim / sampai | requester |
-| Ditolak / dibatalkan | requester (+ Logistics kalau cancel melepas stok) |
+| Request **dibuat** | semua Manager Logistics · SPV & Manager Divisi divisi itu |
+| **Disetujui** | requester · Logistics Staff divisi itu |
+| **Sedang disiapkan / dikirim** | requester |
+| **Sampai (Delivered)** | requester · SPV & Manager Divisi divisi itu |
+| **Ditolak / Dibatalkan** | requester · SPV & Manager Divisi divisi itu (+ Logistics kalau cancel melepas stok) |
 
-Pelaku aksi tidak dapat notifikasi untuk aksinya sendiri.
+**SPV / Manager Divisi** hanya dapat event *milestone* (dibuat, sampai, ditolak,
+dibatalkan) — tidak tiap langkah progress — untuk **semua DR di divisi yang
+di-assign**, tidak peduli siapa pembuatnya. SPV yang cover MSG+RGR hanya dapat
+notifikasi MSG & RGR.
 
 ## Setup server (satu kali)
 

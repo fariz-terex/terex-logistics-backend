@@ -1,4 +1,4 @@
-const { notify, activeManagerIds, activeLogisticsIdsForDivision, userIdsByName } = require("./notify");
+const { notify, activeManagerIds, activeLogisticsIdsForDivision, activeDivisionWatcherIds, userIdsByName } = require("./notify");
 const { notifyDeliveryWebhook } = require("./webhook");
 const { sendMessage } = require("./telegram");
 
@@ -8,15 +8,27 @@ const APP_URL = "https://terex-logistics.up.railway.app";
 // in the Telegram / n8n message; `emoji` prefixes it. `requester` and
 // `extras` describe the in-app notifications (extras also receive the
 // Telegram DM). Functions get (delivery, { note }).
+// SPV / Manager Divisi assigned to the division get MILESTONE events only
+// (created / delivered / rejected / cancelled) for every DR in their
+// division — not the intermediate progress steps.
+const divisionWatcher = (label) => ({
+  resolve: (d, db) => activeDivisionWatcherIds(d.customer, db),
+  title: (d) => `Delivery Request ${d.id} — ${label}`,
+  body: (d, { note }) => `Divisi ${d.customer} · ${d.homebase} · diminta oleh ${d.requester}${note ? ` · ${note}` : ""}`,
+});
+
 const EVENTS = {
   created: {
     status: "Menunggu Approval", emoji: "⏳",
     requester: null, // the requester is the actor here
-    extras: [{
-      resolve: (d, db) => activeManagerIds(db),
-      title: (d) => `Delivery Request ${d.id} menunggu approval`,
-      body: (d) => `${d.homebase}${d.site ? ` · ${d.site}` : ""} · ${d.itemCount ?? "?"} item · divisi ${d.customer}`,
-    }],
+    extras: [
+      {
+        resolve: (d, db) => activeManagerIds(db),
+        title: (d) => `Delivery Request ${d.id} menunggu approval`,
+        body: (d) => `${d.homebase}${d.site ? ` · ${d.site}` : ""} · ${d.itemCount ?? "?"} item · divisi ${d.customer}`,
+      },
+      divisionWatcher("baru dibuat"),
+    ],
   },
   approved: {
     status: "Disetujui", emoji: "✅",
@@ -38,20 +50,25 @@ const EVENTS = {
   delivered: {
     status: "Sampai (Delivered)", emoji: "🎉",
     requester: { title: (d) => `Delivery Request ${d.id} sudah sampai (Delivered)`, body: (d, { note }) => `${d.homebase}${note ? ` · ${note}` : ""}` },
+    extras: [divisionWatcher("sampai (Delivered)")],
   },
   rejected: {
     status: "Ditolak", emoji: "❌",
     requester: { title: (d) => `Delivery Request ${d.id} ditolak`, body: (d, { note }) => note || "" },
+    extras: [divisionWatcher("ditolak")],
   },
   cancelled: {
     status: "Dibatalkan", emoji: "⛔",
     requester: { title: (d) => `Delivery Request ${d.id} dibatalkan`, body: (d, { note }) => note || "" },
-    extras: [{
-      when: (d, { releasedStock }) => releasedStock,
-      resolve: (d, db) => activeLogisticsIdsForDivision(d.customer, db),
-      title: (d) => `Delivery Request ${d.id} dibatalkan`,
-      body: (d, { note }) => `Stock yang direservasi sudah dikembalikan.${note ? ` Alasan: ${note}` : ""}`,
-    }],
+    extras: [
+      {
+        when: (d, { releasedStock }) => releasedStock,
+        resolve: (d, db) => activeLogisticsIdsForDivision(d.customer, db),
+        title: (d) => `Delivery Request ${d.id} dibatalkan`,
+        body: (d, { note }) => `Stock yang direservasi sudah dikembalikan.${note ? ` Alasan: ${note}` : ""}`,
+      },
+      divisionWatcher("dibatalkan"),
+    ],
   },
 };
 
