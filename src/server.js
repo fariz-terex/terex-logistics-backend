@@ -63,6 +63,7 @@ app.use("/api/tools", toolRoutes); // /api/tools, /api/tools/serials, /api/tools
 app.use("/api/material-swaps", materialSwapRoutes);
 app.use("/api/automation", automationRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/telegram", require("./routes/telegram")); // account linking + Telegram bot webhook
 app.use("/api/backup", require("./routes/backup")); // GET /api/backup/db — off-site backup job, X-Automation-Key auth
 
 // Centralized error handler: anything thrown synchronously inside a route

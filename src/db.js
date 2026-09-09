@@ -138,6 +138,10 @@ if (!userColumnsForDivision.includes("customer")) {
   console.log("[db] adding customer (division) column to users");
   db.exec("ALTER TABLE users ADD COLUMN customer TEXT");
 }
+if (!userColumnsForDivision.includes("telegram_chat_id")) {
+  console.log("[db] adding telegram_chat_id column to users");
+  db.exec("ALTER TABLE users ADD COLUMN telegram_chat_id TEXT");
+}
 
 const returnColumnsForDivision = db.prepare("PRAGMA table_info(returns)").all().map((c) => c.name);
 if (!returnColumnsForDivision.includes("customer")) {

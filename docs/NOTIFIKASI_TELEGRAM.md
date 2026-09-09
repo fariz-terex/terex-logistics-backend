@@ -1,88 +1,93 @@
-# Notifikasi Status Delivery ke Telegram (Lapis 2)
+# Notifikasi Telegram (Lapis 2)
 
-Backend mengirim event **setiap perubahan status Delivery Request** ke satu
-webhook n8n. n8n memformat pesan dan mengirim ke grup Telegram. Lapis 1
-(notifikasi in-app) tetap jalan independen — ini pelengkap untuk push.
+Setiap perubahan status Delivery Request dikirim sebagai **pesan pribadi (DM)**
+dari bot Telegram langsung ke user yang relevan (requester + role terkait).
+Backend memanggil Telegram API sendiri — **tidak perlu n8n** untuk ini.
 
-## Alur
+Lapis 1 (notifikasi in-app di lonceng) tetap jalan independen.
+
+## Siapa dapat notifikasi apa
+
+| Event | Penerima |
+|---|---|
+| Request dibuat | semua Manager |
+| Disetujui | requester + Logistics Staff divisi itu |
+| Sedang disiapkan / dikirim / sampai | requester |
+| Ditolak / dibatalkan | requester (+ Logistics kalau cancel melepas stok) |
+
+Pelaku aksi tidak dapat notifikasi untuk aksinya sendiri.
+
+## Setup server (satu kali)
+
+### 1. Buat bot
+`@BotFather` → `/newbot` → catat **token** dan **username bot** (mis. `terex_logistics_bot`).
+
+### 2. Set env var di Railway (backend service → Variables)
 
 ```
-Backend TEREX ──POST──▶ n8n Webhook ──▶ Code (susun pesan) ──▶ Telegram (kirim ke grup)
+TELEGRAM_BOT_TOKEN      = 123456789:ABCdef...
+TELEGRAM_BOT_USERNAME   = terex_logistics_bot        (tanpa @)
+TELEGRAM_WEBHOOK_SECRET = <string acak panjang, mis. dari `openssl rand -hex 24`>
 ```
 
-Event yang dikirim (7): Menunggu Approval · Disetujui · Sedang Disiapkan ·
-Dalam Pengiriman · Sampai (Delivered) · Ditolak · Dibatalkan.
+Railway auto-redeploy. Tanpa `TELEGRAM_BOT_TOKEN` + `TELEGRAM_BOT_USERNAME`,
+fitur mati (tombol "Hubungkan Telegram" di app menampilkan "belum diaktifkan").
 
-## Payload yang dikirim backend
+### 3. Daftarkan webhook bot ke backend (satu kali)
 
-`POST` JSON ke `N8N_DELIVERY_WEBHOOK_URL`:
+Ganti `<TOKEN>` dan `<SECRET>` lalu buka URL ini di browser (atau `curl`):
+
+```
+https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://backend-production-5543.up.railway.app/api/telegram/webhook/<SECRET>&secret_token=<SECRET>
+```
+
+Balasan `{"ok":true,"result":true,...}` = berhasil. Cek dengan:
+```
+https://api.telegram.org/bot<TOKEN>/getWebhookInfo
+```
+
+> Catatan: satu bot hanya boleh punya **satu** webhook. Kalau bot ini juga
+> dipakai n8n **Telegram Trigger**, jangan pakai `setWebhook` di sini — pakai
+> bot terpisah, atau gunakan opsi grup n8n di bawah. (Workflow n8n yang cuma
+> *mengirim* pesan / sendMessage tidak masalah, tidak merebut webhook.)
+
+## Cara user menghubungkan (mandiri)
+
+1. TEREX → **Settings** → kartu **Notifikasi Telegram** → **Hubungkan Telegram**.
+2. Tab Telegram terbuka ke chat bot → klik **Start**.
+3. Bot balas "✅ Terhubung". Kembali ke app → **Saya sudah klik Start**.
+4. Selesai. Untuk berhenti: **Putuskan** di app, atau kirim `/stop` ke bot.
+
+Kode tautan berlaku 15 menit dan sekali pakai.
+
+## Tes
+
+1. Hubungkan 2 akun (mis. SPV & Manager) ke Telegram masing-masing.
+2. SPV buat Delivery Request → Manager terima DM "⏳ Delivery DR-xxx — Menunggu Approval".
+3. Manager approve → SPV & Logistics divisi terima DM.
+4. Cek log backend kalau tidak masuk: `[telegram] sendMessage ...`.
+
+## Opsi tambahan: feed grup lewat n8n
+
+Kalau juga mau satu grup Telegram yang menerima **semua** event (bukan DM),
+set `N8N_DELIVERY_WEBHOOK_URL` di Railway dan import
+[`n8n-delivery-telegram.json`](n8n-delivery-telegram.json) (Webhook → Code →
+Telegram sendMessage ke chat grup). Backend mengirim payload terstruktur:
 
 ```json
-{
-  "event": "delivery.status_changed",
-  "deliveryId": "DR-260909-001",
-  "status": "Dalam Pengiriman",
-  "customer": "MSG",
-  "homebase": "Merauke",
-  "site": "SDN 1 Merauke",
-  "keperluan": "Instalasi",
-  "itemCount": 3,
-  "requester": "Rina",
-  "actor": "Sari",
-  "note": null,
-  "timestamp": "2026-09-09"
-}
+{ "event": "delivery.status_changed", "deliveryId": "...", "status": "Disetujui",
+  "customer": "MSG", "homebase": "...", "site": "...", "keperluan": "...",
+  "itemCount": 3, "requester": "...", "actor": "...", "note": null, "timestamp": "..." }
 ```
 
-`note` berisi alasan saat status **Ditolak / Dibatalkan**, atau nama penerima
-saat **Delivered**.
+DM dan grup bisa jalan bersamaan.
 
-## Setup (satu kali)
+## Catatan teknis
 
-### 1. Bot & grup Telegram
-Kalau belum ada, ikuti `Blueprint_Otomasi_n8n_Claude_TEREX.md` Bagian 1:
-buat bot via `@BotFather`, buat grup, undang bot, ambil **Chat ID** grup
-(angka negatif) dari `https://api.telegram.org/bot<TOKEN>/getUpdates`.
-
-### 2. Import workflow ke n8n
-1. n8n → **Workflows** → **Import from File** → pilih
-   [`docs/n8n-delivery-telegram.json`](n8n-delivery-telegram.json).
-2. Node **Kirim Telegram**:
-   - **Credential**: buat/pilih *Telegram API* dengan Bot Token.
-   - **Chat ID**: ganti `GANTI_DENGAN_CHAT_ID` dengan Chat ID grup.
-3. **Save**, lalu **Activate** (toggle kanan atas).
-4. Klik node **Webhook** → salin **Production URL** (mis.
-   `https://n8n-anda.domain/webhook/terex-delivery-status`).
-
-> Kalau import bermasalah karena versi n8n, buat manual — cuma 3 node:
-> **Webhook** (POST, path `terex-delivery-status`) → **Code** (tempel isi
-> `jsCode` dari file JSON) → **Telegram** (`sendMessage`, Chat ID grup,
-> Text = `{{ $json.message }}`, parse_mode `HTML`).
-
-### 3. Set env var di Railway
-Backend service → **Variables** → tambah:
-
-```
-N8N_DELIVERY_WEBHOOK_URL = https://n8n-anda.domain/webhook/terex-delivery-status
-```
-
-Railway auto-redeploy. **Kalau var ini tidak di-set, fitur mati total** —
-tidak ada yang dikirim, tidak ada error. (Sengaja terpisah dari
-`N8N_WEBHOOK_URL` yang dipakai workflow sinkronisasi Google Sheet.)
-
-### 4. Tes
-1. Buat Delivery Request baru di TEREX → dalam beberapa detik pesan
-   "⏳ Delivery DR-xxx — Menunggu Approval" masuk ke grup Telegram.
-2. Approve / ship / dst → tiap langkah kirim pesan.
-3. Cek n8n → **Executions** kalau pesan tidak muncul (lihat error node mana).
-
-## Catatan
-
-- Fire-and-forget dengan timeout 5 detik: webhook lambat/gagal **tidak**
-  memperlambat atau menggagalkan aksi user di TEREX. Kegagalan hanya
-  tercatat di log backend (`[webhook] failed ...`).
-- Mau DM per-user (bukan grup)? Perlu kolom `telegram_chat_id` di tabel
-  users + tiap user `/start` ke bot sekali. Belum dibuat — grup dulu.
-- Mau pisah per divisi? Duplikat workflow, tambah **IF** `{{ $json.body.customer }}`
-  di depan node Telegram, arahkan ke Chat ID grup masing-masing. Atau satu
-  grup dengan Topics.
+- Semua pengiriman fire-and-forget, timeout 5 detik — Telegram lambat/error
+  tidak memperlambat atau menggagalkan aksi user. Kegagalan hanya tercatat di
+  log backend.
+- Chat id disimpan di `users.telegram_chat_id`. User non-aktif tetap punya
+  baris tapi tidak akan di-notify kalau resolver role tidak memilihnya.
+- DM per divisi vs semua: sudah otomatis per-role/requester, tidak perlu
+  konfigurasi.

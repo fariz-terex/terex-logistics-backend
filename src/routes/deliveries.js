@@ -3,8 +3,7 @@ const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
 const { scopeOf, scopeAllows, getDivisionStock, adjustStock, adjustConsumable, resolveCreateCustomer } = require("../utils/stock");
-const { notify, activeManagerIds, activeLogisticsIdsForDivision, userIdsByName } = require("../utils/notify");
-const { notifyDeliveryWebhook } = require("../utils/webhook");
+const { announceDelivery } = require("../utils/deliveryNotify");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -58,29 +57,6 @@ function addHistory(id, text) {
     .run(id, new Date().toISOString(), text);
 }
 
-// In-app notification to whoever created the request (stored as a name).
-function notifyRequester(delivery, title, body, actor) {
-  notify(userIdsByName(delivery.requester), {
-    type: "delivery.status", title, body, refType: "delivery", refId: delivery.id, actor,
-  });
-}
-
-// Structured event to the Telegram/n8n workflow (message text is built there).
-// No-op when N8N_DELIVERY_WEBHOOK_URL isn't set.
-function webhookDelivery(delivery, status, { actor = null, note = null } = {}) {
-  notifyDeliveryWebhook({
-    deliveryId: delivery.id,
-    status,
-    customer: delivery.customer,
-    homebase: delivery.homebase,
-    site: delivery.site || null,
-    keperluan: delivery.keperluan || null,
-    itemCount: Array.isArray(delivery.items) ? delivery.items.length : null,
-    requester: delivery.requester,
-    actor,
-    note,
-  });
-}
 
 router.get("/", requireAuth, (req, res) => {
   const scope = scopeOf(req.user);
@@ -147,13 +123,10 @@ router.post("/", requireAuth, requireRole(SPV, MANAGER), (req, res) => {
   });
   tx();
 
-  notify(activeManagerIds(), {
-    type: "delivery.status",
-    title: `Delivery Request ${id} menunggu approval`,
-    body: `${homebase}${site ? ` · ${site}` : ""} · ${items.length} item · divisi ${customer}`,
-    refType: "delivery", refId: id, actor: req.user.name,
-  });
-  webhookDelivery({ id, customer, homebase, site, keperluan, items, requester: req.user.name }, "Menunggu Approval", { actor: req.user.name });
+  announceDelivery(
+    { id, customer, homebase, site, keperluan, itemCount: items.length, requester: req.user.name },
+    { event: "created", actor: req.user.name },
+  );
 
   res.status(201).json(loadDelivery(id));
 });
@@ -187,14 +160,7 @@ router.post("/:id/approve", requireAuth, requireRole(MANAGER), (req, res) => {
   db.prepare("UPDATE deliveries SET status = 'Waiting Stock Assignment' WHERE id = ?").run(delivery.id);
   addHistory(delivery.id, `Approved by ${req.user.name} (Manager) — menunggu penugasan stock oleh Logistics Staff`);
 
-  notifyRequester(delivery, `Delivery Request ${delivery.id} disetujui`, "Menunggu penugasan stock oleh Logistics Staff.", req.user.name);
-  notify(activeLogisticsIdsForDivision(delivery.customer), {
-    type: "delivery.status",
-    title: `Delivery Request ${delivery.id} perlu penugasan stock`,
-    body: `${delivery.homebase} · ${delivery.requester}`,
-    refType: "delivery", refId: delivery.id, actor: req.user.name,
-  });
-  webhookDelivery(delivery, "Disetujui", { actor: req.user.name });
+  announceDelivery(delivery, { event: "approved", actor: req.user.name });
 
   res.json(loadDelivery(delivery.id));
 });
@@ -312,8 +278,7 @@ router.post("/:id/assign-stock", requireAuth, requireRole(LOGISTICS, MANAGER), (
   });
   tx();
 
-  notifyRequester(delivery, `Delivery Request ${delivery.id} sedang disiapkan`, "Stock sudah direservasi, menunggu dokumentasi & pengiriman.", req.user.name);
-  webhookDelivery(delivery, "Sedang Disiapkan", { actor: req.user.name });
+  announceDelivery(delivery, { event: "preparing", actor: req.user.name });
 
   res.json(loadDelivery(delivery.id));
 });
@@ -328,8 +293,7 @@ router.post("/:id/reject", requireAuth, requireRole(MANAGER), (req, res) => {
   }
   db.prepare("UPDATE deliveries SET status = 'Rejected', rejection_reason = ? WHERE id = ?").run(reason.trim(), delivery.id);
   addHistory(delivery.id, `Rejected by ${req.user.name} (Manager) — alasan: ${reason.trim()}`);
-  notifyRequester(delivery, `Delivery Request ${delivery.id} ditolak`, reason.trim(), req.user.name);
-  webhookDelivery(delivery, "Ditolak", { actor: req.user.name, note: reason.trim() });
+  announceDelivery(delivery, { event: "rejected", actor: req.user.name, note: reason.trim() });
   res.json(loadDelivery(delivery.id));
 });
 
@@ -372,16 +336,7 @@ router.post("/:id/cancel", requireAuth, requireRole(MANAGER), (req, res) => {
   });
   tx();
 
-  notifyRequester(delivery, `Delivery Request ${delivery.id} dibatalkan`, reason.trim(), req.user.name);
-  if (releasedStock) {
-    notify(activeLogisticsIdsForDivision(delivery.customer), {
-      type: "delivery.status",
-      title: `Delivery Request ${delivery.id} dibatalkan`,
-      body: `Stock yang direservasi sudah dikembalikan. Alasan: ${reason.trim()}`,
-      refType: "delivery", refId: delivery.id, actor: req.user.name,
-    });
-  }
-  webhookDelivery(delivery, "Dibatalkan", { actor: req.user.name, note: reason.trim() });
+  announceDelivery(delivery, { event: "cancelled", actor: req.user.name, note: reason.trim(), releasedStock });
 
   res.json(loadDelivery(delivery.id));
 });
@@ -444,8 +399,7 @@ router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
   });
   tx();
 
-  notifyRequester(delivery, `Delivery Request ${delivery.id} dalam pengiriman`, `Tujuan: ${delivery.homebase}${delivery.site ? ` · ${delivery.site}` : ""}`, req.user.name);
-  webhookDelivery(delivery, "Dalam Pengiriman", { actor: req.user.name });
+  announceDelivery(delivery, { event: "shipped", actor: req.user.name });
 
   res.json(loadDelivery(delivery.id));
 });
@@ -547,8 +501,7 @@ router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, 
   });
   tx();
 
-  notifyRequester(delivery, `Delivery Request ${delivery.id} sudah sampai (Delivered)`, `${delivery.homebase}${receivedBy ? ` · diterima oleh ${receivedBy}` : ""}`, req.user.name);
-  webhookDelivery(delivery, "Sampai (Delivered)", { actor: req.user.name, note: receivedBy ? `Diterima oleh ${receivedBy}` : null });
+  announceDelivery(delivery, { event: "delivered", actor: req.user.name, note: receivedBy ? `Diterima oleh ${receivedBy}` : null });
 
   res.json(loadDelivery(delivery.id));
 });

@@ -29,10 +29,14 @@ Legenda repo: **[BE]** `terex-backend` · **[FE]** `terex-frontend`
   `routes/notifications.js` (GET/read/read-all), di-fire di 7 transisi delivery
   (create/approve/assign-stock/ship/advance/reject/cancel). Frontend: polling 45 dtk +
   on-focus, dropdown bell dengan unread & "tandai semua dibaca".
-- ✅ **Notifikasi delivery (Lapis 2 — push Telegram)** — backend fire
-  `notifyDeliveryWebhook(...)` di 7 transisi ke `N8N_DELIVERY_WEBHOOK_URL`.
-  Workflow n8n siap-import + panduan: `docs/n8n-delivery-telegram.json` &
-  `docs/NOTIFIKASI_TELEGRAM.md`. Tinggal set env var di Railway + aktifkan workflow.
+- ✅ **Notifikasi delivery (Lapis 2 — Telegram DM per user)** — bot Telegram kirim
+  DM langsung ke user relevan (backend panggil Telegram API sendiri, tanpa n8n).
+  `users.telegram_chat_id`, `utils/telegram.js` (link code + sendMessage),
+  `utils/deliveryNotify.js` (`announceDelivery()` — 1 titik untuk in-app + Telegram +
+  webhook), `routes/telegram.js` (link/unlink + bot webhook). Panel "Hubungkan Telegram"
+  di Settings (semua user). Feed grup via n8n tetap opsional (`N8N_DELIVERY_WEBHOOK_URL`).
+  Setup: `docs/NOTIFIKASI_TELEGRAM.md`. Env: `TELEGRAM_BOT_TOKEN`,
+  `TELEGRAM_BOT_USERNAME`, `TELEGRAM_WEBHOOK_SECRET` + 1× `setWebhook`.
 - ✅ **Fitur baru: `POST /api/deliveries/:id/cancel`** (Manager) — batalkan request sebelum
   dikirim, kembalikan stock yang direservasi.
 
