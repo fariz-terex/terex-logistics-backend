@@ -15,6 +15,7 @@ const reconciliationRoutes = require("./routes/reconciliations");
 const toolRoutes = require("./routes/tools");
 const materialSwapRoutes = require("./routes/materialSwaps");
 const automationRoutes = require("./routes/automation");
+const notificationRoutes = require("./routes/notifications");
 
 // First boot on a fresh volume: schema.sql already ran (via db.js) but every
 // table is empty. Seed once, automatically — this never runs again once
@@ -61,6 +62,7 @@ app.use("/api/reconciliations", reconciliationRoutes);
 app.use("/api/tools", toolRoutes); // /api/tools, /api/tools/serials, /api/tools/receipts, /api/tools/checkouts
 app.use("/api/material-swaps", materialSwapRoutes);
 app.use("/api/automation", automationRoutes);
+app.use("/api/notifications", notificationRoutes);
 app.use("/api/backup", require("./routes/backup")); // GET /api/backup/db — off-site backup job, X-Automation-Key auth
 
 // Centralized error handler: anything thrown synchronously inside a route

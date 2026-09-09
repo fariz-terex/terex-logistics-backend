@@ -3,6 +3,7 @@ const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
 const { scopeOf, scopeAllows, getDivisionStock, adjustStock, adjustConsumable, resolveCreateCustomer } = require("../utils/stock");
+const { notify, activeManagerIds, activeLogisticsIdsForDivision, userIdsByName } = require("../utils/notify");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -54,6 +55,13 @@ function loadDelivery(id) {
 function addHistory(id, text) {
   db.prepare("INSERT INTO delivery_history (delivery_id, time, text) VALUES (?, ?, ?)")
     .run(id, new Date().toISOString(), text);
+}
+
+// In-app notification to whoever created the request (stored as a name).
+function notifyRequester(delivery, title, body, actor) {
+  notify(userIdsByName(delivery.requester), {
+    type: "delivery.status", title, body, refType: "delivery", refId: delivery.id, actor,
+  });
 }
 
 router.get("/", requireAuth, (req, res) => {
@@ -121,6 +129,13 @@ router.post("/", requireAuth, requireRole(SPV, MANAGER), (req, res) => {
   });
   tx();
 
+  notify(activeManagerIds(), {
+    type: "delivery.status",
+    title: `Delivery Request ${id} menunggu approval`,
+    body: `${homebase}${site ? ` · ${site}` : ""} · ${items.length} item · divisi ${customer}`,
+    refType: "delivery", refId: id, actor: req.user.name,
+  });
+
   res.status(201).json(loadDelivery(id));
 });
 
@@ -152,6 +167,14 @@ router.post("/:id/approve", requireAuth, requireRole(MANAGER), (req, res) => {
 
   db.prepare("UPDATE deliveries SET status = 'Waiting Stock Assignment' WHERE id = ?").run(delivery.id);
   addHistory(delivery.id, `Approved by ${req.user.name} (Manager) — menunggu penugasan stock oleh Logistics Staff`);
+
+  notifyRequester(delivery, `Delivery Request ${delivery.id} disetujui`, "Menunggu penugasan stock oleh Logistics Staff.", req.user.name);
+  notify(activeLogisticsIdsForDivision(delivery.customer), {
+    type: "delivery.status",
+    title: `Delivery Request ${delivery.id} perlu penugasan stock`,
+    body: `${delivery.homebase} · ${delivery.requester}`,
+    refType: "delivery", refId: delivery.id, actor: req.user.name,
+  });
 
   res.json(loadDelivery(delivery.id));
 });
@@ -269,6 +292,8 @@ router.post("/:id/assign-stock", requireAuth, requireRole(LOGISTICS, MANAGER), (
   });
   tx();
 
+  notifyRequester(delivery, `Delivery Request ${delivery.id} sedang disiapkan`, "Stock sudah direservasi, menunggu dokumentasi & pengiriman.", req.user.name);
+
   res.json(loadDelivery(delivery.id));
 });
 
@@ -282,6 +307,7 @@ router.post("/:id/reject", requireAuth, requireRole(MANAGER), (req, res) => {
   }
   db.prepare("UPDATE deliveries SET status = 'Rejected', rejection_reason = ? WHERE id = ?").run(reason.trim(), delivery.id);
   addHistory(delivery.id, `Rejected by ${req.user.name} (Manager) — alasan: ${reason.trim()}`);
+  notifyRequester(delivery, `Delivery Request ${delivery.id} ditolak`, reason.trim(), req.user.name);
   res.json(loadDelivery(delivery.id));
 });
 
@@ -323,6 +349,16 @@ router.post("/:id/cancel", requireAuth, requireRole(MANAGER), (req, res) => {
     addHistory(delivery.id, `Dibatalkan oleh ${req.user.name} (Manager) — alasan: ${reason.trim()}${releasedStock ? " · stock yang sudah direservasi dikembalikan ke Ready" : ""}`);
   });
   tx();
+
+  notifyRequester(delivery, `Delivery Request ${delivery.id} dibatalkan`, reason.trim(), req.user.name);
+  if (releasedStock) {
+    notify(activeLogisticsIdsForDivision(delivery.customer), {
+      type: "delivery.status",
+      title: `Delivery Request ${delivery.id} dibatalkan`,
+      body: `Stock yang direservasi sudah dikembalikan. Alasan: ${reason.trim()}`,
+      refType: "delivery", refId: delivery.id, actor: req.user.name,
+    });
+  }
 
   res.json(loadDelivery(delivery.id));
 });
@@ -384,6 +420,8 @@ router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
     addHistory(delivery.id, `Ditandai Shipped oleh ${req.user.name} — dokumentasi pengiriman lengkap`);
   });
   tx();
+
+  notifyRequester(delivery, `Delivery Request ${delivery.id} dalam pengiriman`, `Tujuan: ${delivery.homebase}${delivery.site ? ` · ${delivery.site}` : ""}`, req.user.name);
 
   res.json(loadDelivery(delivery.id));
 });
@@ -484,6 +522,8 @@ router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, 
     addHistory(delivery.id, `Status diubah ke Delivered oleh ${req.user.name}${receivedBy ? ` — diterima oleh ${receivedBy}` : ""}`);
   });
   tx();
+
+  notifyRequester(delivery, `Delivery Request ${delivery.id} sudah sampai (Delivered)`, `${delivery.homebase}${receivedBy ? ` · diterima oleh ${receivedBy}` : ""}`, req.user.name);
 
   res.json(loadDelivery(delivery.id));
 });

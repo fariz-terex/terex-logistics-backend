@@ -513,3 +513,22 @@ CREATE TABLE IF NOT EXISTS cluster_transfers (
 CREATE INDEX IF NOT EXISTS idx_cluster_transfers_sn ON cluster_transfers(sn);
 CREATE INDEX IF NOT EXISTS idx_cluster_transfers_status ON cluster_transfers(status);
 
+-- ===================== IN-APP NOTIFICATIONS =====================
+-- One row per (recipient user, event). Written whenever a delivery changes
+-- status (see utils/notify.js). `ref_type`/`ref_id` let the front-end deep
+-- link to the thing the notification is about. `read_at` NULL = unread.
+CREATE TABLE IF NOT EXISTS notifications (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    TEXT NOT NULL,
+  type       TEXT NOT NULL,          -- e.g. 'delivery.status'
+  title      TEXT NOT NULL,
+  body       TEXT DEFAULT '',
+  ref_type   TEXT,                   -- e.g. 'delivery'
+  ref_id     TEXT,                   -- e.g. the delivery id
+  actor      TEXT,                   -- name of whoever triggered it (for display / to skip self-notify)
+  created_at TEXT NOT NULL,
+  read_at    TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, id);
+CREATE INDEX IF NOT EXISTS idx_notifications_unread ON notifications(user_id, read_at);
+
