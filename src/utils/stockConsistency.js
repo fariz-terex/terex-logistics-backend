@@ -76,6 +76,10 @@ function computeStockConsistency(db) {
         if (total) serialVsMaterialStock.push({ material, customer: null, issue: "serial tanpa divisi (customer NULL)", count: total, byStatus: counts });
         continue;
       }
+      // 'Unassigned' is a migration artifact (see below) — its material_stock
+      // was copied from the old aggregate, not driven by serial statuses, so a
+      // gap here is expected. Reported under `unassignedStock` instead.
+      if (customer === "Unassigned") continue;
 
       const stored = stockCust.get(customer) || zero();
       const fromSerials = {
@@ -105,12 +109,24 @@ function computeStockConsistency(db) {
   }
 
   // ---- Check 4: material_stock rows pointing at an unknown material/customer ----
+  // "Unassigned" is a real synthetic division created by the division-scoping
+  // migration (db.js) for stock that predates that feature — it is expected,
+  // not corruption, so it is reported in its own bucket rather than flagged.
+  const UNASSIGNED = "Unassigned";
   const materialNames = new Set(materials.map((m) => m.name));
   const customerNames = new Set(db.prepare("SELECT name FROM customers").all().map((r) => r.name));
+  customerNames.add(UNASSIGNED);
   const orphans = [];
+  const unassignedStock = [];
   for (const r of stockRows) {
     if (!materialNames.has(r.material)) orphans.push({ type: "material tidak dikenal", material: r.material, customer: r.customer });
-    else if (!customerNames.has(r.customer)) orphans.push({ type: "divisi tidak dikenal", material: r.material, customer: r.customer });
+    else if (r.customer === UNASSIGNED) {
+      if (r.ready || r.faulty || r.reserved || r.in_transit) {
+        unassignedStock.push({ material: r.material, ready: r.ready, faulty: r.faulty, reserved: r.reserved, in_transit: r.in_transit });
+      }
+    } else if (!customerNames.has(r.customer)) {
+      orphans.push({ type: "divisi tidak dikenal", material: r.material, customer: r.customer });
+    }
   }
 
   const realSerialMismatches = serialVsMaterialStock.filter((r) => !r.matchesDeliveredInclusive);
@@ -129,11 +145,13 @@ function computeStockConsistency(db) {
       serialVsMaterialStockExpectedMsg: serialVsMaterialStock.length - realSerialMismatches.length,
       negatives: negatives.length,
       orphans: orphans.length,
+      unassignedStock: unassignedStock.length,
     },
     globalVsDivisionSum,
     serialVsMaterialStock,
     negatives,
     orphans,
+    unassignedStock,
   };
 }
 

@@ -76,6 +76,17 @@ test("serial rows with no division (customer NULL) are reported", () => {
   assert.ok(row && row.customer === null && row.count === 1);
 });
 
+test("'Unassigned' stock is reported separately, not flagged as an orphan or unclean", () => {
+  const db = freshDb();
+  db.exec("INSERT INTO materials VALUES ('Modem G',1, 3,0,0,0)");
+  db.exec("INSERT INTO material_stock VALUES ('Modem G','Unassigned', 3,0,0,0)");
+  const r = computeStockConsistency(db);
+  assert.equal(r.orphans.length, 0);
+  assert.equal(r.summary.unassignedStock, 1);
+  assert.deepEqual(r.unassignedStock[0], { material: "Modem G", ready: 3, faulty: 0, reserved: 0, in_transit: 0 });
+  assert.equal(r.summary.clean, true);
+});
+
 test("non-serialized material is not checked against serial_numbers", () => {
   const db = freshDb();
   db.exec("INSERT INTO materials VALUES ('Kabel',0, 100,0,0,0)");
