@@ -46,15 +46,15 @@ router.post("/webhook/:secret", (req, res) => {
       if (userId) {
         db.prepare("UPDATE users SET telegram_chat_id = ? WHERE id = ?").run(String(chatId), userId);
         const user = db.prepare("SELECT name FROM users WHERE id = ?").get(userId);
-        sendMessage(chatId, `✅ Terhubung, <b>${user ? user.name : ""}</b>. Notifikasi TEREX Logistics akan dikirim ke chat ini.`);
+        sendMessage(chatId, `✅ Terhubung, <b>${user ? user.name : ""}</b>. Notifikasi LMS Terex akan dikirim ke chat ini.`);
       } else {
-        sendMessage(chatId, "⚠️ Kode tidak valid atau sudah kadaluarsa. Buka TEREX → Settings → \"Hubungkan Telegram\" lalu coba lagi.");
+        sendMessage(chatId, "⚠️ Kode tidak valid atau sudah kadaluarsa. Buka LMS Terex → Settings → \"Hubungkan Telegram\" lalu coba lagi.");
       }
     } else if (/^\/start\b/.test(text)) {
-      sendMessage(chatId, "Halo! Untuk menerima notifikasi TEREX Logistics, buka aplikasi TEREX → Settings → \"Hubungkan Telegram\", lalu ikuti tautannya.");
+      sendMessage(chatId, "Halo! Untuk menerima notifikasi LMS Terex, buka aplikasi LMS Terex → Settings → \"Hubungkan Telegram\", lalu ikuti tautannya.");
     } else if (/^\/stop\b/.test(text)) {
       db.prepare("UPDATE users SET telegram_chat_id = NULL WHERE telegram_chat_id = ?").run(String(chatId));
-      sendMessage(chatId, "🔕 Notifikasi dihentikan. Hubungkan lagi kapan saja dari Settings di TEREX.");
+      sendMessage(chatId, "🔕 Notifikasi dihentikan. Hubungkan lagi kapan saja dari Settings di LMS Terex.");
     }
   } catch (err) {
     console.error("[telegram] webhook processing failed:", err.message);
