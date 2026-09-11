@@ -20,7 +20,7 @@ router.post("/", requireAuth, requireRole(MANAGER), (req, res) => {
   if (!name || !category) return res.status(400).json({ error: "name and category are required" });
   if (db.prepare("SELECT 1 FROM materials WHERE name = ?").get(name)) return res.status(409).json({ error: "Material Name sudah ada" });
 
-  const id = paddedSequenceId(db, "materials", "MAT");
+  const id = paddedSequenceId(db, "materials", "MAT", "id");
   db.prepare(`
     INSERT INTO materials (id, name, category, unit, serialized, min_stock, status, ready, faulty, reserved, in_transit)
     VALUES (?, ?, ?, ?, ?, ?, 'Active', 0, 0, 0, 0)

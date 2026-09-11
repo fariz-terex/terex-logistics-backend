@@ -21,7 +21,8 @@ router.get("/", requireAuth, (req, res) => {
 router.post("/", requireAuth, requireRole(MANAGER), (req, res) => {
   const { name, category, unit, minStock } = req.body;
   if (!name || !category) return res.status(400).json({ error: "name and category are required" });
-  const id = paddedSequenceId(db, "consumables", "CSM");
+  if (db.prepare("SELECT 1 FROM consumables WHERE name = ?").get(name)) return res.status(409).json({ error: "Consumable Name sudah ada" });
+  const id = paddedSequenceId(db, "consumables", "CSM", "id");
   db.prepare(`INSERT INTO consumables (id, name, category, unit, min_stock, status, ready, reserved, in_transit) VALUES (?, ?, ?, ?, ?, 'Active', 0, 0, 0)`)
     .run(id, name, category, unit || "Unit", minStock || 0);
   res.status(201).json(db.prepare("SELECT * FROM consumables WHERE id = ?").get(id));
