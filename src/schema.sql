@@ -119,7 +119,10 @@ CREATE TABLE IF NOT EXISTS deliveries (
   bast_filename      TEXT,  -- original filename, for display purposes
   customer           TEXT,  -- division this request belongs to (the requesting SPV's division)
   bkb_link           TEXT,  -- URL to the BKB / Surat Jalan document kept in a separate external system — optional, no API integration exists so this is just a reference link
-  rejection_reason   TEXT   -- why the Manager rejected this request — shown to the requester so they know what to fix/reconsider
+  rejection_reason   TEXT,  -- why the Manager rejected this request — shown to the requester so they know what to fix/reconsider
+  est_arrival_date     TEXT,  -- estimated arrival date, required alongside resi (see POST /:id/resi) — drives the H-2/H-1 Telegram reminder
+  reminder_h2_sent_at  TEXT,  -- set once the H-2 reminder has been sent, so the automation endpoint never double-sends
+  reminder_h1_sent_at  TEXT   -- same for H-1
 );
 
 CREATE TABLE IF NOT EXISTS delivery_items (

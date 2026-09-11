@@ -289,6 +289,18 @@ if (!deliveryColumnsForReject.includes("rejection_reason")) {
   db.exec("ALTER TABLE deliveries ADD COLUMN rejection_reason TEXT");
 }
 
+// Estimasi tanggal sampai (set alongside resi — see routes/deliveries.js
+// POST /:id/resi) plus the two reminder-sent markers the automation
+// endpoint (/api/automation/shipment-reminders) uses to send each H-2/H-1
+// Telegram reminder to Logistics Staff exactly once.
+const deliveryColumnsForEta = db.prepare("PRAGMA table_info(deliveries)").all().map((c) => c.name);
+if (!deliveryColumnsForEta.includes("est_arrival_date")) {
+  console.log("[db] adding est_arrival_date + reminder-sent columns to deliveries");
+  db.exec("ALTER TABLE deliveries ADD COLUMN est_arrival_date TEXT");
+  db.exec("ALTER TABLE deliveries ADD COLUMN reminder_h2_sent_at TEXT");
+  db.exec("ALTER TABLE deliveries ADD COLUMN reminder_h1_sent_at TEXT");
+}
+
 // Adding "Manager Divisi" as a valid role means updating a CHECK
 // constraint, same rebuild pattern as serial_numbers/material_swaps
 // earlier. users.id is referenced by user_divisions via FK, so foreign key

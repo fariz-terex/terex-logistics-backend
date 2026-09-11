@@ -4,6 +4,7 @@ const { requireAutomationKey } = require("../middleware/automationAuth");
 const { dailySequenceId, isoDate } = require("../utils/ids");
 const { markFaulty, sendToCustomer, receiveFromCustomer } = require("../utils/faultyCycle");
 const { computeStockConsistency } = require("../utils/stockConsistency");
+const { sendShipmentReminders } = require("../utils/shipmentReminders");
 const { notifyWebhook } = require("../utils/webhook");
 
 const router = express.Router();
@@ -61,6 +62,16 @@ router.get("/stock-consistency", (req, res) => {
     notifyWebhook("stock-drift", { summary: report.summary });
   }
   res.json({ ok: report.summary.clean, summary: report.summary, report });
+});
+
+// Scheduled job for GitHub Actions: check every Shipped delivery with an
+// est_arrival_date and send Logistics Staff a Telegram + in-app reminder
+// exactly once at H-2 and once at H-1, so a shipment isn't just left
+// unmonitored until it happens to show up. Idempotent per delivery/step —
+// safe to call more than once a day.
+router.get("/shipment-reminders", (req, res) => {
+  const result = sendShipmentReminders(db);
+  res.json({ ok: true, ...result });
 });
 
 // Lets n8n (or anyone debugging) pull recent activity — successes and

@@ -44,6 +44,7 @@ function loadDelivery(id) {
   return {
     ...delivery, items, history,
     docOverall: delivery.doc_overall, docAfterPacking: delivery.doc_after_packing, resiNumber: delivery.resi_number, resiPhoto: delivery.resi_photo,
+    estArrivalDate: delivery.est_arrival_date,
     deliveredPhoto: delivery.delivered_photo, receivedBy: delivery.received_by,
     bastDocument: delivery.bast_document, bastFilename: delivery.bast_filename,
     bkbLink: delivery.bkb_link,
@@ -405,7 +406,7 @@ router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
 });
 
 router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
-  const { resiNumber, resiPhoto } = req.body;
+  const { resiNumber, resiPhoto, estArrivalDate } = req.body;
   if (!resiNumber?.trim() && !resiPhoto) {
     return res.status(400).json({ error: "Isi nomor resi atau upload foto resi" });
   }
@@ -413,10 +414,23 @@ router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
   if (!scopeAllows(scopeOf(req.user), delivery.customer)) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
 
+  const nextEstArrival = estArrivalDate || delivery.est_arrival_date;
+  if (!nextEstArrival) {
+    return res.status(400).json({ error: "Isi estimasi tanggal sampai sesuai resi" });
+  }
+
   const nextNumber = resiNumber?.trim() || delivery.resi_number;
   const nextPhoto = resiPhoto || delivery.resi_photo;
-  db.prepare("UPDATE deliveries SET resi_number = ?, resi_photo = ? WHERE id = ?").run(nextNumber, nextPhoto, delivery.id);
-  addHistory(delivery.id, `Resi ditambahkan${nextNumber ? `: ${nextNumber}` : " (foto)"}`);
+  // A changed ETA re-arms both reminders (e.g. resi corrected/updated) so a
+  // pushed-back date still gets its own H-2/H-1 check instead of staying
+  // silent because the old date already fired one.
+  const etaChanged = nextEstArrival !== delivery.est_arrival_date;
+  db.prepare(`
+    UPDATE deliveries SET resi_number = ?, resi_photo = ?, est_arrival_date = ?
+      ${etaChanged ? ", reminder_h2_sent_at = NULL, reminder_h1_sent_at = NULL" : ""}
+    WHERE id = ?
+  `).run(nextNumber, nextPhoto, nextEstArrival, delivery.id);
+  addHistory(delivery.id, `Resi ditambahkan${nextNumber ? `: ${nextNumber}` : " (foto)"} — estimasi sampai ${nextEstArrival}`);
   res.json(loadDelivery(delivery.id));
 });
 

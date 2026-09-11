@@ -1,0 +1,43 @@
+name: Reminder H-2/H-1 pengiriman
+
+# Panggil endpoint /api/automation/shipment-reminders tiap hari. Endpoint ini
+# yang mengirim notifikasi Telegram + in-app ke Logistics Staff untuk setiap
+# Delivery Request berstatus Shipped yang estimasi sampainya H-2 atau H-1 —
+# supaya paket tidak hanya dibiarkan/ditunggu sampai sendiri. Idempotent per
+# delivery (kolom reminder_h2_sent_at / reminder_h1_sent_at), aman dipanggil
+# berkali-kali.
+#
+# Secret yang dibutuhkan (sama seperti workflow backup & stock-consistency):
+#   AUTOMATION_API_KEY - sama dengan env var di Railway
+
+on:
+  schedule:
+    - cron: "0 1 * * *" # 01:00 UTC = 08:00 WIB, tiap hari
+  workflow_dispatch: {}
+
+concurrency:
+  group: shipment-reminders
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Panggil endpoint reminder
+        env:
+          URL: https://backend-production-5543.up.railway.app/api/automation/shipment-reminders
+          AUTOMATION_API_KEY: ${{ secrets.AUTOMATION_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${AUTOMATION_API_KEY}" ]; then
+            echo "::error::Secret AUTOMATION_API_KEY belum di-set"; exit 1
+          fi
+          curl -fsSL --retry 3 --retry-delay 15 --max-time 120 \
+            -H "X-Automation-Key: ${AUTOMATION_API_KEY}" \
+            -o result.json "${URL}"
+
+          echo "----- ringkasan -----"
+          cat result.json
