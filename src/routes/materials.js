@@ -18,6 +18,7 @@ router.get("/", requireAuth, (req, res) => {
 router.post("/", requireAuth, requireRole(MANAGER), (req, res) => {
   const { name, category, unit, serialized, minStock } = req.body;
   if (!name || !category) return res.status(400).json({ error: "name and category are required" });
+  if (db.prepare("SELECT 1 FROM materials WHERE name = ?").get(name)) return res.status(409).json({ error: "Material Name sudah ada" });
 
   const id = paddedSequenceId(db, "materials", "MAT");
   db.prepare(`
