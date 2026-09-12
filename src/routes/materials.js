@@ -29,6 +29,61 @@ router.post("/", requireAuth, requireRole(MANAGER), (req, res) => {
   res.status(201).json(serialize(db.prepare("SELECT * FROM materials WHERE id = ?").get(id)));
 });
 
+// Renames a material (e.g. fixing a typo). materials.name isn't just a
+// label — it's referenced by name (not id) across a dozen tables, so a
+// rename has to cascade everywhere that value is stored or every existing
+// stock/history row would silently detach from the renamed material.
+// Every table below has a plain `material` (or old_material/new_material)
+// TEXT column that stores the name, whether or not it carries a formal FK.
+const MATERIAL_NAME_CASCADE = [
+  ["material_stock", "material"],
+  ["material_stock_homebase", "material"],
+  ["stock_movements", "material"],
+  ["delivery_items", "material"],
+  ["return_items", "material"],
+  ["reconciliation_items", "material"],
+  ["serial_numbers", "material"],
+  ["stock_transfers", "material"],
+  ["faulty_customer_returns", "material"],
+  ["automation_log", "material"],
+  ["receipts", "material"],
+  ["material_swaps", "old_material"],
+  ["material_swaps", "new_material"],
+  ["cluster_transfers", "material"],
+];
+
+router.patch("/:id", requireAuth, requireRole(MANAGER), (req, res) => {
+  const name = (req.body.name || "").trim();
+  if (!name) return res.status(400).json({ error: "Nama material tidak boleh kosong" });
+
+  const material = db.prepare("SELECT * FROM materials WHERE id = ?").get(req.params.id);
+  if (!material) return res.status(404).json({ error: "Material not found" });
+  if (name === material.name) return res.json(serialize(material));
+
+  const clash = db.prepare("SELECT 1 FROM materials WHERE name = ? AND id != ?").get(name, material.id);
+  if (clash) return res.status(409).json({ error: "Material Name sudah ada" });
+
+  // Several of the cascaded tables have a real FK to materials(name), so
+  // renaming the parent row would fail the moment it no longer matches
+  // those child rows (and vice versa) — FK enforcement has to be off for
+  // this rename, same as the users-table rebuild migration in db.js
+  // (PRAGMA foreign_keys can't be toggled inside a transaction).
+  const tx = db.transaction(() => {
+    db.prepare("UPDATE materials SET name = ? WHERE id = ?").run(name, material.id);
+    for (const [table, column] of MATERIAL_NAME_CASCADE) {
+      db.prepare(`UPDATE ${table} SET ${column} = ? WHERE ${column} = ?`).run(name, material.name);
+    }
+  });
+  db.pragma("foreign_keys = OFF");
+  try {
+    tx();
+  } finally {
+    db.pragma("foreign_keys = ON");
+  }
+
+  res.json(serialize(db.prepare("SELECT * FROM materials WHERE id = ?").get(material.id)));
+});
+
 router.patch("/:id/toggle-status", requireAuth, requireRole(MANAGER), (req, res) => {
   const material = db.prepare("SELECT * FROM materials WHERE id = ?").get(req.params.id);
   if (!material) return res.status(404).json({ error: "Material not found" });
