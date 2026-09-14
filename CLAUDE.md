@@ -72,7 +72,11 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
   lebih andal pakai `git add/commit/push` langsung dari repo.)
 - Setelah deploy backend, cek Railway deploy log ada
   `TEREX Logistics backend listening` dan tidak ada error modul/crash.
-- Frontend butuh hard refresh (Ctrl+Shift+R) setelah deploy karena cache.
+- Frontend sekarang set `Cache-Control` yang benar lewat
+  `terex-frontend/public/serve.json` (di-copy Vite ke `dist/` saat build —
+  taruh di root repo TIDAK terbaca oleh `serve`, harus di `public/`):
+  `index.html` no-cache, `assets/**` immutable. Reload biasa sudah cukup
+  untuk lihat versi terbaru setelah deploy, tidak perlu hard refresh lagi.
 
 ## Status saat ini
 
