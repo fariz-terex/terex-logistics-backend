@@ -6,7 +6,7 @@ const { scopeOf, scopeAllows, scopeClause, resolveCreateCustomer, adjustStock } 
 const { sendToCustomer, receiveFromCustomer } = require("../utils/faultyCycle");
 const { notifyWebhook } = require("../utils/webhook");
 const { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild } = require("../utils/stockConsistency");
-const { parseBkbDocument, matchMaterial } = require("../utils/bkbParser");
+const { parseBkbDocument } = require("../utils/bkbParser");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -320,27 +320,27 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
 });
 
 // Reads an uploaded BKB (photo or PDF) via Claude and returns the line
-// items it found, each paired with a best-effort guess at which Master
-// Material it matches (or null — the frontend always shows this for
-// review/correction, never submits it as-is). Writes nothing to the
-// database; the actual receipt still goes through POST /receipts above,
-// once per item, only after a human confirms it.
+// items it found plus a guessed destination division — each material
+// matched against the Master Material list we hand Claude directly (see
+// bkbParser.js), not a plain string-similarity guess, so differently
+// worded/ordered names on the real document still resolve correctly.
+// Writes nothing to the database; the actual receipt still goes through
+// POST /receipts above, once per item, only after a human confirms it.
 router.post("/parse-bkb", requireAuth, requireRole(LOGISTICS, MANAGER), async (req, res) => {
   const { document } = req.body;
   if (!document) return res.status(400).json({ error: "Dokumen BKB wajib diupload" });
   try {
-    const rawItems = await parseBkbDocument(document);
-    const materials = db.prepare("SELECT id, name, serialized FROM materials WHERE status = 'Active'").all();
-    const items = rawItems.map((it) => {
-      const match = matchMaterial(it.material, materials);
-      return {
-        rawMaterial: it.material, qty: it.qty, serials: it.serials, note: it.note,
-        matchedMaterial: match ? match.name : null,
-        matchedSerialized: match ? !!match.serialized : null,
-        confidence: match ? match.confidence : "none",
-      };
-    });
-    res.json({ items });
+    const materialNames = db.prepare("SELECT name FROM materials WHERE status = 'Active'").all().map((r) => r.name);
+    const divisionNames = db.prepare("SELECT name FROM customers WHERE status = 'Active'").all().map((r) => r.name);
+    const materialsByName = new Map(
+      db.prepare("SELECT name, serialized FROM materials WHERE status = 'Active'").all().map((m) => [m.name, !!m.serialized])
+    );
+    const result = await parseBkbDocument(document, { materialNames, divisionNames });
+    const items = result.items.map((it) => ({
+      ...it,
+      matchedSerialized: it.matchedMaterial ? materialsByName.get(it.matchedMaterial) : null,
+    }));
+    res.json({ division: result.division, items });
   } catch (err) {
     res.status(err.status || 500).json({ error: err.message || "Gagal membaca dokumen BKB" });
   }
