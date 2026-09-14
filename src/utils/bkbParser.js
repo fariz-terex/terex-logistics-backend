@@ -32,9 +32,16 @@ ${materialList}
 DAFTAR DIVISI YANG VALID DI SISTEM:
 ${divisionList}
 
+PENTING — dokumen ini akan dipakai untuk fitur "Penerimaan Barang Baru" (Goods Receipt): barang baru yang masuk ke gudang dari SUPPLIER/VENDOR EKSTERNAL. Dokumen lain yang sekilas mirip tapi BUKAN ini, misalnya:
+- Tanda terima PENGEMBALIAN material dari site/customer/teknisi kembali ke gudang ("Pengembalian Material", "Retur", material yang tadinya sudah terpasang/terkirim lalu ditarik balik)
+- Berita Acara Serah Terima (BAST) instalasi
+- Surat jalan PENGIRIMAN KELUAR dari gudang ke site (bukan barang masuk)
+- Dokumen lain yang tidak ada hubungannya dengan pergerakan barang gudang
+
 Tugas Anda:
-1. Tentukan divisi tujuan penerimaan barang ini berdasarkan isi dokumen (kop surat, nama pengirim/penerima, referensi site/project, catatan, dll). Jawab HANYA salah satu nama persis dari DAFTAR DIVISI di atas, atau null jika sama sekali tidak yakin.
-2. Untuk SETIAP baris barang di dokumen, ekstrak:
+1. Tentukan "documentType": "penerimaan_baru" HANYA jika dokumen ini benar-benar barang baru masuk gudang dari supplier/vendor eksternal. Kalau dokumen ini pengembalian/retur material dari site/customer, isi "pengembalian_material". Kalau BAST atau lainnya, isi "lainnya". Kalau benar-benar tidak jelas, isi "tidak_jelas".
+2. Tentukan divisi tujuan penerimaan barang ini berdasarkan isi dokumen (kop surat, nama pengirim/penerima, referensi site/project, catatan, dll). Jawab HANYA salah satu nama persis dari DAFTAR DIVISI di atas, atau null jika sama sekali tidak yakin.
+3. Untuk SETIAP baris barang di dokumen, ekstrak (tetap ekstrak baris barangnya walaupun documentType bukan "penerimaan_baru" — biarkan manusia yang memutuskan):
    - "rawMaterial": nama barang PERSIS seperti tertulis di dokumen (jangan diterjemahkan/disingkat)
    - "matchedMaterial": nama yang paling cocok dari DAFTAR MASTER MATERIAL di atas — HARUS disalin PERSIS karakter demi karakter dari daftar itu (bukan dari dokumen). Kalau benar-benar tidak ada yang cocok maknanya, isi null. JANGAN mengarang nama yang tidak ada di daftar.
    - "confidence": "tinggi" kalau yakin cocok, "rendah" kalau hanya perkiraan, "tidak_ada" kalau matchedMaterial null
@@ -43,9 +50,9 @@ Tugas Anda:
    - "note": catatan tambahan pada baris itu jika ada (kondisi, nomor PO/BKB, dll) — string kosong jika tidak ada
 
 Balas HANYA dengan JSON valid, tanpa penjelasan atau teks lain, persis format ini:
-{"division": "...", "items": [{"rawMaterial": "...", "matchedMaterial": "...", "confidence": "...", "qty": 0, "serials": [], "note": "..."}]}
+{"documentType": "...", "division": "...", "items": [{"rawMaterial": "...", "matchedMaterial": "...", "confidence": "...", "qty": 0, "serials": [], "note": "..."}]}
 
-Jika dokumen tidak terbaca sama sekali atau tidak berisi daftar barang, balas: {"division": null, "items": []}`;
+Jika dokumen tidak terbaca sama sekali atau tidak berisi daftar barang, balas: {"documentType": "tidak_jelas", "division": null, "items": []}`;
 }
 
 async function callClaude(mimeType, base64, prompt) {
@@ -109,6 +116,7 @@ function parseResponse(text) {
     throw err;
   }
   return {
+    documentType: ["penerimaan_baru", "pengembalian_material", "lainnya"].includes(parsed.documentType) ? parsed.documentType : "tidak_jelas",
     division: parsed.division == null ? null : String(parsed.division).trim(),
     items: parsed.items
       .map((it) => ({
@@ -147,6 +155,7 @@ async function parseBkbDocument(dataUrl, { materialNames, divisionNames }) {
   const materialSet = new Set(materialNames);
   const divisionSet = new Set(divisionNames);
   return {
+    documentType: result.documentType,
     division: result.division && divisionSet.has(result.division) ? result.division : null,
     items: result.items.map((it) => ({
       ...it,

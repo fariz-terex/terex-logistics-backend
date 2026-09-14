@@ -340,7 +340,7 @@ router.post("/parse-bkb", requireAuth, requireRole(LOGISTICS, MANAGER), async (r
       ...it,
       matchedSerialized: it.matchedMaterial ? materialsByName.get(it.matchedMaterial) : null,
     }));
-    res.json({ division: result.division, items });
+    res.json({ documentType: result.documentType, division: result.division, items });
   } catch (err) {
     res.status(err.status || 500).json({ error: err.message || "Gagal membaca dokumen BKB" });
   }
