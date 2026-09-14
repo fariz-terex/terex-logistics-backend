@@ -11,7 +11,6 @@ const { parseBkbDocument } = require("../utils/bkbParser");
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
 const LOGISTICS = "Logistics Staff";
-const TECH = "Technician";
 
 router.get("/", requireAuth, (req, res) => {
   const { customer: customerOverride } = req.query;
@@ -327,12 +326,7 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
 // worded/ordered names on the real document still resolve correctly.
 // Writes nothing to the database; the actual receipt still goes through
 // POST /receipts above, once per item, only after a human confirms it.
-// LOGISTICS/MANAGER use this for Goods Receipt; TECH uses the exact same
-// endpoint for Return Material Faulty (a technician's "Tanda Terima
-// Pengembalian" document) — same extraction, the returned documentType
-// tells each frontend whether what got uploaded actually matches what
-// that screen expects.
-router.post("/parse-bkb", requireAuth, requireRole(LOGISTICS, MANAGER, TECH), async (req, res) => {
+router.post("/parse-bkb", requireAuth, requireRole(LOGISTICS, MANAGER), async (req, res) => {
   const { document } = req.body;
   if (!document) return res.status(400).json({ error: "Dokumen BKB wajib diupload" });
   try {
