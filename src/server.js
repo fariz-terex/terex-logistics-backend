@@ -49,7 +49,21 @@ app.use(cors({
 }));
 app.use(express.json({ limit: "30mb" })); // generous limit: base64 photos in the request body — frontend now also compresses images before upload
 
-app.get("/api/health", (req, res) => res.json({ ok: true, service: "terex-logistics-backend" }));
+// RAILWAY_GIT_COMMIT_SHA is set automatically by Railway for a GitHub-linked
+// service (both at build and at runtime) — falls back to running `git`
+// directly for local dev, where that env var doesn't exist.
+function currentCommit() {
+  if (process.env.RAILWAY_GIT_COMMIT_SHA) return process.env.RAILWAY_GIT_COMMIT_SHA.slice(0, 7);
+  try {
+    return require("child_process").execSync("git rev-parse --short HEAD").toString().trim();
+  } catch {
+    return "unknown";
+  }
+}
+const startedAt = new Date().toISOString();
+const commit = currentCommit();
+
+app.get("/api/health", (req, res) => res.json({ ok: true, service: "terex-logistics-backend", commit, startedAt }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/materials", materialRoutes);
