@@ -564,4 +564,15 @@ const PIM_CLUSTERS = [
 const insertCluster = db.prepare("INSERT OR IGNORE INTO clusters (code, name, customer, pic, status) VALUES (?, ?, ?, ?, 'Active')");
 PIM_CLUSTERS.forEach((c) => insertCluster.run(c.code, c.name, PIM_DIVISION, c.pic));
 
+// Lets a Transfer Stock be cancelled/reversed (POST /stock/transfers/:id/cancel)
+// instead of being permanent the instant it's submitted — every existing row
+// defaults to 'Completed' so nothing already done changes meaning.
+const transferColumns = db.prepare("PRAGMA table_info(stock_transfers)").all().map((c) => c.name);
+if (!transferColumns.includes("status")) {
+  console.log("[db] adding status/cancelled_by/cancelled_at columns to stock_transfers");
+  db.exec("ALTER TABLE stock_transfers ADD COLUMN status TEXT NOT NULL DEFAULT 'Completed'");
+  db.exec("ALTER TABLE stock_transfers ADD COLUMN cancelled_by TEXT");
+  db.exec("ALTER TABLE stock_transfers ADD COLUMN cancelled_at TEXT");
+}
+
 module.exports = db;

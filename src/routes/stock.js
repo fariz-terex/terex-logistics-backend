@@ -458,6 +458,62 @@ router.post("/transfers", requireAuth, requireRole(LOGISTICS, MANAGER), (req, re
   });
 });
 
+// Reverses a Transfer Stock — for fixing a mistaken entry, not a normal
+// business flow (there's no approval step to undo here; the transfer was
+// applied instantly on submit). Only safe to reverse automatically while
+// nothing has touched the units/qty since: a serialized unit must still be
+// sitting at homebaseTo with status Delivered, and for a non-serialized
+// material homebaseTo must still hold at least `qty`. If either isn't true
+// (the unit got installed, moved again, qty got used elsewhere), this
+// rejects with a clear reason instead of silently producing wrong numbers —
+// whoever needs it will have to fix it by hand instead.
+router.post("/transfers/:id/cancel", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+  const transfer = db.prepare("SELECT * FROM stock_transfers WHERE id = ?").get(req.params.id);
+  if (!transfer) return res.status(404).json({ error: "Transfer not found" });
+  if (transfer.status === "Cancelled") return res.status(409).json({ error: "Transfer ini sudah dibatalkan sebelumnya" });
+  if (!scopeAllows(scopeOf(req.user), transfer.customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
+
+  const mat = db.prepare("SELECT * FROM materials WHERE name = ?").get(transfer.material);
+
+  const tx = db.transaction(() => {
+    if (mat && mat.serialized) {
+      const serials = db.prepare("SELECT sn FROM stock_transfer_serials WHERE transfer_id = ?").all(transfer.id).map((r) => r.sn);
+      const rows = serials.map((sn) => db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(sn));
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || row.status !== "Delivered" || row.homebase !== transfer.homebase_to) {
+          throw new Error(`Serial Number ${serials[i]} sudah berubah sejak transfer ini (status/homebase tidak lagi cocok) — tidak bisa dibatalkan otomatis`);
+        }
+      }
+      const update = db.prepare("UPDATE serial_numbers SET homebase = ? WHERE sn = ?");
+      serials.forEach((sn) => update.run(transfer.homebase_from, sn));
+    } else {
+      const dest = db.prepare("SELECT qty FROM material_stock_homebase WHERE material = ? AND customer = ? AND homebase = ?")
+        .get(transfer.material, transfer.customer, transfer.homebase_to);
+      if (!dest || dest.qty < transfer.qty) {
+        throw new Error(`Stock ${transfer.material} di ${transfer.homebase_to} sudah berkurang sejak transfer ini (tersedia: ${dest ? dest.qty : 0}) — tidak bisa dibatalkan otomatis`);
+      }
+      db.prepare("UPDATE material_stock_homebase SET qty = qty - ? WHERE material = ? AND customer = ? AND homebase = ?")
+        .run(transfer.qty, transfer.material, transfer.customer, transfer.homebase_to);
+      db.prepare(`
+        INSERT INTO material_stock_homebase (material, customer, homebase, qty) VALUES (?, ?, ?, ?)
+        ON CONFLICT(material, customer, homebase) DO UPDATE SET qty = qty + excluded.qty
+      `).run(transfer.material, transfer.customer, transfer.homebase_from, transfer.qty);
+    }
+
+    db.prepare("UPDATE stock_transfers SET status = 'Cancelled', cancelled_by = ?, cancelled_at = ? WHERE id = ?")
+      .run(req.user.name, new Date().toISOString(), transfer.id);
+  });
+
+  try {
+    tx();
+  } catch (err) {
+    return res.status(409).json({ error: err.message });
+  }
+
+  res.json(db.prepare("SELECT * FROM stock_transfers WHERE id = ?").get(transfer.id));
+});
+
 // ===================== TRANSFER ANTAR CLUSTER =====================
 // Move ownership of a specific serialized unit from one PIM cluster to
 // another, WITHIN the same division. Requires the owning cluster's SPV to

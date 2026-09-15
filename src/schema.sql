@@ -284,7 +284,10 @@ CREATE TABLE IF NOT EXISTS stock_transfers (
   qty           INTEGER NOT NULL,
   performed_by  TEXT NOT NULL,
   date          TEXT NOT NULL,
-  note          TEXT DEFAULT ''
+  note          TEXT DEFAULT '',
+  status        TEXT NOT NULL DEFAULT 'Completed',  -- 'Completed' | 'Cancelled'
+  cancelled_by  TEXT,
+  cancelled_at  TEXT
 );
 
 CREATE TABLE IF NOT EXISTS stock_transfer_serials (
