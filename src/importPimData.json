@@ -1,0 +1,6972 @@
+[
+ {
+  "sn": "DSH.0324.06554",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.06556",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.06555",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604P4E13",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604PA442",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604P4932",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604PB4A4",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604P51D4",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604P624E",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604P738E",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604P7B0A",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-1",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-07-21"
+ },
+ {
+  "sn": "34604P9521",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702231212383",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR REJE PEPAYUNGEN ANGKUP",
+  "installedDate": "2026-05-14"
+ },
+ {
+  "sn": "C60015123180A6",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "SD NEGERI 10 SILIH NARA",
+  "installedDate": "2025-01-07"
+ },
+ {
+  "sn": "346015D1F6",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "PONDOK PESANTREN PUTRI AL-MIZAN 2",
+  "installedDate": "2026-06-26"
+ },
+ {
+  "sn": "346015C64B",
+  "material": "Router Grandstream GWN7003",
+  "status": "Faulty",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "3460157EAE",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "MDTA BABUSSALAM",
+  "installedDate": "2026-05-29"
+ },
+ {
+  "sn": "3460154316",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "PONDOK PESANTREN PUTRI AL-MIZAN 2",
+  "installedDate": "2026-06-08"
+ },
+ {
+  "sn": "3460157869",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR GAMPONG LAMME GAROT",
+  "installedDate": "2025-08-01"
+ },
+ {
+  "sn": "2024070485",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024070486",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "MADRASAH TSANAWIYAH LAMPAKUK",
+  "installedDate": "2025-02-25"
+ },
+ {
+  "sn": "2024070487",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071457",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR GEUCHIK GAMPONG WEU",
+  "installedDate": "2025-02-28"
+ },
+ {
+  "sn": "2024071458",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071644",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071460",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071641",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071642",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Faulty",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071643",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Faulty",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071459",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.06557",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604R5663",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "PONDOK PESANTREN RAUDLATUL MUTTAQIN",
+  "installedDate": "2025-04-25"
+ },
+ {
+  "sn": "34604R4E96",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH AL-MANSHUR SUKAMANAH",
+  "installedDate": "2024-12-27"
+ },
+ {
+  "sn": "702315100462",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "PONDOK PESANTREN SALAFIAH TORIQUL HUDA",
+  "installedDate": "2025-01-29"
+ },
+ {
+  "sn": "702232500034",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702231312555",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "SDN KIARAPAYUNG 01",
+  "installedDate": "2025-05-04"
+ },
+ {
+  "sn": "C60015081481AD",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "PONDOK PESANTREN SALAFI NURUL HUDA AL-HASANI",
+  "installedDate": "2025-04-14"
+ },
+ {
+  "sn": "346015430E",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "PON-PES SALAFIYAH PUTRA PUTRI ALHIJRAH 2",
+  "installedDate": "2025-06-23"
+ },
+ {
+  "sn": "346015694E",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "PONDOK PESANTREN RAUDLATUL MUTTAQIN",
+  "installedDate": "2025-04-25"
+ },
+ {
+  "sn": "2024070962",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "PONPES AN - NUR",
+  "installedDate": "2025-09-11"
+ },
+ {
+  "sn": "2024070961",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "PON-PES SALAFIYAH PUTRA PUTRI ALHIJRAH 2",
+  "installedDate": "2025-06-23"
+ },
+ {
+  "sn": "2024070488",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "PONDOK PESANTREN RAUDHATUL JANNAH",
+  "installedDate": "2026-05-18"
+ },
+ {
+  "sn": "2024070964",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH AL-MANSHUR SUKAMANAH",
+  "installedDate": "2025-08-20"
+ },
+ {
+  "sn": "2024070963",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "PON-PES MAJLIS TA'LIM ASYIFA",
+  "installedDate": "2025-09-02"
+ },
+ {
+  "sn": "DSH.0324.06553",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.06552",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604P5F91",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604PBFD8",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604PDAFB",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "KANTOR GAMPONG WARABO",
+  "installedDate": "2026-05-03"
+ },
+ {
+  "sn": "34604P2601",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "MAJLIS TA'LIM AS-SA'ADAH NURUL HUDA - PANIMBANG",
+  "installedDate": "2024-01-24"
+ },
+ {
+  "sn": "34604P479D",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "GAMPONG MEUNASAH TUTONG",
+  "installedDate": "2025-01-06"
+ },
+ {
+  "sn": "34604P4711",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "SMK DWI PUTRA BANGSA",
+  "installedDate": "2025-03-19"
+ },
+ {
+  "sn": "702232008319",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702232009309",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "BANTEN-1",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS)",
+  "installedDate": "2025-10-24"
+ },
+ {
+  "sn": "702232012998",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702231308207",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "YAYASAN NURUL FALAH SINDANG RESMI",
+  "installedDate": "2026-05-24"
+ },
+ {
+  "sn": "702231306813",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "KANTOR DESA SUKADAME",
+  "installedDate": "2026-05-18"
+ },
+ {
+  "sn": "702228400512",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C60015278212AD",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "BANTEN-1",
+  "installSite": "UPTD Puskesmas Samarkilang",
+  "installedDate": "2026-01-09"
+ },
+ {
+  "sn": "C60015277904AK",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "BANTEN-1",
+  "installSite": "KANTOR REJE SIMPANG KEMILI",
+  "installedDate": "2025-12-27"
+ },
+ {
+  "sn": "C60015277889AW",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "BANTEN-1",
+  "installSite": "KANTOR REJE KAMPUNG DAMARAN BARU",
+  "installedDate": "2025-12-23"
+ },
+ {
+  "sn": "34605J260A",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PENGINAPAN MATAIE HOMESTAY",
+  "installedDate": "2025-10-22"
+ },
+ {
+  "sn": "346015403F",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PONDOK PESANTREN DARUL ATTAUHID",
+  "installedDate": "2025-02-24"
+ },
+ {
+  "sn": "346015E0C9",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "MADRASAH TSANAWIYAH LAMPAKUK",
+  "installedDate": "2025-02-25"
+ },
+ {
+  "sn": "2024062969",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "Pondok Pesantren Nasha Ihul Ibad",
+  "installedDate": "2025-09-26"
+ },
+ {
+  "sn": "2024062970",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PONDOK PESANTREN HIDAYATUL KHOIROT",
+  "installedDate": "2026-05-11"
+ },
+ {
+  "sn": "2024062971",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "DARUL ATFAL",
+  "installedDate": "2026-05-18"
+ },
+ {
+  "sn": "2024063271",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024063272",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024063269",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024063270",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C240708141",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "GEDUNG SERBAGUNA DESA PAKUK",
+  "installedDate": "2025-02-24"
+ },
+ {
+  "sn": "C240704001",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "KANTOR KEUCHIK GAMPONG LIMO BLANG",
+  "installedDate": "2025-12-23"
+ },
+ {
+  "sn": "DSH.0324.06512",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.06511",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.06510",
+  "material": "Antenna Jonsa E97",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PONDOK PESANTREN TAHFIDZ AL-QUR'AN MATHLA'UL ANWAR TAQURMA",
+  "installedDate": "2025-02-15"
+ },
+ {
+  "sn": "34604P8809",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "MADRASAH IBTIDAIYAH LANGKAPLANCAR",
+  "installedDate": "2025-11-19"
+ },
+ {
+  "sn": "34604P55D6",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "SMP NEGERI 5 SAKETI",
+  "installedDate": "2026-08-03"
+ },
+ {
+  "sn": "34604P435B",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604RF542",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604R5861",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604R2401",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604P9A7F",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "MTS AL-IHSAN",
+  "installedDate": "2026-04-20"
+ },
+ {
+  "sn": "34604PC2BB",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PUSKESMAS CIPARAY DTP",
+  "installedDate": "2026-08-08"
+ },
+ {
+  "sn": "34604R136D",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604R14F6",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604R445B",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702315201542",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702315103854",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR KEPALA DESA CIBIRU HILIR KABUPATEN BANDUNG",
+  "installedDate": "2025-03-18"
+ },
+ {
+  "sn": "702231204083",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "SMP NEGERI CIMANGGU 4",
+  "installedDate": "2026-03-31"
+ },
+ {
+  "sn": "702231301723",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "JABAR-1B",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-03-11"
+ },
+ {
+  "sn": "702232016205",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702315001538",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702231407918",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C60015123867AI",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C60015063372AC",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PONDOK PESANTREN AN NAJIAH",
+  "installedDate": "2025-09-25"
+ },
+ {
+  "sn": "C60015129750AF",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PON-PES SALAFIYAH PUTRA PUTRI ALHIJRAH 2",
+  "installedDate": "2025-06-23"
+ },
+ {
+  "sn": "34605J1043",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "MADRASAH IBTIDAIYAH LANGKAPLANCAR",
+  "installedDate": "2025-09-10"
+ },
+ {
+  "sn": "34605JEBF2",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "MADRASAH IBTIDAIYAH MI ANNIZHOMIYYAH",
+  "installedDate": "2026-04-12"
+ },
+ {
+  "sn": "3460155F5A",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "MADRASAH TSANAWIYAH AL-MANSHUR SUKAMANAH",
+  "installedDate": "2025-08-29"
+ },
+ {
+  "sn": "346015AB91",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PONDOK PESANTREN AN NAJIAH",
+  "installedDate": "2025-11-04"
+ },
+ {
+  "sn": "34605JD554",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "MI SWASTA AR ROHMAH",
+  "installedDate": "2026-06-10"
+ },
+ {
+  "sn": "34605J772C",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PONDOK PESANTREN SALAFIYAH MIFTAHUL HUSNA",
+  "installedDate": "2025-05-10"
+ },
+ {
+  "sn": "2024061787",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024063464",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024063819",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "SMP MEKARSARI",
+  "installedDate": "2025-11-18"
+ },
+ {
+  "sn": "2024063820",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "SMP TARBIYATUL AULAD",
+  "installedDate": "2025-10-08"
+ },
+ {
+  "sn": "2024070445",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PONPES AR-RAUDHOH PANIIS",
+  "installedDate": "2025-02-26"
+ },
+ {
+  "sn": "2024070446",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024072216",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024070448",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071126",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071127",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024072213",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "Kantor Desa Neglasari",
+  "installedDate": "2025-09-29"
+ },
+ {
+  "sn": "2024072214",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024072215",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024070447",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "EH0018442685M5",
+  "material": "Transceiver Hughes HT3210",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "RA MIFTAHUL HIKMAH",
+  "installedDate": "2025-02-28"
+ },
+ {
+  "sn": "EH0018470078AX",
+  "material": "Transceiver Hughes HT3210",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR KEPALA DESA DARMACAANG",
+  "installedDate": "2025-02-21"
+ },
+ {
+  "sn": "E8AWB3000452AD",
+  "material": "Modem with adaptor Hughes WE3100",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "RA MIFTAHUL HIKMAH",
+  "installedDate": "2025-02-28"
+ },
+ {
+  "sn": "E8AWB3000697AO",
+  "material": "Modem with adaptor Hughes WE3100",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR KEPALA DESA DARMACAANG",
+  "installedDate": "2025-02-21"
+ },
+ {
+  "sn": "EH0018442603AQ",
+  "material": "Transceiver Hughes HT3210",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR GEUCHIK GAMPONG WEU",
+  "installedDate": "2025-02-28"
+ },
+ {
+  "sn": "EH0018468940M7",
+  "material": "Transceiver Hughes HT3210",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "MADRASAH TSANAWIYAH LAMPAKUK",
+  "installedDate": "2025-02-25"
+ },
+ {
+  "sn": "EH0018470161AQ",
+  "material": "Transceiver Hughes HT3210",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "PONDOK PESANTREN MIFTACHUL ULUM BANI SALIM",
+  "installedDate": "2025-02-16"
+ },
+ {
+  "sn": "EH0018470172AS",
+  "material": "Transceiver Hughes HT3210",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-1",
+  "installSite": "RAUDHATUL ATHFAL (RA) AS SYIFA",
+  "installedDate": null
+ },
+ {
+  "sn": "E8A9C3000132AT",
+  "material": "Modem with adaptor Hughes WE3100",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "MADRASAH TSANAWIYAH LAMPAKUK",
+  "installedDate": "2025-02-25"
+ },
+ {
+  "sn": "E8AWB3000825AH",
+  "material": "Modem with adaptor Hughes WE3100",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "PONDOK PESANTREN MIFTACHUL ULUM BANI SALIM",
+  "installedDate": "2025-02-16"
+ },
+ {
+  "sn": "E8AWB3000201A5",
+  "material": "Modem with adaptor Hughes WE3100",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR GEUCHIK GAMPONG WEU",
+  "installedDate": "2025-02-28"
+ },
+ {
+  "sn": "E8AWB3000893AM",
+  "material": "Modem with adaptor Hughes WE3100",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-3",
+  "installSite": "SMPN 1 SINGAJAYA",
+  "installedDate": "2025-02-28"
+ },
+ {
+  "sn": "EH0018468964A1",
+  "material": "Transceiver Hughes HT3210",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-3",
+  "installSite": "SMPN 1 SINGAJAYA",
+  "installedDate": "2025-02-28"
+ },
+ {
+  "sn": "EH0018468708M9",
+  "material": "Transceiver Hughes HT3210",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "YAYASAN PONDOK PESANTREN AL-BAROKAH",
+  "installedDate": "2025-02-17"
+ },
+ {
+  "sn": "E8AWB3000714AE",
+  "material": "Modem with adaptor Hughes WE3100",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "YAYASAN PONDOK PESANTREN AL-BAROKAH",
+  "installedDate": "2025-02-17"
+ },
+ {
+  "sn": "NONSN-B0017",
+  "material": "Boom Arm",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "RAUDHATUL ATHFAL (RA) AS SYIFA",
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0018",
+  "material": "Boom Arm",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "RA MIFTAHUL HIKMAH",
+  "installedDate": "2025-02-28"
+ },
+ {
+  "sn": "NONSN-B0019",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0020",
+  "material": "Boom Arm",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR KEPALA DESA DARMACAANG",
+  "installedDate": "2025-02-21"
+ },
+ {
+  "sn": "NONSN-B0021",
+  "material": "Boom Arm",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "SMPN 1 SINGAJAYA",
+  "installedDate": "2025-02-28"
+ },
+ {
+  "sn": "NONSN-B0022",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0023",
+  "material": "Boom Arm",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR GEUCHIK GAMPONG WEU",
+  "installedDate": "2025-02-28"
+ },
+ {
+  "sn": "NONSN-B0024",
+  "material": "Boom Arm",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "MADRASAH TSANAWIYAH LAMPAKUK",
+  "installedDate": "2025-02-25"
+ },
+ {
+  "sn": "NONSN-B0025",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0026",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0027",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0028",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0029",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0030",
+  "material": "Boom Arm",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PONDOK PESANTREN MIFTACHUL ULUM BANI SALIM",
+  "installedDate": "2025-02-16"
+ },
+ {
+  "sn": "NONSN-B0031",
+  "material": "Boom Arm",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "YAYASAN PONDOK PESANTREN AL-BAROKAH",
+  "installedDate": "2025-02-17"
+ },
+ {
+  "sn": "NONSN-B0032",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0033",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0017",
+  "material": "Feed Support",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "MADRASAH TSANAWIYAH LAMPAKUK",
+  "installedDate": "2025-02-25"
+ },
+ {
+  "sn": "NONSN-F0018",
+  "material": "Feed Support",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "RA MIFTAHUL HIKMAH",
+  "installedDate": "2025-02-28"
+ },
+ {
+  "sn": "NONSN-F0019",
+  "material": "Feed Support",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "RAUDHATUL ATHFAL (RA) AS SYIFA",
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0020",
+  "material": "Feed Support",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "SMPN 1 SINGAJAYA",
+  "installedDate": "2025-02-28"
+ },
+ {
+  "sn": "NONSN-F0021",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0022",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0023",
+  "material": "Feed Support",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR KEPALA DESA DARMACAANG",
+  "installedDate": "2025-02-21"
+ },
+ {
+  "sn": "NONSN-F0024",
+  "material": "Feed Support",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "GEDUNG SERBAGUNA DESA PAKUK",
+  "installedDate": "2025-02-24"
+ },
+ {
+  "sn": "NONSN-F0025",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0026",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0027",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0028",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0029",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0030",
+  "material": "Feed Support",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PONDOK PESANTREN MIFTACHUL ULUM BANI SALIM",
+  "installedDate": "2025-02-16"
+ },
+ {
+  "sn": "NONSN-F0031",
+  "material": "Feed Support",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "YAYASAN PONDOK PESANTREN AL-BAROKAH",
+  "installedDate": "2025-02-17"
+ },
+ {
+  "sn": "NONSN-F0032",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0033",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0034",
+  "material": "Boom arm Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PONDOK PESANTREN TAHFIDZ AL-QUR'AN MATHLA'UL ANWAR TAQURMA",
+  "installedDate": "2025-02-15"
+ },
+ {
+  "sn": "NONSN-B0035",
+  "material": "Boom arm Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "SEKOLAH MENENGAH PERTAMA WELAS ASIH",
+  "installedDate": "2026-05-04"
+ },
+ {
+  "sn": "NONSN-B0036",
+  "material": "Boom arm Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR DESA SUNGAI BATANG",
+  "installedDate": "2026-05-05"
+ },
+ {
+  "sn": "NONSN-B0037",
+  "material": "Boom arm Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "RA MIFTAHUL HIKMAH",
+  "installedDate": "2026-04-17"
+ },
+ {
+  "sn": "NONSN-F0034",
+  "material": "Feed support Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PONDOK PESANTREN TAHFIDZ AL-QUR'AN MATHLA'UL ANWAR TAQURMA",
+  "installedDate": "2025-02-15"
+ },
+ {
+  "sn": "NONSN-F0035",
+  "material": "Feed support Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "SEKOLAH MENENGAH PERTAMA WELAS ASIH",
+  "installedDate": "2026-04-17"
+ },
+ {
+  "sn": "NONSN-F0036",
+  "material": "Feed support Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR DESA SUNGAI BATANG",
+  "installedDate": "2026-05-04"
+ },
+ {
+  "sn": "NONSN-F0037",
+  "material": "Feed support Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-1",
+  "installSite": "RA MIFTAHUL HIKMAH",
+  "installedDate": "2026-05-05"
+ },
+ {
+  "sn": "E8AWB3000140A7",
+  "material": "Modem with adaptor Hughes WE3100",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "SEKOLAH MENENGAH PERTAMA WELAS ASIH",
+  "installedDate": "2025-03-21"
+ },
+ {
+  "sn": "E8AWB3000231A8",
+  "material": "Modem with adaptor Hughes WE3100",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR KEPALA DESA JELAT",
+  "installedDate": "2025-04-09"
+ },
+ {
+  "sn": "EH0018442702AQ",
+  "material": "Transceiver Hughes HT3210",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "SEKOLAH MENENGAH PERTAMA WELAS ASIH",
+  "installedDate": "2025-02-25"
+ },
+ {
+  "sn": "EH0018469990A1",
+  "material": "Transceiver Hughes HT3210",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR KEPALA DESA JELAT",
+  "installedDate": "2026-04-28"
+ },
+ {
+  "sn": "NONSN-B0147",
+  "material": "Boom Arm",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "SEKOLAH MENENGAH PERTAMA WELAS ASIH",
+  "installedDate": "2025-02-25"
+ },
+ {
+  "sn": "NONSN-B0148",
+  "material": "Boom Arm",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR KEPALA DESA JELAT",
+  "installedDate": "2025-04-09"
+ },
+ {
+  "sn": "NONSN-F0147",
+  "material": "Feed Support",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "SEKOLAH MENENGAH PERTAMA WELAS ASIH",
+  "installedDate": "2025-03-21"
+ },
+ {
+  "sn": "NONSN-F0148",
+  "material": "Feed Support",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR KEPALA DESA JELAT",
+  "installedDate": "2026-04-28"
+ },
+ {
+  "sn": "34605J45E1",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA KARASON RAYA",
+  "installedDate": "2026-06-08"
+ },
+ {
+  "sn": "346015E35A",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "MADRASAH TSANAWIYAH AL KHAIRIYAH",
+  "installedDate": "2026-04-17"
+ },
+ {
+  "sn": "3460150981",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA MAHANYAN",
+  "installedDate": "2025-08-10"
+ },
+ {
+  "sn": "34605J9AD0",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA TUMBANG OROI",
+  "installedDate": "2025-10-11"
+ },
+ {
+  "sn": "34604P68A1",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "MTs NURUL FALAH",
+  "installedDate": "2025-10-20"
+ },
+ {
+  "sn": "34604R0DAF",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "Kantor Desa Penda Siron",
+  "installedDate": "2025-09-15"
+ },
+ {
+  "sn": "34509FFA94",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "TK BULUH MARINDU",
+  "installedDate": "2025-09-19"
+ },
+ {
+  "sn": "34509FE605",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34509F7E2C",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "MADRASAH ALIYAH NURUL HIDAYAH",
+  "installedDate": "2025-07-16"
+ },
+ {
+  "sn": "34509F21AF",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "Kantor Desa KARALI",
+  "installedDate": "2025-09-14"
+ },
+ {
+  "sn": "34604PF5F0",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA BUKIT BAMBA",
+  "installedDate": "2026-02-09"
+ },
+ {
+  "sn": "DSH.0324.01833",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.01834",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.01835",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.01831",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.01832",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702230610926",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702229111407",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR KEPALA DESA BUNTOI",
+  "installedDate": "2026-05-14"
+ },
+ {
+  "sn": "702229111878",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR KEPALA DESA BUNTOI",
+  "installedDate": "2026-05-06"
+ },
+ {
+  "sn": "702230611668",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "MTS DARUL HUDA BABAI",
+  "installedDate": "2026-04-22"
+ },
+ {
+  "sn": "702230614159",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "MADRASAH TSANAWIYAH AL-IHSAN",
+  "installedDate": "2026-05-30"
+ },
+ {
+  "sn": "C60015081241A7",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C60015080916AF",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA KARYA BERSAMA",
+  "installedDate": "2025-11-06"
+ },
+ {
+  "sn": "C60015137236AD",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C60015136888AP",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA BERENG RAMBANG",
+  "installedDate": "2025-10-24"
+ },
+ {
+  "sn": "C60015061823AB",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "MADRASAH IBTIDAIYAH NEGERI 1 BARITO SELATAN",
+  "installedDate": "2026-05-11"
+ },
+ {
+  "sn": "CC0015374826AR",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA TUMBANG OROI",
+  "installedDate": "2025-07-24"
+ },
+ {
+  "sn": "CC0015375078AR",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA SEI ANTAI",
+  "installedDate": "2025-07-12"
+ },
+ {
+  "sn": "CC0015376451AN",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA TOKUNG",
+  "installedDate": "2025-08-05"
+ },
+ {
+  "sn": "CC0015375276AR",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA BERENG BALAWAN",
+  "installedDate": "2025-07-03"
+ },
+ {
+  "sn": "CC0015376542AO",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Faulty",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C241003995",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "SD NEGERI TAJAH ANTANG RAYA",
+  "installedDate": "2025-10-30"
+ },
+ {
+  "sn": "C241005126",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR KEPALA DESA TINO TALIH",
+  "installedDate": "2025-11-07"
+ },
+ {
+  "sn": "C241005142",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA LAAS BARU",
+  "installedDate": "2025-10-28"
+ },
+ {
+  "sn": "C241005161",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA BERENG BALAWAN",
+  "installedDate": "2025-07-03"
+ },
+ {
+  "sn": "C241005162",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA SEI ANTAI",
+  "installedDate": "2025-07-12"
+ },
+ {
+  "sn": "2024065291",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024070690",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071310",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071312",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071315",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071817",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071820",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071819",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024071818",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "CC0015375277AS",
+  "material": "Modem Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR  KEUCHIK GAMPONG BAET LAMPUOT",
+  "installedDate": "2025-07-04"
+ },
+ {
+  "sn": "NONSN-F0168",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0169",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0170",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0171",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0172",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0168",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0169",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0170",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0171",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0172",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0173",
+  "material": "Feed support Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "KALTENG-1",
+  "installSite": "SMPN 1 SINGAJAYA",
+  "installedDate": "2026-05-05"
+ },
+ {
+  "sn": "NONSN-F0174",
+  "material": "Feed support Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR GEUCHIK GAMPONG WEU",
+  "installedDate": "2026-05-04"
+ },
+ {
+  "sn": "NONSN-F0175",
+  "material": "Feed support Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "MADRASAH TSANAWIYAH LAMPAKUK",
+  "installedDate": "2026-05-07"
+ },
+ {
+  "sn": "NONSN-F0176",
+  "material": "Feed support Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "BALAI PENDIDIKAN PONDOK PESANTREN DARUSSALAM",
+  "installedDate": "2025-11-03"
+ },
+ {
+  "sn": "NONSN-F0177",
+  "material": "Feed support Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA SEI ANTAI",
+  "installedDate": "2025-07-12"
+ },
+ {
+  "sn": "NONSN-B0173",
+  "material": "Boom arm Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA SEI ANTAI",
+  "installedDate": "2025-07-12"
+ },
+ {
+  "sn": "NONSN-B0174",
+  "material": "Boom arm Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "BALAI PENDIDIKAN PONDOK PESANTREN DARUSSALAM",
+  "installedDate": "2025-11-03"
+ },
+ {
+  "sn": "NONSN-B0175",
+  "material": "Boom arm Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "SMPN 1 SINGAJAYA",
+  "installedDate": "2026-05-05"
+ },
+ {
+  "sn": "NONSN-B0176",
+  "material": "Boom arm Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR GEUCHIK GAMPONG WEU",
+  "installedDate": "2026-05-08"
+ },
+ {
+  "sn": "NONSN-B0177",
+  "material": "Boom arm Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "MADRASAH TSANAWIYAH LAMPAKUK",
+  "installedDate": "2026-05-04"
+ },
+ {
+  "sn": "NONSN-P0013",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA LIANG NYALING",
+  "installedDate": "2025-07-11"
+ },
+ {
+  "sn": "NONSN-P0014",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "RAUDHAUL ATHFAL (RA) NURUL IMAN",
+  "installedDate": "2025-07-14"
+ },
+ {
+  "sn": "NONSN-P0015",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "Kantor Desa Tumbang Tuan",
+  "installedDate": "2025-07-13"
+ },
+ {
+  "sn": "NONSN-P0016",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA CINTA BUDIMAN",
+  "installedDate": "2025-07-04"
+ },
+ {
+  "sn": "NONSN-P0017",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA KARASON RAYA",
+  "installedDate": "2025-07-17"
+ },
+ {
+  "sn": "NONSN-P0018",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "MADRASAH TSANAWIYAH AL-MUJAHIDIN",
+  "installedDate": "2025-07-14"
+ },
+ {
+  "sn": "NONSN-P0019",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA NAGREG KENDAN",
+  "installedDate": "2025-07-12"
+ },
+ {
+  "sn": "NONSN-P0020",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA NAGREG KENDAN",
+  "installedDate": "2025-07-12"
+ },
+ {
+  "sn": "NONSN-STIKER089",
+  "material": "Sticker Komdigi",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "DESA BALUKUN",
+  "installedDate": "2025-08-07"
+ },
+ {
+  "sn": "NONSN-STIKER090",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER091",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER092",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER093",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER094",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER095",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER096",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER097",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER098",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER099",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER100",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER101",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER102",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER103",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER104",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER105",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER106",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER107",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER108",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER109",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER110",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER111",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER112",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER113",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "R.0324.04385",
+  "material": "Rack Wallmount 6U",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR DESA NAGREG KENDAN",
+  "installedDate": "2025-07-12"
+ },
+ {
+  "sn": "34604PD444",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR DESA NAGREG KENDAN",
+  "installedDate": "2025-07-12"
+ },
+ {
+  "sn": "34604PE498",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR DESA NAGREG KENDAN",
+  "installedDate": "2025-07-12"
+ },
+ {
+  "sn": "ACCESSORIES001",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR DESA NAGREG KENDAN",
+  "installedDate": "2025-07-12"
+ },
+ {
+  "sn": "BACKFRAME2025001",
+  "material": "Back frame antenna",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR DESA NAGREG KENDAN",
+  "installedDate": "2025-07-12"
+ },
+ {
+  "sn": "POLE/MOUNTING0012025",
+  "material": "Pole mounting penetrating",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR DESA NAGREG KENDAN",
+  "installedDate": "2025-07-12"
+ },
+ {
+  "sn": "DESK0012025",
+  "material": "Desk rack & stabilizer",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR DESA NAGREG KENDAN",
+  "installedDate": "2025-07-12"
+ },
+ {
+  "sn": "NONSN-P0033",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "MADRASAH IBTIDAIYAH LANGKAP LANGACAR",
+  "installedDate": "2025-08-30"
+ },
+ {
+  "sn": "NONSN-P0034",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "MADRASAH IBTIDAIYAH LANGKAP LANGACAR",
+  "installedDate": "2025-08-30"
+ },
+ {
+  "sn": "NONSN-B0188",
+  "material": "Boom arm Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PONDOK PESANTREN MIFTACHUL ULUM BANI SALIM",
+  "installedDate": "2026-05-05"
+ },
+ {
+  "sn": "NONSN-F0188",
+  "material": "Feed support Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PONDOK PESANTREN MIFTACHUL ULUM BANI SALIM",
+  "installedDate": "2026-06-05"
+ },
+ {
+  "sn": "CC0015377517AR",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "MAHENG MAHENG",
+  "installedDate": "2025-09-20"
+ },
+ {
+  "sn": "CC0015377508AR",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-1",
+  "installSite": "RA NURUSSA'ADAH",
+  "installedDate": "2025-10-10"
+ },
+ {
+  "sn": "C240403104",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR DESA MEKARPAWITAN",
+  "installedDate": "2025-12-24"
+ },
+ {
+  "sn": "C240406805",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR GEUCHIK GAMPONG NIRON",
+  "installedDate": "2026-03-04"
+ },
+ {
+  "sn": "C240406227",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR KEUCHIK GAMPONG LAMSINYEU",
+  "installedDate": "2025-10-18"
+ },
+ {
+  "sn": "C240405790",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "YAYASAN PONDOK PESANTREN AL-BAROKAH",
+  "installedDate": "2026-04-24"
+ },
+ {
+  "sn": "C240405769",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-1",
+  "installSite": "RA NURUSSA'ADAH",
+  "installedDate": "2025-10-10"
+ },
+ {
+  "sn": "C240405071",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR REJE BERGANG",
+  "installedDate": "2026-04-28"
+ },
+ {
+  "sn": "C240405080",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR KEPALA DESA JELAT",
+  "installedDate": "2026-04-28"
+ },
+ {
+  "sn": "C240405086",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C240405728",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR DESA SUNGAI BATANG",
+  "installedDate": "2026-05-04"
+ },
+ {
+  "sn": "C240405756",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-1",
+  "installSite": "SEKOLAH MENENGAH PERTAMA WELAS ASIH",
+  "installedDate": "2026-05-04"
+ },
+ {
+  "sn": "CC0015375232AJ",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "KANTOR KEUCHIK GAMPONG PIYEUNG DATU",
+  "installedDate": "2025-08-25"
+ },
+ {
+  "sn": "C241005109",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "BANTEN-1",
+  "installSite": "SMPN 1 SINGAJAYA",
+  "installedDate": "2026-05-05"
+ },
+ {
+  "sn": "2024071983",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PONDOK PESANTREN PUTRI AL-MIZAN 2",
+  "installedDate": null
+ },
+ {
+  "sn": "CC0015376464AR",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR DESA MEKARPAWITAN",
+  "installedDate": "2025-09-11"
+ },
+ {
+  "sn": "CC0015377096AT",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PONPES AR-RAUDHOH PANIIS",
+  "installedDate": "2026-02-26"
+ },
+ {
+  "sn": "C241004011",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C241004017",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR DESA TUMBANG KUAYAN",
+  "installedDate": "2026-04-17"
+ },
+ {
+  "sn": "C241005170",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PONPES AR-RAUDHOH PANIIS",
+  "installedDate": "2026-03-02"
+ },
+ {
+  "sn": "C241005165",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PONDOK PESANTREN TAHFIDZ GLOBAL AL-JABBAR",
+  "installedDate": "2026-03-24"
+ },
+ {
+  "sn": "C241005156",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR DESA NONO KLIWON",
+  "installedDate": "2026-04-21"
+ },
+ {
+  "sn": "C241005151",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "pondok pesantren miftahulhuda",
+  "installedDate": "2026-04-24"
+ },
+ {
+  "sn": "C241005140",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR KEPALA DESA DARMACAANG",
+  "installedDate": "2025-12-06"
+ },
+ {
+  "sn": "C241005110",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR GEUCHIK GAMPONG WEU",
+  "installedDate": "2026-05-07"
+ },
+ {
+  "sn": "C241005108",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Faulty",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C241005102",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "BALAI PENDIDIKAN PONDOK PESANTREN DARUSSALAM",
+  "installedDate": "2025-11-03"
+ },
+ {
+  "sn": "C241004025",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "RA MIFTAHUL HIKMAH",
+  "installedDate": "2026-05-05"
+ },
+ {
+  "sn": "NONSN-F0189",
+  "material": "Feed support Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PONDOK PESANTREN AL-HIDAYAH",
+  "installedDate": "2025-08-16"
+ },
+ {
+  "sn": "NONSN-B0189",
+  "material": "Boom arm Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PONDOK PESANTREN AL-HIDAYAH",
+  "installedDate": "2025-08-16"
+ },
+ {
+  "sn": "NONSN-F0190",
+  "material": "Feed support Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR KEPALA DESA DARMACAANG",
+  "installedDate": "2025-12-06"
+ },
+ {
+  "sn": "NONSN-B0190",
+  "material": "Boom arm Revgo military",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR KEPALA DESA DARMACAANG",
+  "installedDate": "2025-12-06"
+ },
+ {
+  "sn": "CC0015377483AT",
+  "material": "Modem Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA TUMBANG KUAYAN",
+  "installedDate": "2026-04-17"
+ },
+ {
+  "sn": "CC0015375230AH",
+  "material": "Modem Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA “MATHLABUL ‘ULUM",
+  "installedDate": "2025-11-15"
+ },
+ {
+  "sn": "CC0015375229AP",
+  "material": "Modem Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "KALTENG-1",
+  "installSite": "BALAI PENDIDIKAN PONDOK PESANTREN DARUSSALAM",
+  "installedDate": "2025-11-03"
+ },
+ {
+  "sn": "CC0015374188AS",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR KEPALA DESA CISONTROL",
+  "installedDate": "2025-12-02"
+ },
+ {
+  "sn": "CC0015377487AX",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR KEPALA DESA DARMACAANG",
+  "installedDate": "2025-12-06"
+ },
+ {
+  "sn": "CC0015375189AU",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PONDOK PESANTREN RAUDLATUL MUTA'ALIMIN",
+  "installedDate": "2025-12-30"
+ },
+ {
+  "sn": "34604P7E9A",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PONDOK PESANTREN PUTRI AL-MIZAN 2",
+  "installedDate": "2026-04-10"
+ },
+ {
+  "sn": "34604P0253",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "SMP NEGERI 5 SAKETI",
+  "installedDate": "2026-08-03"
+ },
+ {
+  "sn": "C240603024",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PONDOK PESANTREN RAUDLATUL MUTA'ALIMIN",
+  "installedDate": "2025-12-30"
+ },
+ {
+  "sn": "2024061786",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PONDOK PESANTREN RAUDLATUL MUTA'ALIMIN",
+  "installedDate": "2025-12-30"
+ },
+ {
+  "sn": "34402443FC",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "RESORT RANCAPINANG",
+  "installedDate": "2026-01-17"
+ },
+ {
+  "sn": "NONSN-P0109",
+  "material": "PoE",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-P0110",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PONDOK PESANTREN PUTRI AL-MIZAN 2",
+  "installedDate": "2026-04-10"
+ },
+ {
+  "sn": "DSH.0324.07405",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.07404",
+  "material": "Antenna Jonsa E97",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "DSH.0324.07403",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.07402",
+  "material": "Antenna Jonsa E97",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "DSH.0324.07401",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.07406",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C60015080960AE",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AL ARIF",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "C60015286738AP",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RAUDHATUL ATHFAL (RA) RAUDHATUL HASANAH",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "C60015101746AA",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG WAQ TOWEREN",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "C60015081290AB",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "C60015080956AJ",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH AL-AMIN",
+  "installedDate": "2026-02-14"
+ },
+ {
+  "sn": "C60015291022A7",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "702231300386",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG WAQ TOWEREN",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "702315010596",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "702315006537",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "702315101411",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH AL-AMIN",
+  "installedDate": "2026-02-14"
+ },
+ {
+  "sn": "702315102021",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AL ARIF",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "702315103938",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RAUDHATUL ATHFAL (RA) RAUDHATUL HASANAH",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "34605J0981",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH AL-AMIN",
+  "installedDate": "2026-02-14"
+ },
+ {
+  "sn": "34605J8893",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RAUDHATUL ATHFAL (RA) RAUDHATUL HASANAH",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "34605JACD7",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "34605JAE49",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "34605JC4BD",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG WAQ TOWEREN",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "3460150AE2",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AL ARIF",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "34604PADAA",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH AL-AMIN",
+  "installedDate": "2026-02-14"
+ },
+ {
+  "sn": "34604PF3A2",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "34604PDFDF",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG WAQ TOWEREN",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "34604PEC89",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG WAQ TOWEREN",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "34604R58D5",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AL ARIF",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "34604PA268",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "34604P8B2B",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "34604P88CA",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RAUDHATUL ATHFAL (RA) RAUDHATUL HASANAH",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "34604R8252",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AL ARIF",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "34604P37C9",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RAUDHATUL ATHFAL (RA) RAUDHATUL HASANAH",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "34604P0F68",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH AL-AMIN",
+  "installedDate": "2026-02-14"
+ },
+ {
+  "sn": "34604P4B0C",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "2024064100",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AL ARIF",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "2024065166",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "2024064421",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG WAQ TOWEREN",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "2024061623",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH AL-AMIN",
+  "installedDate": "2026-02-14"
+ },
+ {
+  "sn": "2024061621",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "2024061622",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RAUDHATUL ATHFAL (RA) RAUDHATUL HASANAH",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "R.0324.09512",
+  "material": "Rack Wallmount 6U",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH AL-AMIN",
+  "installedDate": "2026-02-14"
+ },
+ {
+  "sn": "R.0324.09513",
+  "material": "Rack Wallmount 6U",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "R.0324.09514",
+  "material": "Rack Wallmount 6U",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 2 RANTAU PAUH",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "R.0324.09515",
+  "material": "Rack Wallmount 6U",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AL ARIF",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "R.0324.09517",
+  "material": "Rack Wallmount 6U",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MTs Swasta Sunting",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "R.0324.09519",
+  "material": "Rack Wallmount 6U",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH JAMALUL 'ARAFAH",
+  "installedDate": "2026-02-19"
+ },
+ {
+  "sn": "DSH.0324.07407",
+  "material": "Antenna Jonsa E97",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "DSH.0324.07408",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.07413",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.07409",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.07410",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.07411",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.07412",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C60015277568AQ",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 2 RANTAU PAUH",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "C60015061882AG",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MTs Swasta Sunting",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "C60015080774AH",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "C60015127732AD",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH JAMALUL 'ARAFAH",
+  "installedDate": "2026-02-19"
+ },
+ {
+  "sn": "C60015151413A6",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA Darul Muta'alimin",
+  "installedDate": "2026-02-16"
+ },
+ {
+  "sn": "C60015286330AD",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "C60015079727AN",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "702229900692",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA Darul Muta'alimin",
+  "installedDate": "2026-02-16"
+ },
+ {
+  "sn": "702207502163",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 2 RANTAU PAUH",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "702229000105",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "702230703598",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH JAMALUL 'ARAFAH",
+  "installedDate": "2026-02-19"
+ },
+ {
+  "sn": "702312803498",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "702312809487",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MTs Swasta Sunting",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "702315201369",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "34605KC8D0",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH JAMALUL 'ARAFAH",
+  "installedDate": "2026-02-19"
+ },
+ {
+  "sn": "3460158BC4",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA Darul Muta'alimin",
+  "installedDate": "2026-02-16"
+ },
+ {
+  "sn": "3460157DD0",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "34601558E0",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "34605J8031",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 2 RANTAU PAUH",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "34402444E5",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "3440256430",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MTs Swasta Sunting",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "34604R22FF",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "34604R0C80",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "34604PAF5F",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH JAMALUL 'ARAFAH",
+  "installedDate": "2026-02-19"
+ },
+ {
+  "sn": "34604P9F9B",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 2 RANTAU PAUH",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "34604P709F",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 2 RANTAU PAUH",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "34604P09D7",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH JAMALUL 'ARAFAH",
+  "installedDate": "2026-02-19"
+ },
+ {
+  "sn": "34604R2397",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "34604RD1F7",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA Darul Muta'alimin",
+  "installedDate": "2026-02-16"
+ },
+ {
+  "sn": "34604RA2C7",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA Darul Muta'alimin",
+  "installedDate": "2026-02-16"
+ },
+ {
+  "sn": "34604R937A",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "34604R78D3",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "34604R4CBD",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "34604R400A",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MTs Swasta Sunting",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "34604RD724",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MTs Swasta Sunting",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "2024071389",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "2024064390",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "2024064099",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "2024064097",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA Darul Muta'alimin",
+  "installedDate": "2026-02-16"
+ },
+ {
+  "sn": "2024071372",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 2 RANTAU PAUH",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "2024061797",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH JAMALUL 'ARAFAH",
+  "installedDate": "2026-02-19"
+ },
+ {
+  "sn": "2024071390",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MTs Swasta Sunting",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "R.0324.09520",
+  "material": "Rack Wallmount 6U",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RAUDHATUL ATHFAL (RA) RAUDHATUL HASANAH",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "R.0324.09521",
+  "material": "Rack Wallmount 6U",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "R.0324.09522",
+  "material": "Rack Wallmount 6U",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "R.0324.09524",
+  "material": "Rack Wallmount 6U",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA Darul Muta'alimin",
+  "installedDate": "2026-02-16"
+ },
+ {
+  "sn": "R.0324.09525",
+  "material": "Rack Wallmount 6U",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "R.0324.09526",
+  "material": "Rack Wallmount 6U",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG WAQ TOWEREN",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "R.0324.09527",
+  "material": "Rack Wallmount 6U",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "34801FA616",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "MTs Nurul Falah",
+  "installedDate": "2026-04-08"
+ },
+ {
+  "sn": "CC0015376460AN",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "KANTOR GAMPONG IE ALANG DAYAH",
+  "installedDate": "2026-02-14"
+ },
+ {
+  "sn": "C60015008799AO",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "PONDOK PESANTREN NURUSSA'ADAH",
+  "installedDate": "2026-01-28"
+ },
+ {
+  "sn": "34801F2638",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "SMP NEGERI SATU ATAP 2 KAHAYAN TENGAH",
+  "installedDate": "2026-05-18"
+ },
+ {
+  "sn": "344024CC86",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "MAJLIS TA'LIM AS-SHIDIQILAULAD",
+  "installedDate": "2026-04-20"
+ },
+ {
+  "sn": "C60015123814AA",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "DARUL BAYAN BEUNGBEU",
+  "installedDate": "2026-01-29"
+ },
+ {
+  "sn": "34605J4C3A",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "RESORT CIBADAK",
+  "installedDate": "2026-03-30"
+ },
+ {
+  "sn": "346015CE5F",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "ANTOR KEPALA DESA SUKASETIA",
+  "installedDate": "2026-04-01"
+ },
+ {
+  "sn": "CC0015375221AH",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR GAMPONG IE ALANG MESJID",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "346015FD46",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "PONDOK PESANTREN MIFTACHUL ULUM BANI SALIM",
+  "installedDate": "2026-01-29"
+ },
+ {
+  "sn": "NONSN-F0195",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0196",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0197",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0198",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0199",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0200",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00001",
+  "material": "Back frame antenna",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "SDN UJUNGJAYA 1",
+  "installedDate": "2026-05-05"
+ },
+ {
+  "sn": "NONSN-00002",
+  "material": "Back frame antenna",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "GEDUNG PKK DESA AYON",
+  "installedDate": "2026-08-10"
+ },
+ {
+  "sn": "NONSN00003",
+  "material": "Back frame antenna",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00004",
+  "material": "Back frame antenna",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00005",
+  "material": "Back frame antenna",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00006",
+  "material": "Back frame antenna",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0196",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0197",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0198",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0199",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0200",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0201",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00007",
+  "material": "Pole mounting penetrating",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00008",
+  "material": "Pole mounting penetrating",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00009",
+  "material": "Pole mounting penetrating",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00010",
+  "material": "Pole mounting penetrating",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00011",
+  "material": "Pole mounting penetrating",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00012",
+  "material": "Pole mounting penetrating",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-P0125",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "NONSN-P0126",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "NONSN-P0127",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-P0128",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-P0129",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH AL-AMIN",
+  "installedDate": "2026-02-14"
+ },
+ {
+  "sn": "NONSN-P0130",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH AL-AMIN",
+  "installedDate": "2026-02-14"
+ },
+ {
+  "sn": "NONSN-P0131",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AL ARIF",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-P0132",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AL ARIF",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-P0133",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA Darul Muta'alimin",
+  "installedDate": "2026-02-16"
+ },
+ {
+  "sn": "NONSN-P0134",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA Darul Muta'alimin",
+  "installedDate": "2026-02-16"
+ },
+ {
+  "sn": "NONSN-P0135",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 2 RANTAU PAUH",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "NONSN-P0136",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 2 RANTAU PAUH",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "NONSN00013",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "NONSN00014",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN00015",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH AL-AMIN",
+  "installedDate": "2026-02-14"
+ },
+ {
+  "sn": "NONSN00016",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AL ARIF",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN00017",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA Darul Muta'alimin",
+  "installedDate": "2026-02-16"
+ },
+ {
+  "sn": "NONSN00018",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 2 RANTAU PAUH",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "NONSN00019",
+  "material": "Desk rack & stabilizer",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "NONSN00020",
+  "material": "Desk rack & stabilizer",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN00021",
+  "material": "Desk rack & stabilizer",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH AL-AMIN",
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00022",
+  "material": "Desk rack & stabilizer",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AL ARIF",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN00023",
+  "material": "Desk rack & stabilizer",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA Darul Muta'alimin",
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00024",
+  "material": "Desk rack & stabilizer",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 2 RANTAU PAUH",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "NONSN00025",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "NONSN00026",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN00027",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH AL-AMIN",
+  "installedDate": "2026-02-14"
+ },
+ {
+  "sn": "NONSN00028",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AL ARIF",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN00029",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA Darul Muta'alimin",
+  "installedDate": "2026-02-16"
+ },
+ {
+  "sn": "NONSN00030",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 2 RANTAU PAUH",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "NONSN-STIKER148",
+  "material": "Sticker Komdigi",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "NONSN-STIKER149",
+  "material": "Sticker Komdigi",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-STIKER150",
+  "material": "Sticker Komdigi",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH AL-AMIN",
+  "installedDate": "2026-02-14"
+ },
+ {
+  "sn": "NONSN-STIKER151",
+  "material": "Sticker Komdigi",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AL ARIF",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-STIKER152",
+  "material": "Sticker Komdigi",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA Darul Muta'alimin",
+  "installedDate": "2026-02-16"
+ },
+ {
+  "sn": "NONSN-STIKER153",
+  "material": "Sticker Komdigi",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 2 RANTAU PAUH",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "NONSN-STIKER154",
+  "material": "Sticker PIM",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI ALUR JAMBU",
+  "installedDate": "2026-02-21"
+ },
+ {
+  "sn": "NONSN-STIKER155",
+  "material": "Sticker PIM",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AS-SYIFA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-STIKER156",
+  "material": "Sticker PIM",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH AL-AMIN",
+  "installedDate": "2026-02-14"
+ },
+ {
+  "sn": "NONSN-STIKER157",
+  "material": "Sticker PIM",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA AL ARIF",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-STIKER158",
+  "material": "Sticker PIM",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA Darul Muta'alimin",
+  "installedDate": "2026-02-16"
+ },
+ {
+  "sn": "NONSN-STIKER159",
+  "material": "Sticker PIM",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 2 RANTAU PAUH",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "NONSN-F0201",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0202",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0203",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0204",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0205",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0206",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0207",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00031",
+  "material": "Back frame antenna",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00032",
+  "material": "Back frame antenna",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00033",
+  "material": "Back frame antenna",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00034",
+  "material": "Back frame antenna",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00035",
+  "material": "Back frame antenna",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00036",
+  "material": "Back frame antenna",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00037",
+  "material": "Back frame antenna",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0202",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0203",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0204",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0205",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0206",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0207",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0208",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00038",
+  "material": "Pole mounting penetrating",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00039",
+  "material": "Pole mounting penetrating",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00040",
+  "material": "Pole mounting penetrating",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00041",
+  "material": "Pole mounting penetrating",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00042",
+  "material": "Pole mounting penetrating",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00043",
+  "material": "Pole mounting penetrating",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN00044",
+  "material": "Pole mounting penetrating",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-P0137",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-P0138",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-P0139",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MTS Swasta Sunting",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "NONSN-P0140",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MTS Swasta Sunting",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "NONSN-P0141",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RAUDHATUL ATHFAL (RA) RAUDHATUL HASANAH",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "NONSN-P0142",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RAUDHATUL ATHFAL (RA) RAUDHATUL HASANAH",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "NONSN-P0143",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH JAMALUL 'ARAFAH",
+  "installedDate": "2026-02-19"
+ },
+ {
+  "sn": "NONSN-P0144",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH JAMALUL 'ARAFAH",
+  "installedDate": "2026-02-19"
+ },
+ {
+  "sn": "NONSN-P0145",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "NONSN-P0146",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "NONSN-P0147",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG WAQ TOWEREN",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "NONSN-P0148",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG WAQ TOWEREN",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "NONSN-P0149",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-P0150",
+  "material": "PoE",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN00045",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN00046",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MTS Swasta Sunting",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "NONSN00047",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RAUDHATUL ATHFAL (RA) RAUDHATUL HASANAH",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "NONSN00048",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH JAMALUL 'ARAFAH",
+  "installedDate": "2026-02-19"
+ },
+ {
+  "sn": "NONSN00049",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "NONSN00050",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG WAQ TOWEREN",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "NONSN00051",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN00052",
+  "material": "Desk rack & stabilizer",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN00053",
+  "material": "Desk rack & stabilizer",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MTS Swasta Sunting",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "NONSN00054",
+  "material": "Desk rack & stabilizer",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RAUDHATUL ATHFAL (RA) RAUDHATUL HASANAH",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "NONSN00055",
+  "material": "Desk rack & stabilizer",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH JAMALUL 'ARAFAH",
+  "installedDate": "2026-02-19"
+ },
+ {
+  "sn": "NONSN00056",
+  "material": "Desk rack & stabilizer",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "NONSN00057",
+  "material": "Desk rack & stabilizer",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG WAQ TOWEREN",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "NONSN00058",
+  "material": "Desk rack & stabilizer",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN00059",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN00060",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MTS Swasta Sunting",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "NONSN00061",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RAUDHATUL ATHFAL (RA) RAUDHATUL HASANAH",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "NONSN00062",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH JAMALUL 'ARAFAH",
+  "installedDate": "2026-02-19"
+ },
+ {
+  "sn": "NONSN00063",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "NONSN00064",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG WAQ TOWEREN",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "NONSN00065",
+  "material": "Accessories VSAT RTGS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-STIKER160",
+  "material": "Sticker Komdigi",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-STIKER161",
+  "material": "Sticker Komdigi",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MTS Swasta Sunting",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "NONSN-STIKER162",
+  "material": "Sticker Komdigi",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RAUDHATUL ATHFAL (RA) RAUDHATUL HASANAH",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "NONSN-STIKER163",
+  "material": "Sticker Komdigi",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH JAMALUL 'ARAFAH",
+  "installedDate": "2026-02-19"
+ },
+ {
+  "sn": "NONSN-STIKER164",
+  "material": "Sticker Komdigi",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "NONSN-STIKER165",
+  "material": "Sticker Komdigi",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG WAQ TOWEREN",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "NONSN-STIKER166",
+  "material": "Sticker Komdigi",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-STIKER167",
+  "material": "Sticker PIM",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH IBTIDAIYAH SWASTA (MIS) PULAU TIGA",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "NONSN-STIKER168",
+  "material": "Sticker PIM",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MTS Swasta Sunting",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "NONSN-STIKER169",
+  "material": "Sticker PIM",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RAUDHATUL ATHFAL (RA) RAUDHATUL HASANAH",
+  "installedDate": "2026-02-13"
+ },
+ {
+  "sn": "NONSN-STIKER170",
+  "material": "Sticker PIM",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "MADRASAH TSANAWIYAH JAMALUL 'ARAFAH",
+  "installedDate": "2026-02-19"
+ },
+ {
+  "sn": "NONSN-STIKER171",
+  "material": "Sticker PIM",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "RA BABUSSALAM",
+  "installedDate": "2026-02-20"
+ },
+ {
+  "sn": "NONSN-STIKER172",
+  "material": "Sticker PIM",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG WAQ TOWEREN",
+  "installedDate": "2026-02-17"
+ },
+ {
+  "sn": "NONSN-STIKER173",
+  "material": "Sticker PIM",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR REJE KAMPUNG LAMPAHAN TIMUR",
+  "installedDate": "2026-02-11"
+ },
+ {
+  "sn": "C60015124419AC",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "SD NEGERI 1 ALUR SELEBU",
+  "installedDate": "2026-03-01"
+ },
+ {
+  "sn": "C60015170009A8",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-3",
+  "clusterNod": "ACEH-3",
+  "installSite": "KANTOR DESA PAYA TUMPI BARU",
+  "installedDate": "2026-02-27"
+ },
+ {
+  "sn": "CC0015376485AU",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "CC0015376448AT",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PONDOK PESANTREN TAHFIDZ GLOBAL AL-JABBAR",
+  "installedDate": "2026-03-24"
+ },
+ {
+  "sn": "CC0015375238AP",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-1",
+  "installSite": "RA MIFTAHUL HIKMAH",
+  "installedDate": "2026-05-05"
+ },
+ {
+  "sn": "CC0015375263AN",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "MADRASAH TSANAWIYAH LAMPAKUK",
+  "installedDate": "2026-06-05"
+ },
+ {
+  "sn": "CC0015375245AN",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "KANTOR GEUCHIK GAMPONG WEU",
+  "installedDate": "2026-05-07"
+ },
+ {
+  "sn": "CC0015357587AW",
+  "material": "Modem Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "PONDOK PESANTREN MIFTACHUL ULUM BANI SALIM",
+  "installedDate": null
+ },
+ {
+  "sn": "CC0015343884AR",
+  "material": "Modem Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "pondok pesantren miftahulhuda",
+  "installedDate": "2026-04-24"
+ },
+ {
+  "sn": "CC0015105570AF",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "KANTOR KEPALA DESA JELAT",
+  "installedDate": "2026-04-24"
+ },
+ {
+  "sn": "CC0015197089AV",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Faulty",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "CC0015285482AQ",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "JABAR-1B",
+  "installSite": "SEKOLAH MENENGAH PERTAMA WELAS ASIH",
+  "installedDate": "2026-05-04"
+ },
+ {
+  "sn": "CC0015340568AN",
+  "material": "Modem with adaptor Hughes HT2300",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "YAYASAN PONDOK PESANTREN AL-BAROKAH",
+  "installedDate": "2026-04-24"
+ },
+ {
+  "sn": "C240508012",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Faulty",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C240603017",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "ACEH-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "MADRASAH TSANAWIYAH LAMPAKUK",
+  "installedDate": "2026-06-05"
+ },
+ {
+  "sn": "34604P2106",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "DSH.0324.00540",
+  "material": "Antenna Jonsa E97",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702315205139",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "MADRASAH IBTIDAIYAH NEGERI 1 BARITO SELATAN",
+  "installedDate": "2026-08-03"
+ },
+ {
+  "sn": "C60015061173A9",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "EH0018444275AX",
+  "material": "Transceiver Hughes HT3210",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "E8AWB3000670AF",
+  "material": "Modem with adaptor Hughes WE3100",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KOMANDO RAYON MILITER 1013-16/BATURA",
+  "installedDate": "2026-08-18"
+ },
+ {
+  "sn": "2024070053",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34201C3581",
+  "material": "Router Grandstream GWN7003",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "344024545D",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "JABAR-1B",
+  "installSite": "MADRASAH TSANAWIYAH AL-MUJAHIDIN",
+  "installedDate": "2026-06-15"
+ },
+ {
+  "sn": "2024070577",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "PONDOK PESANTREN TAHFIDZ GLOBAL AL-JABBAR",
+  "installedDate": "2026-06-11"
+ },
+ {
+  "sn": "C60015279923AN",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "344024C9E9",
+  "material": "Router Grandstream GWN7003",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": "KANTOR DESA ASEM KUMBANG",
+  "installedDate": "2026-06-01"
+ },
+ {
+  "sn": "NONSN-F0266",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0267",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER227",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER228",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER229",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER230",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024070516",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-1",
+  "installSite": "SEKRETARIAT PERSATUAN PERANGKAT DESA INDONESIA",
+  "installedDate": null
+ },
+ {
+  "sn": "702227807170",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Faulty",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702230014194",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Faulty",
+  "customer": "PIM",
+  "cluster": "KALTENG-1",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C60015124259AE",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2024063147",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "PONDOK PESANTREN AL-KAUTSAR",
+  "installedDate": null
+ },
+ {
+  "sn": "2024061717",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "ACEH-3",
+  "installSite": "SMP NEGERI 5 SAKETI",
+  "installedDate": "2026-08-03"
+ },
+ {
+  "sn": "34604PA987",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "33C03Z4C9A",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "35B0433D5A",
+  "material": "Router Grandstream GWN7003",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C60015127760AE",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C60015170233A7",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C240508048",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "BANTEN-1",
+  "clusterNod": "BANTEN-1",
+  "installSite": "PONDOK PESANTREN MIFTACHUL ULUM BANI SALIM",
+  "installedDate": null
+ },
+ {
+  "sn": "343045303B",
+  "material": "Router Grandstream GWN7003",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "35B043CFBC",
+  "material": "Router Grandstream GWN7003",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604Q6610",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "3470138BEF",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34402594AD",
+  "material": "Router Grandstream GWN7003",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C240701604",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34201B6C6E",
+  "material": "Router Grandstream GWN7003",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "2023100832",
+  "material": "Stabilizer Matsuyama AVR L-1.5GS",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C60015128657AK",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-3",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "347013FCB2",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702314500290",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "BANTEN-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "35B043AAE1",
+  "material": "Router Grandstream GWN7003",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "JABAR-1B",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C60015008129AB",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702310103842",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702312804819",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "344025B8C9",
+  "material": "Router Grandstream GWN7003",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "KALTENG-1",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "E8AWB3000909AK",
+  "material": "Modem with adaptor Hughes WE3100",
+  "status": "Installed",
+  "customer": "PIM",
+  "cluster": "JABAR-1B",
+  "clusterNod": "KALTENG-1",
+  "installSite": "RAUDHATUL ATHFAL (RA) AS SYIFA",
+  "installedDate": null
+ },
+ {
+  "sn": "3440254C47",
+  "material": "Router Grandstream GWN7003",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34605J9F1D",
+  "material": "Router Grandstream GWN7003",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "3440247E31",
+  "material": "Router Grandstream GWN7003",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604R4602",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604R06C5",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604RF9E9",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604P6AD3",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "34604PDB30",
+  "material": "Access Point Grandstream GWN7630LR",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "702229811055",
+  "material": "Transceiver Hughes HB220-L",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C60015124063A7",
+  "material": "Modem with adaptor Hughes HT2010",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "C240603044",
+  "material": "Transceiver Revgo RGTR-A203",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0275",
+  "material": "Feed Support",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0276",
+  "material": "Boom Arm",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-F0276",
+  "material": "Feed support Revgo military",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-B0277",
+  "material": "Boom arm Revgo military",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER297",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER298",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER299",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER300",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER301",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER302",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER303",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER304",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER305",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER306",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER307",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER308",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER309",
+  "material": "Sticker Komdigi",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER310",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER311",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER312",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER313",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER314",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER315",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER316",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER317",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER318",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER319",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER320",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER321",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ },
+ {
+  "sn": "NONSN-STIKER322",
+  "material": "Sticker PIM",
+  "status": "Ready",
+  "customer": "PIM",
+  "cluster": null,
+  "clusterNod": "ACEH-2",
+  "installSite": null,
+  "installedDate": null
+ }
+]

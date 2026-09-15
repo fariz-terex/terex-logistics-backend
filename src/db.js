@@ -500,6 +500,17 @@ if (!serialColumnsForCluster.includes("cluster")) {
   db.exec("CREATE INDEX IF NOT EXISTS idx_serials_cluster ON serial_numbers(cluster)");
 }
 
+// cluster_nod: the cluster a PIM unit was originally shipped/allocated
+// under (from the sheet's "Cluster"/MR column) — separate from `cluster`
+// above, which is the unit's ACTUAL current cluster ("Cluster actual" in
+// the sheet). The two can differ when a unit got reallocated after
+// shipping; both are worth keeping rather than only the current one.
+const serialColumnsForClusterNod = db.prepare("PRAGMA table_info(serial_numbers)").all().map((c) => c.name);
+if (!serialColumnsForClusterNod.includes("cluster_nod")) {
+  console.log("[db] adding cluster_nod column to serial_numbers");
+  db.exec("ALTER TABLE serial_numbers ADD COLUMN cluster_nod TEXT");
+}
+
 // Historical lifecycle dates carried per unit (populated by the MSG data
 // import; NULL for units created through the normal flow, which tracks these
 // via transaction records instead). Plain ADD COLUMN, same gap-safe pattern

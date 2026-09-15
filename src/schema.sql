@@ -249,7 +249,8 @@ CREATE TABLE IF NOT EXISTS serial_numbers (
   installed_by   TEXT,     -- who confirmed it (Logistics Staff, based on field report)
   install_photo  TEXT,     -- proof-of-installation photo — required to reach Installed
   install_site   TEXT,     -- site it was installed at (falls back to the owning delivery's site if not given explicitly)
-  homebase       TEXT      -- current physical homebase location, set once status reaches Delivered (via the owning delivery's homebase) and updated by Transfer Stock from then on. NULL before Delivered — not yet at a specific homebase.
+  homebase       TEXT,     -- current physical homebase location, set once status reaches Delivered (via the owning delivery's homebase) and updated by Transfer Stock from then on. NULL before Delivered — not yet at a specific homebase.
+  cluster_nod    TEXT      -- PIM only: the cluster this unit was originally shipped/allocated under (MR-level) — can differ from `cluster` (actual current cluster) when a unit got reallocated after shipping. NULL for every non-PIM unit.
 );
 CREATE INDEX IF NOT EXISTS idx_serials_material_status ON serial_numbers(material, status);
 -- idx_serials_homebase is NOT created here — on an existing database the
