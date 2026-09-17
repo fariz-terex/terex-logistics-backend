@@ -1,0 +1,2480 @@
+{
+ "toInsert": [
+  {
+   "sn": "702315010760",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015127784AK",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "344024A547",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34201C9EE1",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024061968",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2021080612",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "33C03Z9B9E",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "33C03Z87DB",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702228307881",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702229705521",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015007971AF",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34201CEFB3",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "3440245087",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2023100739",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2023060127",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2023060126",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2022050278",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024011696",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34201G3A15",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "3430678D01",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "343067A452",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34300XFF0C",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702204202080",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702228306073",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702232017575",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015173298AL",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015081227AB",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015128198AK",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "3440256D2C",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "3440240947",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "3440243CF4",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2021080368",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2022050402",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2021080760",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240506924",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240506910",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "DSH.0324.06265",
+   "material": "Antenna Jonsa E97",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34300X2FDC",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "no sn",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "343068A42B",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P88DF",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702228306255",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702228300589",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015129657AL",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015124323A6",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34402555D5",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "346015C877",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "3440242ECC",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "3440249108",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "344024CFE6",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "344024D539",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024064602",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024064604",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024070332",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024051146",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240603964",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240506957",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015367901AN",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015340092AF",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240507788",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240508897",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240506921",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015340937AN",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015200828AH",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015357766AV",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015281220AC",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240802686",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015200219AB",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015340436AH",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240705237",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240506773",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "3460155BD5",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34402527B4",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34605J72F2",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34605JA7A7",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34300UF8C3",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "stolen",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34300X3EF3",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34300X0D8D",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604PA9B9",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702230014087",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702229100558",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702227806784",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C6001512958AK",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015063290AB",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015279153AI",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015214839AO",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "E8AWB3000937AL",
+   "material": "Modem with adaptor Hughes WE3100",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015369732AR",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "EH0018442585AZ",
+   "material": "Transceiver Hughes HT3210",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240800456",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240701612",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "NO SN",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "EH0018454043AR",
+   "material": "Transceiver Hughes HT3210",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015368195AT",
+   "material": "Modem Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604PED91",
+   "material": "PoE",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P50BF",
+   "material": "PoE",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "R.0324.01047",
+   "material": "Rack Wallmount 6U",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015368641AP",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015369585AX",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240605481",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240603949",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240602410",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240508930",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240806589",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240405086",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "EH0018468890MB",
+   "material": "Transceiver Hughes HT3210",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015370633AJ",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024010528",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015368625AR",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015285604AM",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "EH0018442654AW",
+   "material": "Transceiver Hughes HT3210",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240700588",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240601859",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240705251",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "EH0018442574AX",
+   "material": "Transceiver Hughes HT3210",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "EH0018470095AW",
+   "material": "Transceiver Hughes HT3210",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "no SN",
+   "material": "Feed support Revgo military",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "F202510S0007",
+   "material": "Feed Support",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "B202510S0005",
+   "material": "Boom Arm",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "E8AWB3000175AF",
+   "material": "Modem Hughes WE3100",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015285927AU",
+   "material": "Modem Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "E8AWB3000218AD",
+   "material": "Modem Hughes WE3100",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015369736AV",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "E8AWB3000110A4",
+   "material": "Modem with adaptor Hughes WE3100",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015357717AR",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "343067C498",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C240600972",
+   "material": "Transceiver Revgo RGTR-A203",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2021080311",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34402483C7",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "DSH.0324.05372",
+   "material": "Antenna Jonsa E97",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "DSH.0324.01788",
+   "material": "Antenna Jonsa E97",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015128233AA",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015137793AL",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015288469AS",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015136916AH",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015125248AD",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015115001MB",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702207500514",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702207503229",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702231301665",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702207503294",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702315010810",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702207504706",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "3460153F30",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34605J4A68",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34605J6B0C",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34601551A3",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34605JFC5D",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "346015B36E",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P3BED",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P1828",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P2350",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604PA499",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P1B28",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P290C",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P03C5",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P6CA5",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P3B41",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604PE95F",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P05C3",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P90D6",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "20240646658",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024071009",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024071114",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024062670",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024070560",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024064657",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "R.0324.05086",
+   "material": "Rack Wallmount 6U",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "R.0324.05050",
+   "material": "Rack Wallmount 6U",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "R.0324.05079",
+   "material": "Rack Wallmount 6U",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "R.0324.05032",
+   "material": "Rack Wallmount 6U",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "R.0324.05049",
+   "material": "Rack Wallmount 6U",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "324.05378",
+   "material": "Antenna Jonsa E97",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015286747AP",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015172834AG",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015125019A9",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015081089AH",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015136449AI",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015122856AF",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015136876AM",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702130804025",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702315012022",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702207505042",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702315011065",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702130704647",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702315012295",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "3460154D20",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "346015CBB2",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34605J61E2",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "346015F619",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "346015BE93",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "346015E790",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34605J641A",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P06D1",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P5071",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604PF697",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P48B1",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P8DD7",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P6719",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P5664",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P0030",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604PB1A9",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P680A",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P184E",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P396C",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P308B",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34604P6E42",
+   "material": "Access Point Grandstream GWN7630LR",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024062672",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024064660",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024070175",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024071012",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024065172",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024062671",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2024062669",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "R.0324.05078",
+   "material": "Rack Wallmount 6U",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "R.0324.05057",
+   "material": "Rack Wallmount 6U",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "R.0324.05047",
+   "material": "Rack Wallmount 6U",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "R.0324.05096",
+   "material": "Rack Wallmount 6U",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "R.0324.05058",
+   "material": "Rack Wallmount 6U",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "R.0324.05104",
+   "material": "Rack Wallmount 6U",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "R.0324.05061",
+   "material": "Rack Wallmount 6U",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "344025D118",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015340624AG",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015136401A6",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "3440256B2B",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "3440244363",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "banTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015128682AI",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "344024C9CF",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "344025177A",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015368630AN",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "34605JE543",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "NONSN-BFA00002",
+   "material": "Back frame antenna",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015286668AR",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "C60015286416AI",
+   "material": "Modem with adaptor Hughes HT2010",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "ACEH-3",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015357672AR",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "BANTEN-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "E8AWB3000911AD",
+   "material": "Modem Hughes WE3100",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "702228404472",
+   "material": "Transceiver Hughes HB220-L",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "E8AWB3000579AN",
+   "material": "Modem with adaptor Hughes WE3100",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "3430453839",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG",
+   "clusterNod": "JABAR-1B",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2023100737",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "344025C8CE",
+   "material": "Router Grandstream GWN7003",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "KALTENG-1",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2022050295",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-1",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "2021080493",
+   "material": "Stabilizer Matsuyama AVR L-1.5GS",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "BANTEN-1",
+   "clusterNod": "ACEH-3",
+   "installSite": null,
+   "installedDate": null
+  },
+  {
+   "sn": "CC0015339988M6",
+   "material": "Modem with adaptor Hughes HT2300",
+   "status": "Faulty",
+   "customer": "PIM",
+   "cluster": "JABAR-1B",
+   "clusterNod": "KALTENG-1",
+   "installSite": null,
+   "installedDate": null
+  }
+ ],
+ "toUpdateStatusSns": [
+  "34604R937A",
+  "3460154316",
+  "702232009309",
+  "702229000105",
+  "EH0018442685M5",
+  "EH0018470078AX",
+  "E8AWB3000452AD",
+  "EH0018442603AQ",
+  "C240508048",
+  "EH0018468940M7",
+  "E8A9C3000132AT",
+  "E8AWB3000201A5",
+  "EH0018468964A1",
+  "EH0018468708M9",
+  "E8AWB3000714AE",
+  "NONSN-B0023",
+  "NONSN-B0024",
+  "NONSN-F0017",
+  "NONSN-F0018",
+  "NONSN-F0020",
+  "E8AWB3000140A7",
+  "E8AWB3000231A8",
+  "EH0018442702AQ",
+  "702229111878"
+ ]
+}
