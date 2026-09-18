@@ -670,6 +670,33 @@ router.post("/serials/:sn/send-to-customer", requireAuth, requireRole(LOGISTICS,
   }
 });
 
+// Sends several Faulty units to the customer under ONE Nomor Surat/BA — the
+// common real-world case (a batch shipped together on one document), which
+// the single-SN endpoint above can't express. Each SN still gets its own
+// faulty_customer_returns row (so per-unit receive-back tracking is
+// unaffected), they just share `ref`. All-or-nothing: sendToCustomer's own
+// per-call transaction nests inside this one via SAVEPOINT, so one bad SN
+// rolls the whole batch back instead of leaving it half-sent.
+router.post("/serials/send-to-customer-batch", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+  const { sns, ref, note } = req.body || {};
+  if (!Array.isArray(sns) || sns.length === 0) return res.status(400).json({ error: "Pilih minimal satu Serial Number" });
+
+  const scope = scopeOf(req.user);
+  for (const sn of sns) {
+    const row = db.prepare("SELECT customer FROM serial_numbers WHERE sn = ?").get(sn);
+    if (row && !scopeAllows(scope, row.customer)) return res.status(403).json({ error: `Divisi unit ${sn} bukan divisi Anda` });
+  }
+
+  try {
+    const results = db.transaction(() => sns.map((sn) => sendToCustomer({ sn, ref, note, performedBy: req.user.name })))();
+    results.forEach((result) => notifyWebhook("sent_to_customer", { sn: result.sn, material: result.material, division: result.customer, ref, performedBy: req.user.name }));
+    res.status(201).json({ results });
+  } catch (err) {
+    const status = /not found/i.test(err.message) ? 404 : /wajib diisi/i.test(err.message) ? 400 : 409;
+    res.status(status).json({ error: err.message });
+  }
+});
+
 router.post("/serials/:sn/receive-from-customer", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const { ref, note } = req.body || {};
   const row = db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(req.params.sn);
