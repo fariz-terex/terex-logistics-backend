@@ -1,0 +1,2018 @@
+[
+ {
+  "sn": "A21176A87",
+  "material": "BUC Kuband 3 Watt Type NJT8302UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A47485A02",
+  "material": "BUC Kuband 3 Watt Type NJT8302UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A28266A89",
+  "material": "BUC Kuband 3 Watt Type NJT8302UF - NJRC",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2026-04-25",
+  "installSite": "SJM Tigal",
+  "homebase": null
+ },
+ {
+  "sn": "A84908A1Z",
+  "material": "BUC Kuband 3 Watt Type NJT8302UF - NJRC",
+  "status": "Faulty",
+  "receivedDate": "2025-05-23",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A38215A91",
+  "material": "BUC Kuband 3 Watt Type NJT8302UF - NJRC",
+  "status": "Installed",
+  "receivedDate": "2025-07-10",
+  "installedDate": "2025-10-22",
+  "installSite": "Golago Kusuma",
+  "homebase": null
+ },
+ {
+  "sn": "A20287B97",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A31982B31",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A20525B9X",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2026-03-13",
+  "installSite": "Kampung Kumaban",
+  "homebase": "Kepi"
+ },
+ {
+  "sn": "A20213B97",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2025-11-22",
+  "installSite": "Simanggaris Baru",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "A31653B2Y",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2025-12-10",
+  "installSite": "Tujung",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "A19093B96",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2025-11-15",
+  "installSite": "Katiagan",
+  "homebase": null
+ },
+ {
+  "sn": "A19379B96",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Installed",
+  "receivedDate": "2025-08-22",
+  "installedDate": "2025-09-01",
+  "installSite": "Melasu Baru",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "A32955B39",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-02-02",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A19108B96",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Installed",
+  "receivedDate": "2026-04-09",
+  "installedDate": "2026-05-03",
+  "installSite": "Dusun Tangah",
+  "homebase": null
+ },
+ {
+  "sn": "A27659B25",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-04-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A98637A33",
+  "material": "BUC Kuband 3 Watt Type NJT8302UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-10-13",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A27604B24",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-04-24",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "SC15130143",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Ready",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "EC07291723",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2025-08-05",
+  "installSite": "Melasu Baru",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "EB93G05670",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2025-05-26",
+  "installSite": "Bumi Makmur",
+  "homebase": "Bengkulu"
+ },
+ {
+  "sn": "EB79K54128",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2026-10-22",
+  "installSite": "Boha",
+  "homebase": "Merauke"
+ },
+ {
+  "sn": "SC147K6413",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2025-10-24",
+  "installSite": "Andaito",
+  "homebase": "Merauke"
+ },
+ {
+  "sn": "SC147K6477",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2025-12-22",
+  "installSite": "Rauki",
+  "homebase": "Sorong"
+ },
+ {
+  "sn": "SC186C3551",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Ready",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "EC07231726",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Ready",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "EC07231724",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": "On Search",
+  "homebase": null
+ },
+ {
+  "sn": "EC07231722",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Ready",
+  "receivedDate": "2026-02-23",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "EB7BA54488",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Installed",
+  "receivedDate": "2026-02-23",
+  "installedDate": "2026-05-16",
+  "installSite": "Latalola Besar",
+  "homebase": "Ambon"
+ },
+ {
+  "sn": "E884E78499",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Installed",
+  "receivedDate": "2026-02-23",
+  "installedDate": "2026-05-09",
+  "installSite": "Pengikik",
+  "homebase": null
+ },
+ {
+  "sn": "EB85921406",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Installed",
+  "receivedDate": "2026-02-23",
+  "installedDate": "2026-03-18",
+  "installSite": "Hebing",
+  "homebase": null
+ },
+ {
+  "sn": "EB7BA53878",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Ready",
+  "receivedDate": "2026-04-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "SC147K6471",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Installed",
+  "receivedDate": "2026-04-09",
+  "installedDate": "2026-06-18",
+  "installSite": "Lubuk Ulang Aling",
+  "homebase": null
+ },
+ {
+  "sn": "SC147K6476",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Ready",
+  "receivedDate": "2026-04-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A32952B39",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-04-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A21656B9Y",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-04-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "EC0A561970",
+  "material": "Inverter AC to DC Input 200-240 Vac, Output 48Vdc, 12.5A MeanWell",
+  "status": "Installed",
+  "receivedDate": "2025-04-24",
+  "installedDate": "2025-04-29",
+  "installSite": "Wawonii Timur",
+  "homebase": null
+ },
+ {
+  "sn": "EB8E78560",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Ready",
+  "receivedDate": "2025-07-10",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "555295",
+  "material": "Lampu OBL - Type XGP 388, Blinking PHILIPS",
+  "status": "Ready",
+  "receivedDate": "2026-02-23",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "EC07231727",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Ready",
+  "receivedDate": "2025-10-13",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "643491",
+  "material": "Lampu OBL - Type XGP 388, Blinking PHILIPS",
+  "status": "Ready",
+  "receivedDate": "2025-08-08",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "643492",
+  "material": "Lampu OBL - Type XGP 388, Blinking PHILIPS",
+  "status": "Ready",
+  "receivedDate": "2025-08-08",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "643489",
+  "material": "Lampu OBL - Type XGP 388, Blinking PHILIPS",
+  "status": "Ready",
+  "receivedDate": "2025-08-08",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A04895B9X",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A01746D18",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A04100B99",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2026-11-19",
+  "installSite": "Dusun Tangah",
+  "homebase": null
+ },
+ {
+  "sn": "A04087B99",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A04835B99",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A06401B9Y",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A03032B95",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A02615D26",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": "Tujung",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "A01258D18",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Installed",
+  "receivedDate": "2025-05-23",
+  "installedDate": "2025-10-22",
+  "installSite": "Golago Kusuma",
+  "homebase": null
+ },
+ {
+  "sn": "A01445D18",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Installed",
+  "receivedDate": "2025-08-22",
+  "installedDate": "2025-09-01",
+  "installSite": "Melasu Baru",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "A10570B03",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2025-09-25",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A02397D1Y",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2026-04-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A02398D1Y",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2026-04-30",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "E1D80FC2FF33",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2025-08-21",
+  "installSite": "Simanggaris Lama",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "B8D00BBEBCBB",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2025-11-25",
+  "installSite": "Ngaol",
+  "homebase": null
+ },
+ {
+  "sn": "E1D80FD55EFB",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2025-05-10",
+  "installSite": "Telalora",
+  "homebase": null
+ },
+ {
+  "sn": "B8D00C663B7E",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2025-10-24",
+  "installSite": "Bomakia II",
+  "homebase": "Merauke"
+ },
+ {
+  "sn": "HD1085HYGVM",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Installed",
+  "receivedDate": "2025-09-25",
+  "installedDate": "2025-10-01",
+  "installSite": "Katiagan",
+  "homebase": null
+ },
+ {
+  "sn": "B8D00AB72C78",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Faulty",
+  "receivedDate": "2025-09-25",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "B8D00B8E4BF1",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Installed",
+  "receivedDate": "2025-10-10",
+  "installedDate": "2025-11-13",
+  "installSite": "Boha",
+  "homebase": "Merauke"
+ },
+ {
+  "sn": "B8D00A3B116F",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Installed",
+  "receivedDate": "2025-10-30",
+  "installedDate": "2026-06-19",
+  "installSite": "Lubuk Ulang Aling",
+  "homebase": null
+ },
+ {
+  "sn": "E1D80FCF256C",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Installed",
+  "receivedDate": "2025-12-17",
+  "installedDate": null,
+  "installSite": "Sitabu",
+  "homebase": null
+ },
+ {
+  "sn": "B8D00B90E65F",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Installed",
+  "receivedDate": "2025-12-17",
+  "installedDate": null,
+  "installSite": "Latalola Besar",
+  "homebase": null
+ },
+ {
+  "sn": "B8D00ACC979D",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Faulty",
+  "receivedDate": "2026-02-23",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "B8D00A94127B",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Installed",
+  "receivedDate": "2026-04-02",
+  "installedDate": null,
+  "installSite": "Pengikik",
+  "homebase": null
+ },
+ {
+  "sn": "B8D00B660C9B",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Ready",
+  "receivedDate": "2026-04-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "B8D00AE4BCD7",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Ready",
+  "receivedDate": "2026-04-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "CF0015132444AI",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2025-05-09",
+  "installSite": "Rotnama",
+  "homebase": null
+ },
+ {
+  "sn": "BT0013293014AU",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": "On Search",
+  "homebase": null
+ },
+ {
+  "sn": "CF0013933738AV",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Installed",
+  "receivedDate": "2025-04-17",
+  "installedDate": "2025-09-12",
+  "installSite": "Kampung Wonggi",
+  "homebase": "Kepi"
+ },
+ {
+  "sn": "CF0013933622AN",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Installed",
+  "receivedDate": "2025-08-22",
+  "installedDate": "2025-09-01",
+  "installSite": "Melasu Baru",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "BT0013443005AR",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Installed",
+  "receivedDate": "2025-09-18",
+  "installedDate": "2025-10-30",
+  "installSite": "Simpur Ijang",
+  "homebase": "Bengkulu"
+ },
+ {
+  "sn": "CF0015053618AN",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2025-11-04",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "BT0013615909MA",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Installed",
+  "receivedDate": "2025-12-17",
+  "installedDate": "2026-04-10",
+  "installSite": "Kampung Sahapikia",
+  "homebase": "Kepi"
+ },
+ {
+  "sn": "CF0013933568AW",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2025-12-17",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "CF0013977259M6",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Installed",
+  "receivedDate": "2026-02-02",
+  "installedDate": null,
+  "installSite": "Langkuru",
+  "homebase": "Maumere"
+ },
+ {
+  "sn": "CF0013971862AV",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2026-04-02",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "CF0013896834M5",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2026-04-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "BT0013619368AI",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2026-04-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "BT0013616684MB",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Installed",
+  "receivedDate": "2026-04-09",
+  "installedDate": "2026-05-03",
+  "installSite": "Dusun Tangah",
+  "homebase": null
+ },
+ {
+  "sn": "GD1911Q339",
+  "material": "Feedhornd 1,2 M KU-Band",
+  "status": "Ready",
+  "receivedDate": "2026-02-02",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "GD2013P282",
+  "material": "Feedhornd 1,2 M KU-Band",
+  "status": "Ready",
+  "receivedDate": "2026-10-13",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "7203800320169",
+  "material": "Modem KA BAND MDM2510",
+  "status": "Ready",
+  "receivedDate": "2025-06-10",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "GC101L9115",
+  "material": "Inverter AC to DC Input 200-240 Vac, Output 48Vdc, 12.5A MeanWell",
+  "status": "Ready",
+  "receivedDate": "2026-02-02",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "246247183",
+  "material": "Module Rectifier APS3 19\" 3U 2KW - EATON",
+  "status": "Installed",
+  "receivedDate": "2025-06-23",
+  "installedDate": "2026-06-29",
+  "installSite": "Mekar Jaya",
+  "homebase": null
+ },
+ {
+  "sn": "246393929",
+  "material": "Module Rectifier APS3 19\" 3U 2KW - EATON",
+  "status": "Installed",
+  "receivedDate": "2025-06-23",
+  "installedDate": "2026-06-29",
+  "installSite": "Mekar Jaya",
+  "homebase": null
+ },
+ {
+  "sn": "206402030563",
+  "material": "Module Rectifier Smart Power",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": "Ambarbaken",
+  "homebase": "Sorong"
+ },
+ {
+  "sn": "206402030881",
+  "material": "Module Rectifier Smart Power",
+  "status": "Installed",
+  "receivedDate": "2025-04-14",
+  "installedDate": "2026-08-30",
+  "installSite": "Kebar",
+  "homebase": "Merauke"
+ },
+ {
+  "sn": "216401330561",
+  "material": "Module Rectifier Smart Power",
+  "status": "Installed",
+  "receivedDate": "2025-05-08",
+  "installedDate": "2026-05-14",
+  "installSite": "Ambarbaken",
+  "homebase": "Sorong"
+ },
+ {
+  "sn": "216400030040",
+  "material": "Module Rectifier Smart Power",
+  "status": "Ready",
+  "receivedDate": "2025-06-26",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "216401320825",
+  "material": "Module Rectifier Smart Power",
+  "status": "Installed",
+  "receivedDate": "2025-09-25",
+  "installedDate": "2026-11-04",
+  "installSite": "Mayau",
+  "homebase": null
+ },
+ {
+  "sn": "206400220059",
+  "material": "Module Rectifier Smart Power",
+  "status": "Installed",
+  "receivedDate": "2026-02-23",
+  "installedDate": "2026-08-06",
+  "installSite": "Wayau",
+  "homebase": "Merauke"
+ },
+ {
+  "sn": "216401330556",
+  "material": "Module Rectifier Smart Power",
+  "status": "Installed",
+  "receivedDate": "2025-09-25",
+  "installedDate": "2025-11-04",
+  "installSite": "Mayau",
+  "homebase": null
+ },
+ {
+  "sn": "216401330522",
+  "material": "Module Rectifier Smart Power",
+  "status": "Installed",
+  "receivedDate": "2025-11-11",
+  "installedDate": "2026-05-30",
+  "installSite": "Wayau",
+  "homebase": "Merauke"
+ },
+ {
+  "sn": "17430177",
+  "material": "Relay Driver Morningstar",
+  "status": "Installed",
+  "receivedDate": "2025-08-22",
+  "installedDate": "2026-09-01",
+  "installSite": "Melasu Baru",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "IMS08230015",
+  "material": "SNMP BOX (Kabel UTP Ehternet & Relay 48V 10A)",
+  "status": "Installed",
+  "receivedDate": "2025-05-07",
+  "installedDate": "2025-11-26",
+  "installSite": "Tubang BB",
+  "homebase": "Taliabu"
+ },
+ {
+  "sn": "IMS08230018",
+  "material": "SNMP BOX (Kabel UTP Ehternet & Relay 48V 10A)",
+  "status": "Installed",
+  "receivedDate": "2025-05-07",
+  "installedDate": "2025-05-28",
+  "installSite": "Golo Lijun",
+  "homebase": null
+ },
+ {
+  "sn": "IMS18180118",
+  "material": "SNMP BOX (Kabel UTP Ehternet & Relay 48V 10A)",
+  "status": "Installed",
+  "receivedDate": "2025-08-22",
+  "installedDate": "2025-09-01",
+  "installSite": "Melasu Baru",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "IMS08230008",
+  "material": "SNMP BOX (Kabel UTP Ehternet & Relay 48V 10A)",
+  "status": "Installed",
+  "receivedDate": "2026-02-23",
+  "installedDate": "2026-03-01",
+  "installSite": "Nusa Nipa",
+  "homebase": null
+ },
+ {
+  "sn": "IMS18180127",
+  "material": "SNMP BOX (Kabel UTP Ehternet & Relay 48V 10A)",
+  "status": "Installed",
+  "receivedDate": "2026-04-02",
+  "installedDate": "2026-04-13",
+  "installSite": "Lubuk Ulang Aling",
+  "homebase": null
+ },
+ {
+  "sn": "IMS18180119",
+  "material": "SNMP BOX (Kabel UTP Ehternet & Relay 48V 10A)",
+  "status": "Installed",
+  "receivedDate": "2026-04-02",
+  "installedDate": "2026-05-03",
+  "installSite": "Dusun Tangah",
+  "homebase": null
+ },
+ {
+  "sn": "20320048",
+  "material": "Solar Charge Controller (TSMPPT60), 60A '12V/24/48/60V, Max 150V, MorningStar-TS",
+  "status": "Installed",
+  "receivedDate": "2025-06-24",
+  "installedDate": null,
+  "installSite": "Waan",
+  "homebase": "Merauke"
+ },
+ {
+  "sn": "17510472",
+  "material": "Solar Charge Controller (TSMPPT60), 60A '12V/24/48/60V, Max 150V, MorningStar-TS",
+  "status": "Installed",
+  "receivedDate": "2025-07-23",
+  "installedDate": null,
+  "installSite": "Waan",
+  "homebase": "Merauke"
+ },
+ {
+  "sn": "17510466",
+  "material": "Solar Charge Controller (TSMPPT60), 60A '12V/24/48/60V, Max 150V, MorningStar-TS",
+  "status": "Ready",
+  "receivedDate": "2025-07-23",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "19270196",
+  "material": "Solar Charge Controller (TSMPPT60), 60A '12V/24/48/60V, Max 150V, MorningStar-TS",
+  "status": "Faulty",
+  "receivedDate": "2025-05-28",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "17510286",
+  "material": "Solar Charge Controller (TSMPPT60), 60A '12V/24/48/60V, Max 150V, MorningStar-TS",
+  "status": "Installed",
+  "receivedDate": "2025-08-22",
+  "installedDate": "2026-09-01",
+  "installSite": "Melasu Baru",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "17510420",
+  "material": "Solar Charge Controller (TSMPPT60), 60A '12V/24/48/60V, Max 150V, MorningStar-TS",
+  "status": "Installed",
+  "receivedDate": "2025-08-22",
+  "installedDate": "2026-09-01",
+  "installSite": "Melasu Baru",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "17510331",
+  "material": "Solar Charge Controller (TSMPPT60), 60A '12V/24/48/60V, Max 150V, MorningStar-TS",
+  "status": "Ready",
+  "receivedDate": "2025-09-18",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "17510023",
+  "material": "Solar Charge Controller (TSMPPT60), 60A '12V/24/48/60V, Max 150V, MorningStar-TS",
+  "status": "Installed",
+  "receivedDate": "2025-09-18",
+  "installedDate": null,
+  "installSite": "Tujung",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "17510231",
+  "material": "Solar Charge Controller (TSMPPT60), 60A '12V/24/48/60V, Max 150V, MorningStar-TS",
+  "status": "Installed",
+  "receivedDate": "2026-04-02",
+  "installedDate": null,
+  "installSite": "Tubang BB",
+  "homebase": "Taliabu"
+ },
+ {
+  "sn": "17510006",
+  "material": "Solar Charge Controller (TSMPPT60), 60A '12V/24/48/60V, Max 150V, MorningStar-TS",
+  "status": "Ready",
+  "receivedDate": "2026-04-30",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "2179280000220",
+  "material": "Swich Hub TP-Link 8 port",
+  "status": "Installed",
+  "receivedDate": "2025-07-10",
+  "installedDate": "2026-10-10",
+  "installSite": "Melasu Baru",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "2179280000228",
+  "material": "Swich Hub TP-Link 8 port",
+  "status": "Faulty",
+  "receivedDate": "2026-04-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "2203453003833",
+  "material": "Swich Hub TP-Link 8 port",
+  "status": "Installed",
+  "receivedDate": "2026-05-06",
+  "installedDate": null,
+  "installSite": "Lubuk Ulang Aling",
+  "homebase": null
+ },
+ {
+  "sn": "118002060616",
+  "material": "Transceiver 3 Watt KA-Band",
+  "status": "Ready",
+  "receivedDate": "2025-04-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "TC180C7934",
+  "material": "Inverter AC to DC SE-1000-48,  15A Mean well",
+  "status": "Ready",
+  "receivedDate": "2025-10-10",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A19623B97",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-05-25",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "725209C69714",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Installed",
+  "receivedDate": "2026-05-25",
+  "installedDate": "2026-08-06",
+  "installSite": "Rotnama",
+  "homebase": null
+ },
+ {
+  "sn": "B8D00AFC2265",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Ready",
+  "receivedDate": "2026-05-25",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "CF0015053809AP",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2026-05-25",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "IMS18180124",
+  "material": "SNMP BOX (Kabel UTP Ehternet & Relay 48V 10A)",
+  "status": "Installed",
+  "receivedDate": "2026-05-25",
+  "installedDate": null,
+  "installSite": "Nampar Sepang",
+  "homebase": null
+ },
+ {
+  "sn": "643496",
+  "material": "Lampu OBL - Type XGP 388, Blinking PHILIPS",
+  "status": "Ready",
+  "receivedDate": "2025-08-08",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "201999",
+  "material": "Modem IQ Dekstop Satellite",
+  "status": "Ready",
+  "receivedDate": "2026-05-04",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "202000",
+  "material": "Modem IQ Dekstop Satellite",
+  "status": "Installed",
+  "receivedDate": "2026-10-13",
+  "installedDate": "2026-02-13",
+  "installSite": "Simbuang",
+  "homebase": null
+ },
+ {
+  "sn": "202034",
+  "material": "Modem IQ Dekstop Satellite",
+  "status": "Installed",
+  "receivedDate": "2026-04-17",
+  "installedDate": "2026-06-02",
+  "installSite": "Kaputusang",
+  "homebase": null
+ },
+ {
+  "sn": "114000550616",
+  "material": "Transceiver 3 Watt KA-Band",
+  "status": "Installed",
+  "receivedDate": "2025-05-14",
+  "installedDate": null,
+  "installSite": "Samuya",
+  "homebase": null
+ },
+ {
+  "sn": "948009840403",
+  "material": "Transceiver 3 Watt KA-Band",
+  "status": "Ready",
+  "receivedDate": "2026-05-04",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "2227342001180",
+  "material": "Swich Hub TP-Link 8 port",
+  "status": "Installed",
+  "receivedDate": "2025-05-14",
+  "installedDate": null,
+  "installSite": "Rumang",
+  "homebase": null
+ },
+ {
+  "sn": "7210300320690",
+  "material": "Modem KA BAND MDM2510",
+  "status": "Installed",
+  "receivedDate": "2025-05-14",
+  "installedDate": null,
+  "installSite": "Samuya",
+  "homebase": null
+ },
+ {
+  "sn": "7294800306325",
+  "material": "Modem KA BAND MDM2510",
+  "status": "Ready",
+  "receivedDate": "2026-05-04",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "220926 / 2401035",
+  "material": "Modem IQ Dekstop Satellite",
+  "status": "Ready",
+  "receivedDate": "2026-05-15",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A00849D16",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2026-03-02",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A02655D29",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2026-05-04",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A02658D29",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Installed",
+  "receivedDate": "2026-10-13",
+  "installedDate": "2026-05-04",
+  "installSite": "Siwar",
+  "homebase": null
+ },
+ {
+  "sn": "A02771D29",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2026-04-17",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A02779D29",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2025-11-06",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A04122B99",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2025-05-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A04135899",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2025-05-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A06730B9Y",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Installed",
+  "receivedDate": "2025-05-14",
+  "installedDate": null,
+  "installSite": "Salube",
+  "homebase": null
+ },
+ {
+  "sn": "A10597B03",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2025-07-31",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A19084896",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2025-05-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A201759",
+  "material": "Modem IQ Dekstop Satellite",
+  "status": "Installed",
+  "receivedDate": "2026-11-06",
+  "installedDate": "2025-11-13",
+  "installSite": "Kebar",
+  "homebase": "Sorong"
+ },
+ {
+  "sn": "A20540B9X",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Installed",
+  "receivedDate": "2025-05-14",
+  "installedDate": "2025-06-05",
+  "installSite": "Nule",
+  "homebase": null
+ },
+ {
+  "sn": "A29022B26",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Faulty",
+  "receivedDate": "2025-07-31",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A98615A33",
+  "material": "BUC Kuband 3 Watt Type NJT8302UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2025-11-06",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A98621A33",
+  "material": "BUC Kuband 3 Watt Type NJT8302UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-04-17",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A98635A33",
+  "material": "BUC Kuband 3 Watt Type NJT8302UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-05-04",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "B058000440",
+  "material": "Swich Hub TP-Link 8 port",
+  "status": "Installed",
+  "receivedDate": "2025-05-14",
+  "installedDate": null,
+  "installSite": "On Search",
+  "homebase": null
+ },
+ {
+  "sn": "B8D00A58FA4C",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Installed",
+  "receivedDate": "2025-05-14",
+  "installedDate": "2025-07-17",
+  "installSite": "Simanggaris Baru",
+  "homebase": "Malinau"
+ },
+ {
+  "sn": "B8D00AC3D471",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Installed",
+  "receivedDate": "2025-11-11",
+  "installedDate": null,
+  "installSite": "On Search",
+  "homebase": null
+ },
+ {
+  "sn": "B8D00CC3D174",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Installed",
+  "receivedDate": "2026-02-12",
+  "installedDate": "2026-02-20",
+  "installSite": "Rotnama",
+  "homebase": null
+ },
+ {
+  "sn": "BT0013291500AS",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Installed",
+  "receivedDate": "2025-05-14",
+  "installedDate": null,
+  "installSite": "Waigai",
+  "homebase": null
+ },
+ {
+  "sn": "CF0013972544AT",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2025-05-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "CF0015053713AJ",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Installed",
+  "receivedDate": "2025-07-31",
+  "installedDate": "2025-10-16",
+  "installSite": "Giri Nanto",
+  "homebase": "Bengkulu"
+ },
+ {
+  "sn": "E1D80F2B7F00",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Ready",
+  "receivedDate": "2025-11-11",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "EB80B77786",
+  "material": "CONVERTER DC-DC LNP 36-72 VDC 4,2A + 24VDC 14,6A SD-350C-24 - (MEANWELL)",
+  "status": "Ready",
+  "receivedDate": "2025-11-06",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "EB8A606650",
+  "material": "CONVERTER DC-DC LNP 36-72 VDC 4,2A + 24VDC 14,6A SD-350C-24 - (MEANWELL)",
+  "status": "Installed",
+  "receivedDate": "2025-05-14",
+  "installedDate": "2025-02-13",
+  "installSite": "Gela",
+  "homebase": null
+ },
+ {
+  "sn": "EB90695586",
+  "material": "CONVERTER DC-DC LNP 36-72 VDC 4,2A + 24VDC 14,6A SD-350C-24 - (MEANWELL)",
+  "status": "Installed",
+  "receivedDate": "2026-04-17",
+  "installedDate": "2026-06-01",
+  "installSite": "Kaputusang",
+  "homebase": null
+ },
+ {
+  "sn": "B8D00AFAF6EE",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Faulty",
+  "receivedDate": "2026-05-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "GC19E20901",
+  "material": "Inverter AC to DC Input 200-240 Vac, Output 48Vdc, 12.5A MeanWell",
+  "status": "Ready",
+  "receivedDate": "2026-05-04",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "GD2013Q156",
+  "material": "Feedhornd 1,2 M KU-Band",
+  "status": "Ready",
+  "receivedDate": "2026-05-04",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "MEM2010K5136",
+  "material": "Inverter DC to AC 48V to 220VAC,600Watt, Type MEM-600-248 Mastor / 500Watt",
+  "status": "Installed",
+  "receivedDate": "2025-05-14",
+  "installedDate": null,
+  "installSite": "On Search",
+  "homebase": null
+ },
+ {
+  "sn": "RB30171412",
+  "material": "CONVERTER DC-DC LNP 36-72 VDC 4,2A + 24VDC 14,6A SD-350C-24 - (MEANWELL)",
+  "status": "Ready",
+  "receivedDate": "2025-05-14",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "SC147K6479",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Installed",
+  "receivedDate": "2025-07-31",
+  "installedDate": null,
+  "installSite": "On Search",
+  "homebase": null
+ },
+ {
+  "sn": "B8D00BC1AF49",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Faulty",
+  "receivedDate": "2026-05-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A20518B9X",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Faulty",
+  "receivedDate": "2026-03-02",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "CF0013970943AU",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2025-07-04",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "7294900307050",
+  "material": "Modem KA BAND MDM2510",
+  "status": "Ready",
+  "receivedDate": "2025-06-26",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "IMS17180107",
+  "material": "SNMP BOX (Kabel UTP Ehternet & Relay 48V 10A)",
+  "status": "Ready",
+  "receivedDate": "2026-05-25",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "2227342001276",
+  "material": "Swich Hub TP-Link 8 port",
+  "status": "Ready",
+  "receivedDate": "2026-05-25",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "222B0K2001498",
+  "material": "Swich Hub TP-Link 8 port",
+  "status": "Ready",
+  "receivedDate": "2026-05-25",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "MEM20205K013",
+  "material": "Inverter DC to AC 48V to 220VAC,600Watt, Type MEM-600-248 Mastor / 500Watt",
+  "status": "Ready",
+  "receivedDate": "2026-06-25",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "MEM20205K018",
+  "material": "Inverter DC to AC 48V to 220VAC,600Watt, Type MEM-600-248 Mastor / 500Watt",
+  "status": "Ready",
+  "receivedDate": "2026-06-25",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "MEM20205K014",
+  "material": "Inverter DC to AC 48V to 220VAC,600Watt, Type MEM-600-248 Mastor / 500Watt",
+  "status": "Ready",
+  "receivedDate": "2026-06-25",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "019012160616",
+  "material": "Transceiver 3 Watt KA-Band",
+  "status": "Ready",
+  "receivedDate": "2025-06-10",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "120002970616",
+  "material": "Transceiver 3 Watt KA-Band",
+  "status": "Ready",
+  "receivedDate": "2025-06-26",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "216401320629",
+  "material": "Module Rectifier Smart Power",
+  "status": "Installed",
+  "receivedDate": "2026-07-01",
+  "installedDate": null,
+  "installSite": "Ambarbaken",
+  "homebase": "Sorong"
+ },
+ {
+  "sn": "216401330577",
+  "material": "Module Rectifier Smart Power",
+  "status": "Ready",
+  "receivedDate": "2026-07-01",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "CF0013933256AQ",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A20562B9X",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A04108B99",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "B8D00B0D88E5",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "EB7BA53816",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "CF0013933916AT",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A20599B9X",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A04592B99",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "B8D00B7F52077935",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "EB80B77651",
+  "material": "CONVERTER DC-DC LNP 36-72 VDC 4,2A + 24VDC 14,6A SD-350C-24 - (MEANWELL)",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "BT0013291602AV",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A19091B96",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A04094B99",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Installed",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": "Suswa",
+  "homebase": "Sorong"
+ },
+ {
+  "sn": "B8D00B60ED54",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "EB79K54121",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "BT0013293773MB",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A19090B96",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A04091B99",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "E1D80DA13447",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "EB79K54170",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "CF0015053429AN",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A29021B26",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A04508B99",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "B8D00B131D5F",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "EB80B77795",
+  "material": "CONVERTER DC-DC LNP 36-72 VDC 4,2A + 24VDC 14,6A SD-350C-24 - (MEANWELL)",
+  "status": "Ready",
+  "receivedDate": "2026-08-05",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "BT0013618916MB",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2026-09-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A19457B97",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-09-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A04208B99",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2026-09-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "B8D00B27E786",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Ready",
+  "receivedDate": "2026-09-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "0918B0008990",
+  "material": "Feedhorn 1,8 KU-Band",
+  "status": "Ready",
+  "receivedDate": "2026-09-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "CF0013932428AQ",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2026-09-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A24712B19",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-09-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A06493B9Y",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2026-09-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "ADBA0AD9D207",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Ready",
+  "receivedDate": "2026-09-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "0918B0008442",
+  "material": "Feedhorn 1,8 KU-Band",
+  "status": "Ready",
+  "receivedDate": "2026-09-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "EB79K54127",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Ready",
+  "receivedDate": "2026-09-09",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "CF0013977245AW",
+  "material": "Modem HT2524 Type 2500 Hughes",
+  "status": "Ready",
+  "receivedDate": "2026-09-10",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A02626D26",
+  "material": "LNB Kuband NJR2842L",
+  "status": "Ready",
+  "receivedDate": "2026-09-10",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "A27602B24",
+  "material": "BUC Kuband 6 Watt Type NJT8306UF - NJRC",
+  "status": "Ready",
+  "receivedDate": "2026-09-10",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "HD108CWHXHR",
+  "material": "Mikrotik Router RB450Gx4",
+  "status": "Ready",
+  "receivedDate": "2026-09-10",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "17450145",
+  "material": "Solar Charge Controller (TSMPPT60), 60A '12V/24/48/60V, Max 150V, MorningStar-TS",
+  "status": "Ready",
+  "receivedDate": "2026-09-10",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "19270242",
+  "material": "Solar Charge Controller (TSMPPT60), 60A '12V/24/48/60V, Max 150V, MorningStar-TS",
+  "status": "Ready",
+  "receivedDate": "2026-09-10",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "IMS08230004",
+  "material": "SNMP BOX (Kabel UTP Ehternet & Relay 48V 10A)",
+  "status": "Ready",
+  "receivedDate": "2026-09-10",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ },
+ {
+  "sn": "SC147K6443",
+  "material": "DC to DC Converter Mean Well 48V-24V SD-150C-24",
+  "status": "Ready",
+  "receivedDate": "2026-09-10",
+  "installedDate": null,
+  "installSite": null,
+  "homebase": null
+ }
+]

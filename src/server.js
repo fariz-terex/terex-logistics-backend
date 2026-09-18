@@ -80,6 +80,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/telegram", require("./routes/telegram")); // account linking + Telegram bot webhook
 app.use("/api/backup", require("./routes/backup")); // GET /api/backup/db — off-site backup job, X-Automation-Key auth
 app.use("/api/admin", require("./routes/adminImportPim")); // TEMP one-off PIM historical import — remove once done, see routes/adminImportPim.js
+app.use("/api/admin", require("./routes/adminImportIpt")); // TEMP one-off IPT historical import — remove once done, see routes/adminImportIpt.js
 
 // Centralized error handler: anything thrown synchronously inside a route
 // (e.g. a SQLite constraint failure) lands here instead of crashing the process.
