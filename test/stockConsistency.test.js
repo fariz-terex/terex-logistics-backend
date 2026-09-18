@@ -2,14 +2,14 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { DatabaseSync } = require("node:sqlite");
-const { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild } = require("../src/utils/stockConsistency");
+const { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild, planInstalledStatusFix } = require("../src/utils/stockConsistency");
 
 function freshDb() {
   const db = new DatabaseSync(":memory:");
   db.exec(`
     CREATE TABLE materials (name TEXT, serialized INTEGER, ready INT, faulty INT, reserved INT, in_transit INT);
     CREATE TABLE material_stock (material TEXT, customer TEXT, ready INT, faulty INT, reserved INT, in_transit INT);
-    CREATE TABLE serial_numbers (sn TEXT, material TEXT, status TEXT, customer TEXT);
+    CREATE TABLE serial_numbers (sn TEXT, material TEXT, status TEXT, customer TEXT, install_site TEXT, installed_date TEXT);
     CREATE TABLE customers (name TEXT);
   `);
   db.exec("INSERT INTO customers VALUES ('PIM'),('MSG')");
@@ -20,7 +20,7 @@ test("clean data → summary.clean is true, no findings", () => {
   const db = freshDb();
   db.exec("INSERT INTO materials VALUES ('Modem A',1, 3,1,0,0)");
   db.exec("INSERT INTO material_stock VALUES ('Modem A','PIM', 2,1,0,0), ('Modem A','MSG', 1,0,0,0)");
-  db.exec(`INSERT INTO serial_numbers VALUES
+  db.exec(`INSERT INTO serial_numbers (sn, material, status, customer) VALUES
     ('a1','Modem A','Ready','PIM'),('a2','Modem A','Ready','PIM'),
     ('a3','Modem A','Faulty','PIM'),('a4','Modem A','Ready','MSG')`);
   const r = computeStockConsistency(db);
@@ -32,7 +32,7 @@ test("global aggregate not equal to sum of divisions is flagged", () => {
   const db = freshDb();
   db.exec("INSERT INTO materials VALUES ('Modem B',1, 5,0,0,0)");
   db.exec("INSERT INTO material_stock VALUES ('Modem B','PIM', 4,0,0,0)");
-  db.exec("INSERT INTO serial_numbers VALUES ('b1','Modem B','Ready','PIM'),('b2','Modem B','Ready','PIM'),('b3','Modem B','Ready','PIM'),('b4','Modem B','Ready','PIM')");
+  db.exec("INSERT INTO serial_numbers (sn, material, status, customer) VALUES ('b1','Modem B','Ready','PIM'),('b2','Modem B','Ready','PIM'),('b3','Modem B','Ready','PIM'),('b4','Modem B','Ready','PIM')");
   const r = computeStockConsistency(db);
   assert.equal(r.summary.globalVsDivisionSum, 1);
   assert.deepEqual(r.globalVsDivisionSum[0], { material: "Modem B", field: "ready", global: 5, divisionSum: 4, delta: 1 });
@@ -42,7 +42,7 @@ test("MSG-style ready = Ready + Delivered is treated as expected, not a real mis
   const db = freshDb();
   db.exec("INSERT INTO materials VALUES ('Modem C',1, 5,0,0,0)");
   db.exec("INSERT INTO material_stock VALUES ('Modem C','MSG', 5,0,0,0)");
-  db.exec(`INSERT INTO serial_numbers VALUES
+  db.exec(`INSERT INTO serial_numbers (sn, material, status, customer) VALUES
     ('c1','Modem C','Ready','MSG'),('c2','Modem C','Ready','MSG'),
     ('c3','Modem C','Delivered','MSG'),('c4','Modem C','Delivered','MSG'),('c5','Modem C','Delivered','MSG')`);
   const r = computeStockConsistency(db);
@@ -56,7 +56,7 @@ test("real serial drift, negatives, and orphan customer are all flagged", () => 
   const db = freshDb();
   db.exec("INSERT INTO materials VALUES ('Modem D',1, 9,0,-1,0)");
   db.exec("INSERT INTO material_stock VALUES ('Modem D','PIM', 9,0,-1,0)");
-  db.exec("INSERT INTO serial_numbers VALUES ('d1','Modem D','Ready','PIM'),('d2','Modem D','Ready','PIM')");
+  db.exec("INSERT INTO serial_numbers (sn, material, status, customer) VALUES ('d1','Modem D','Ready','PIM'),('d2','Modem D','Ready','PIM')");
   db.exec("INSERT INTO materials VALUES ('Modem E',1, 1,0,0,0)");
   db.exec("INSERT INTO material_stock VALUES ('Modem E','GHOST', 1,0,0,0)");
   const r = computeStockConsistency(db);
@@ -70,7 +70,7 @@ test("real serial drift, negatives, and orphan customer are all flagged", () => 
 test("serial rows with no division (customer NULL) are reported", () => {
   const db = freshDb();
   db.exec("INSERT INTO materials VALUES ('Modem F',1, 0,0,0,0)");
-  db.exec("INSERT INTO serial_numbers VALUES ('f1','Modem F','Ready',NULL)");
+  db.exec("INSERT INTO serial_numbers (sn, material, status, customer) VALUES ('f1','Modem F','Ready',NULL)");
   const r = computeStockConsistency(db);
   const row = r.serialVsMaterialStock.find((x) => x.material === "Modem F");
   assert.ok(row && row.customer === null && row.count === 1);
@@ -100,7 +100,7 @@ test("planSerialBucketRebuild fixes reserved/in_transit/faulty from serials, nev
   // PoE: 10 units In Transit, material_stock says 0
   db.exec("INSERT INTO materials VALUES ('PoE',1, 0,0,0,0)");
   db.exec("INSERT INTO material_stock VALUES ('PoE','MSG', 5,0,0,0)"); // ready=5 must stay 5
-  for (let i = 0; i < 10; i++) db.exec(`INSERT INTO serial_numbers VALUES ('p${i}','PoE','In Transit','MSG')`);
+  for (let i = 0; i < 10; i++) db.exec(`INSERT INTO serial_numbers (sn, material, status, customer) VALUES ('p${i}','PoE','In Transit','MSG')`);
   // 'Unassigned' serialized stock must be ignored
   db.exec("INSERT INTO materials VALUES ('Old',1, 0,0,0,0)");
   db.exec("INSERT INTO material_stock VALUES ('Old','Unassigned', 0,0,3,0)");
@@ -116,6 +116,33 @@ test("planSerialBucketRebuild fixes reserved/in_transit/faulty from serials, nev
   const upd = db.prepare("UPDATE material_stock SET reserved=@reserved, in_transit=@in_transit, faulty=@faulty WHERE material=@material AND customer=@customer");
   for (const row of desired) upd.run(row);
   assert.equal(db.prepare("SELECT ready FROM material_stock WHERE material='PoE' AND customer='MSG'").get().ready, 5);
+});
+
+test("planInstalledStatusFix: Delivered with complete install record is fixable, everything else needs review", () => {
+  const db = freshDb();
+  db.exec("INSERT INTO materials VALUES ('Stabilizer',1, 0,0,0,0)");
+  db.exec(`INSERT INTO serial_numbers (sn, material, status, customer, install_site, installed_date) VALUES
+    ('i1','Stabilizer','Delivered','MSG','SD Negeri 163 Bengkulu Utara','2025-07-18'),
+    ('i2','Stabilizer','Delivered','MSG',NULL,'2025-07-18'),
+    ('i3','Stabilizer','Faulty','MSG','SD Negeri 71 Seluma','2025-07-21'),
+    ('i4','Stabilizer','Installed','MSG','SD Negeri 21 Teluk Payang','2025-08-13'),
+    ('i5','Stabilizer','Ready','MSG',NULL,NULL)`);
+
+  const { fixable, needsReview } = planInstalledStatusFix(db);
+  assert.deepEqual(fixable.map((r) => r.sn), ["i1"]);
+  assert.deepEqual(needsReview.map((r) => r.sn).sort(), ["i2", "i3"]);
+
+  const r = computeStockConsistency(db);
+  assert.equal(r.summary.installedStatusFixable, 1);
+  assert.equal(r.summary.installedStatusNeedsReview, 2);
+  assert.equal(r.summary.clean, false);
+
+  const upd = db.prepare("UPDATE serial_numbers SET status = 'Installed' WHERE sn = ? AND status = 'Delivered'");
+  fixable.forEach((row) => upd.run(row.sn));
+  assert.equal(db.prepare("SELECT status FROM serial_numbers WHERE sn = 'i1'").get().status, "Installed");
+  const after = planInstalledStatusFix(db);
+  assert.equal(after.fixable.length, 0, "i1 no longer fixable after being applied");
+  assert.equal(after.needsReview.length, 2, "i2/i3 untouched — still need manual review");
 });
 
 test("planGlobalAggregateRebuild produces changes that make the global check clean", () => {

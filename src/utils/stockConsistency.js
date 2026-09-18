@@ -129,12 +129,25 @@ function computeStockConsistency(db) {
     }
   }
 
+  // ---- Check 5: install record present but status says otherwise ----
+  // install_site/installed_date are only ever written together with
+  // status='Installed' by the normal confirm-install flow (materialSwaps.js)
+  // — see schema.sql's column comments. A row with either field populated but
+  // a different status is stale/incorrect data, most likely from an import
+  // that carried the fields through without always advancing status to
+  // match. Only the unambiguous case — status exactly 'Delivered' with BOTH
+  // fields present — is offered as an auto-fix; anything else is surfaced
+  // for manual review instead of guessed at.
+  const { fixable: installedStatusFixable, needsReview: installedStatusNeedsReview } = planInstalledStatusFix(db);
+
   const realSerialMismatches = serialVsMaterialStock.filter((r) => !r.matchesDeliveredInclusive);
   const clean =
     globalVsDivisionSum.length === 0 &&
     realSerialMismatches.length === 0 &&
     negatives.length === 0 &&
-    orphans.length === 0;
+    orphans.length === 0 &&
+    installedStatusFixable.length === 0 &&
+    installedStatusNeedsReview.length === 0;
 
   return {
     checkedAt: isoDate(),
@@ -146,13 +159,37 @@ function computeStockConsistency(db) {
       negatives: negatives.length,
       orphans: orphans.length,
       unassignedStock: unassignedStock.length,
+      installedStatusFixable: installedStatusFixable.length,
+      installedStatusNeedsReview: installedStatusNeedsReview.length,
     },
     globalVsDivisionSum,
     serialVsMaterialStock,
     negatives,
     orphans,
     unassignedStock,
+    installedStatusFixable,
+    installedStatusNeedsReview,
   };
+}
+
+// Plan (read-only) for Check 5 above. `fixable`: status='Delivered' rows with
+// a complete install record (site + date both present) — safe to flip to
+// 'Installed'. `needsReview`: every other status/install-record combination
+// that's inconsistent but not unambiguous enough to auto-fix (e.g. only one
+// of the two fields set, or a non-Delivered status carrying a stale record).
+function planInstalledStatusFix(db) {
+  db = db || require("../db");
+  const rows = db.prepare(`
+    SELECT sn, material, customer, status, install_site, installed_date
+    FROM serial_numbers
+    WHERE (install_site IS NOT NULL AND install_site != '')
+       OR (installed_date IS NOT NULL AND installed_date != '')
+  `).all();
+  const mismatched = rows.filter((r) => r.status !== "Installed");
+  const isComplete = (r) => r.install_site && r.installed_date;
+  const fixable = mismatched.filter((r) => r.status === "Delivered" && isComplete(r));
+  const needsReview = mismatched.filter((r) => !(r.status === "Delivered" && isComplete(r)));
+  return { fixable, needsReview };
 }
 
 // Plan (read-only) for rebuilding the materials.* global aggregate columns
@@ -247,4 +284,4 @@ function planSerialBucketRebuild(db) {
   return { changes, desired };
 }
 
-module.exports = { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild };
+module.exports = { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild, planInstalledStatusFix };

@@ -5,7 +5,7 @@ const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids"
 const { scopeOf, scopeAllows, scopeClause, resolveCreateCustomer, adjustStock } = require("../utils/stock");
 const { sendToCustomer, receiveFromCustomer } = require("../utils/faultyCycle");
 const { notifyWebhook } = require("../utils/webhook");
-const { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild } = require("../utils/stockConsistency");
+const { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild, planInstalledStatusFix } = require("../utils/stockConsistency");
 const { parseBkbDocument } = require("../utils/bkbParser");
 
 const router = express.Router();
@@ -780,6 +780,31 @@ router.post("/rebuild-serial-buckets", requireAuth, requireRole(MANAGER), (req, 
 
   console.log(`[stock] rebuild-serial-buckets by ${req.user.name}: ${changes.length} field(s) across ${desired.length} (material,divisi)`);
   res.json({ mode: "committed", count: changes.length, rowsUpdated: desired.length, changes });
+});
+
+// Corrects units left at status='Delivered' despite having a complete
+// install record (install_site + installed_date) — see
+// utils/stockConsistency.js planInstalledStatusFix for the exact criteria.
+// Re-derives the plan server-side rather than trusting the client's stale
+// preview. Dry-run unless body { commit: true }. Manager only.
+router.post("/fix-installed-status", requireAuth, requireRole(MANAGER), (req, res) => {
+  const commit = req.body?.commit === true;
+  const { fixable, needsReview } = planInstalledStatusFix(db);
+
+  if (!commit || fixable.length === 0) {
+    return res.json({ mode: fixable.length === 0 ? "already-consistent" : "dry-run", count: fixable.length, fixable, needsReview });
+  }
+
+  const upd = db.prepare("UPDATE serial_numbers SET status = 'Installed' WHERE sn = ? AND status = 'Delivered'");
+  const tx = db.transaction((rows) => {
+    let n = 0;
+    rows.forEach((r) => { if (upd.run(r.sn).changes) n += 1; });
+    return n;
+  });
+  const updated = tx(fixable);
+
+  console.log(`[stock] fix-installed-status by ${req.user.name}: ${updated} unit(s) corrected Delivered -> Installed`);
+  res.json({ mode: "committed", count: updated, fixable, needsReview });
 });
 
 router.post("/phantom-cleanup", requireAuth, requireRole(MANAGER), (req, res) => {
