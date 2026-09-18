@@ -173,4 +173,80 @@ router.post("/ipt-import/commit", requireAuth, requireRole(MANAGER), (req, res) 
   res.json({ ok: true, inserted, ...preview });
 });
 
+// --- Correction: IPT is not a separate division ---------------------------
+// Turns out "IPT" isn't a real division distinct from "Teleglobal" — same
+// business, the source spreadsheet just used a different name (confirmed by
+// the user after seeing the import create a 5th division). This reassigns
+// everything the import above created from customer='IPT' to
+// customer='Teleglobal', merges non-serialized stock into whatever
+// Teleglobal already has (adds, doesn't overwrite), resyncs serialized-
+// material stock from serial_numbers the normal way, and removes the
+// phantom "IPT" customer row. Areas/homebases are untouched — they're
+// global, not per-division, so nothing to undo there. Safe to run even if
+// the import was never committed (everything below is a no-op then).
+function buildMergePreview() {
+  const SOURCE = "IPT", TARGET = "Teleglobal";
+  const sourceExists = !!db.prepare("SELECT 1 FROM customers WHERE name = ?").get(SOURCE);
+  const unitsToReassign = db.prepare("SELECT COUNT(*) AS n FROM serial_numbers WHERE customer = ?").get(SOURCE).n;
+  const sourceStock = db.prepare("SELECT material, ready, faulty, reserved, in_transit FROM material_stock WHERE customer = ?").all(SOURCE);
+  const serializedSet = new Set(newMaterials.filter((m) => m.serialized).map((m) => m.name));
+  const nonSerialRows = sourceStock.filter((r) => !serializedSet.has(r.material));
+  return { sourceExists, unitsToReassign, nonSerialRows, source: SOURCE, target: TARGET };
+}
+
+router.get("/ipt-merge-into-teleglobal/preview", requireAuth, requireRole(MANAGER), (req, res) => {
+  res.json(buildMergePreview());
+});
+
+router.post("/ipt-merge-into-teleglobal/commit", requireAuth, requireRole(MANAGER), (req, res) => {
+  const SOURCE = "IPT", TARGET = "Teleglobal";
+  const preview = buildMergePreview();
+
+  const tx = db.transaction(() => {
+    const reassigned = db.prepare("UPDATE serial_numbers SET customer = ? WHERE customer = ?").run(TARGET, SOURCE).changes;
+
+    const ensureStock = db.prepare("INSERT INTO material_stock (material, customer, ready, faulty, reserved, in_transit) VALUES (?, ?, 0, 0, 0, 0) ON CONFLICT(material, customer) DO NOTHING");
+    const addToTarget = db.prepare("UPDATE material_stock SET ready = ready + ?, faulty = faulty + ? WHERE material = ? AND customer = ?");
+    for (const row of preview.nonSerialRows) {
+      ensureStock.run(row.material, TARGET);
+      addToTarget.run(row.ready, row.faulty, row.material, TARGET);
+    }
+
+    // Serialized materials: recompute Teleglobal's stock from serial_numbers
+    // now that the reassignment above already moved the units over — this
+    // naturally combines whatever Teleglobal already had with the merged-in
+    // IPT units, no manual addition needed.
+    const touchedSerialMaterials = [...new Set(units.map((u) => u.material))];
+    const countByStatus = db.prepare("SELECT COUNT(*) AS n FROM serial_numbers WHERE customer = ? AND material = ? AND status = ?");
+    const setStock = db.prepare("UPDATE material_stock SET ready = ?, faulty = ? WHERE material = ? AND customer = ?");
+    touchedSerialMaterials.forEach((material) => {
+      ensureStock.run(material, TARGET);
+      const ready = countByStatus.get(TARGET, material, "Ready").n;
+      const faulty = countByStatus.get(TARGET, material, "Faulty").n;
+      setStock.run(ready, faulty, material, TARGET);
+    });
+
+    db.prepare("DELETE FROM material_stock WHERE customer = ?").run(SOURCE);
+    db.prepare("DELETE FROM customers WHERE name = ?").run(SOURCE);
+
+    const touchedAll = new Set([...touchedSerialMaterials, ...Object.keys(nonSerialStock)]);
+    const updateGlobal = db.prepare(`UPDATE materials SET
+      ready = (SELECT COALESCE(SUM(ready), 0) FROM material_stock WHERE material = ?),
+      faulty = (SELECT COALESCE(SUM(faulty), 0) FROM material_stock WHERE material = ?)
+      WHERE name = ?`);
+    touchedAll.forEach((m) => updateGlobal.run(m, m, m));
+
+    return reassigned;
+  });
+
+  let reassigned;
+  try {
+    reassigned = tx();
+  } catch (err) {
+    return res.status(500).json({ error: "Merge gagal: " + err.message });
+  }
+
+  res.json({ ok: true, reassigned, ...preview });
+});
+
 module.exports = router;
