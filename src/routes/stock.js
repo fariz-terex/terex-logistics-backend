@@ -8,6 +8,7 @@ const { createTransferRequest, approveTransfer, rejectTransfer, cancelTransfer }
 const { notifyWebhook } = require("../utils/webhook");
 const { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild, planInstalledStatusFix } = require("../utils/stockConsistency");
 const { parseBkbDocument } = require("../utils/bkbParser");
+const { detectMaterialsFromPhotos } = require("../utils/materialPhotoDetector");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -344,6 +345,28 @@ router.post("/parse-bkb", requireAuth, requireRole(LOGISTICS, MANAGER), async (r
     res.json({ documentType: result.documentType, division: result.division, items });
   } catch (err) {
     res.status(err.status || 500).json({ error: err.message || "Gagal membaca dokumen BKB" });
+  }
+});
+
+// Same idea as parse-bkb above, but for photos of physical materials/goods
+// (not a document) — shared by Reconciliation, Transfer Stock, and Return
+// Material Faulty's "Deteksi dari Foto" panels. requireAuth only: this is
+// read-only and never touches the DB, so it doesn't need to be restricted
+// to a specific role — each flow's own submit endpoint (POST /returns,
+// POST /stock/transfers, POST /reconciliations) keeps its own role gate
+// unchanged, so nothing here widens who can actually create a record.
+router.post("/detect-materials-photo", requireAuth, async (req, res) => {
+  const { photos } = req.body || {};
+  try {
+    const materialNames = db.prepare("SELECT name FROM materials WHERE status = 'Active'").all().map((r) => r.name);
+    const materialsByName = new Map(
+      db.prepare("SELECT name, serialized FROM materials WHERE status = 'Active'").all().map((m) => [m.name, !!m.serialized])
+    );
+    const result = await detectMaterialsFromPhotos(photos, { materialNames });
+    const items = result.items.map((it) => ({ ...it, serialized: materialsByName.get(it.material) }));
+    res.json({ items });
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message || "Gagal mendeteksi material dari foto" });
   }
 });
 
