@@ -4,6 +4,7 @@ const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
 const { scopeOf, scopeAllows, scopeClause, resolveCreateCustomer, adjustStock } = require("../utils/stock");
 const { sendToCustomer, receiveFromCustomer } = require("../utils/faultyCycle");
+const { createTransferRequest, approveTransfer, rejectTransfer, cancelTransfer } = require("../utils/stockTransfers");
 const { notifyWebhook } = require("../utils/webhook");
 const { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild, planInstalledStatusFix } = require("../utils/stockConsistency");
 const { parseBkbDocument } = require("../utils/bkbParser");
@@ -397,121 +398,71 @@ router.get("/transfers", requireAuth, (req, res) => {
   res.json(withSerials);
 });
 
+// Creates a PENDING transfer only — nothing moves yet. Used to apply the
+// stock change instantly on submit; now waits for a Logistics/Manager
+// approval (see POST /:id/approve below) like the other two request types.
+// Business logic lives in utils/stockTransfers.js (unit-tested there); this
+// handler is just auth/scope + translating thrown errors to HTTP status.
 router.post("/transfers", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const { material, customer, homebaseFrom, homebaseTo, qty, serials, note } = req.body || {};
-  if (!material || !customer || !homebaseFrom || !homebaseTo) {
-    return res.status(400).json({ error: "material, customer, homebaseFrom, homebaseTo are required" });
-  }
-  if (homebaseFrom === homebaseTo) return res.status(400).json({ error: "Homebase asal dan tujuan tidak boleh sama" });
-  const scope = scopeOf(req.user);
-  if (!scopeAllows(scope, customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
-
-  const mat = db.prepare("SELECT * FROM materials WHERE name = ?").get(material);
-  if (!mat) return res.status(404).json({ error: "Material not found" });
-
-  const id = dailySequenceId(db, "stock_transfers", "TR");
-  const date = isoDate();
-
-  const tx = db.transaction(() => {
-    let finalQty;
-    if (mat.serialized) {
-      if (!Array.isArray(serials) || serials.length === 0) throw new Error("Pilih minimal satu Serial Number untuk dipindahkan");
-      finalQty = serials.length;
-      const rows = serials.map((sn) => db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(sn));
-      for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        if (!row || row.material !== material || row.customer !== customer || row.status !== "Delivered" || row.homebase !== homebaseFrom) {
-          throw new Error(`Serial Number ${serials[i]} tidak tersedia di homebase ${homebaseFrom}`);
-        }
-      }
-      const update = db.prepare("UPDATE serial_numbers SET homebase = ? WHERE sn = ?");
-      serials.forEach((sn) => update.run(homebaseTo, sn));
-    } else {
-      finalQty = Number(qty);
-      if (!finalQty || finalQty <= 0) throw new Error("Qty harus lebih dari 0");
-      const source = db.prepare("SELECT qty FROM material_stock_homebase WHERE material = ? AND customer = ? AND homebase = ?").get(material, customer, homebaseFrom);
-      if (!source || source.qty < finalQty) throw new Error(`Stock ${material} di ${homebaseFrom} tidak cukup (tersedia: ${source ? source.qty : 0})`);
-      db.prepare("UPDATE material_stock_homebase SET qty = qty - ? WHERE material = ? AND customer = ? AND homebase = ?").run(finalQty, material, customer, homebaseFrom);
-      db.prepare(`
-        INSERT INTO material_stock_homebase (material, customer, homebase, qty) VALUES (?, ?, ?, ?)
-        ON CONFLICT(material, customer, homebase) DO UPDATE SET qty = qty + excluded.qty
-      `).run(material, customer, homebaseTo, finalQty);
-    }
-
-    db.prepare("INSERT INTO stock_transfers (id, material, customer, homebase_from, homebase_to, qty, performed_by, date, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-      .run(id, material, customer, homebaseFrom, homebaseTo, finalQty, req.user.name, date, note || "");
-    if (mat.serialized) {
-      const insertSerial = db.prepare("INSERT INTO stock_transfer_serials (transfer_id, sn) VALUES (?, ?)");
-      serials.forEach((sn) => insertSerial.run(id, sn));
-    }
-  });
+  if (customer && !scopeAllows(scopeOf(req.user), customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
 
   try {
-    tx();
+    const created = createTransferRequest(db, { material, customer, homebaseFrom, homebaseTo, qty, serials, note, performedBy: req.user.name });
+    res.status(201).json(created);
   } catch (err) {
-    return res.status(409).json({ error: err.message });
+    const status = /not found/i.test(err.message) ? 404 : /are required|harus lebih dari 0|tidak boleh sama|Pilih minimal/i.test(err.message) ? 400 : 409;
+    res.status(status).json({ error: err.message });
   }
-
-  res.status(201).json({
-    id, material, customer, homebaseFrom, homebaseTo, date,
-    serials: mat.serialized ? serials : [],
-  });
 });
 
-// Reverses a Transfer Stock — for fixing a mistaken entry, not a normal
-// business flow (there's no approval step to undo here; the transfer was
-// applied instantly on submit). Only safe to reverse automatically while
-// nothing has touched the units/qty since: a serialized unit must still be
-// sitting at homebaseTo with status Delivered, and for a non-serialized
-// material homebaseTo must still hold at least `qty`. If either isn't true
-// (the unit got installed, moved again, qty got used elsewhere), this
-// rejects with a clear reason instead of silently producing wrong numbers —
-// whoever needs it will have to fix it by hand instead.
-router.post("/transfers/:id/cancel", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
-  const transfer = db.prepare("SELECT * FROM stock_transfers WHERE id = ?").get(req.params.id);
-  if (!transfer) return res.status(404).json({ error: "Transfer not found" });
-  if (transfer.status === "Cancelled") return res.status(409).json({ error: "Transfer ini sudah dibatalkan sebelumnya" });
-  if (!scopeAllows(scopeOf(req.user), transfer.customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
-
-  const mat = db.prepare("SELECT * FROM materials WHERE name = ?").get(transfer.material);
-
-  const tx = db.transaction(() => {
-    if (mat && mat.serialized) {
-      const serials = db.prepare("SELECT sn FROM stock_transfer_serials WHERE transfer_id = ?").all(transfer.id).map((r) => r.sn);
-      const rows = serials.map((sn) => db.prepare("SELECT * FROM serial_numbers WHERE sn = ?").get(sn));
-      for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        if (!row || row.status !== "Delivered" || row.homebase !== transfer.homebase_to) {
-          throw new Error(`Serial Number ${serials[i]} sudah berubah sejak transfer ini (status/homebase tidak lagi cocok) — tidak bisa dibatalkan otomatis`);
-        }
-      }
-      const update = db.prepare("UPDATE serial_numbers SET homebase = ? WHERE sn = ?");
-      serials.forEach((sn) => update.run(transfer.homebase_from, sn));
-    } else {
-      const dest = db.prepare("SELECT qty FROM material_stock_homebase WHERE material = ? AND customer = ? AND homebase = ?")
-        .get(transfer.material, transfer.customer, transfer.homebase_to);
-      if (!dest || dest.qty < transfer.qty) {
-        throw new Error(`Stock ${transfer.material} di ${transfer.homebase_to} sudah berkurang sejak transfer ini (tersedia: ${dest ? dest.qty : 0}) — tidak bisa dibatalkan otomatis`);
-      }
-      db.prepare("UPDATE material_stock_homebase SET qty = qty - ? WHERE material = ? AND customer = ? AND homebase = ?")
-        .run(transfer.qty, transfer.material, transfer.customer, transfer.homebase_to);
-      db.prepare(`
-        INSERT INTO material_stock_homebase (material, customer, homebase, qty) VALUES (?, ?, ?, ?)
-        ON CONFLICT(material, customer, homebase) DO UPDATE SET qty = qty + excluded.qty
-      `).run(transfer.material, transfer.customer, transfer.homebase_from, transfer.qty);
-    }
-
-    db.prepare("UPDATE stock_transfers SET status = 'Cancelled', cancelled_by = ?, cancelled_at = ? WHERE id = ?")
-      .run(req.user.name, new Date().toISOString(), transfer.id);
-  });
+// Approves a pending Transfer Stock — this is where the stock actually
+// moves (previously happened instantly at creation). approveTransfer
+// re-validates live rather than trusting what was true when the transfer
+// was requested (mirrors the "re-check, don't trust stale client state"
+// pattern already used by /stock/phantom-cleanup): the source unit/qty
+// could have moved again in the meantime.
+router.post("/transfers/:id/approve", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+  const transfer = db.prepare("SELECT customer FROM stock_transfers WHERE id = ?").get(req.params.id);
+  if (transfer && !scopeAllows(scopeOf(req.user), transfer.customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
 
   try {
-    tx();
+    res.json(approveTransfer(db, req.params.id));
   } catch (err) {
-    return res.status(409).json({ error: err.message });
+    const status = /not found/i.test(err.message) ? 404 : 409;
+    res.status(status).json({ error: err.message });
   }
+});
 
-  res.json(db.prepare("SELECT * FROM stock_transfers WHERE id = ?").get(transfer.id));
+// Rejects a pending Transfer Stock — nothing to unwind since stock never
+// moved (that only happens at /approve now).
+router.post("/transfers/:id/reject", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+  const transfer = db.prepare("SELECT customer FROM stock_transfers WHERE id = ?").get(req.params.id);
+  if (transfer && !scopeAllows(scopeOf(req.user), transfer.customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
+
+  try {
+    res.json(rejectTransfer(db, req.params.id, { reason: req.body?.reason, rejectedBy: req.user.name }));
+  } catch (err) {
+    const status = /not found/i.test(err.message) ? 404 : 409;
+    res.status(status).json({ error: err.message });
+  }
+});
+
+// Reverses an already-APPROVED Transfer Stock — for fixing a mistaken
+// entry, not a normal business-flow undo. cancelTransfer only allows this
+// while nothing has touched the units/qty since (see its own comments) —
+// if something has, it rejects with a clear reason instead of silently
+// producing wrong numbers, and whoever needs it fixes it by hand instead.
+router.post("/transfers/:id/cancel", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+  const transfer = db.prepare("SELECT customer FROM stock_transfers WHERE id = ?").get(req.params.id);
+  if (transfer && !scopeAllows(scopeOf(req.user), transfer.customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
+
+  try {
+    res.json(cancelTransfer(db, req.params.id, { cancelledBy: req.user.name }));
+  } catch (err) {
+    const status = /not found/i.test(err.message) ? 404 : 409;
+    res.status(status).json({ error: err.message });
+  }
 });
 
 // ===================== TRANSFER ANTAR CLUSTER =====================

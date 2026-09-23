@@ -286,9 +286,11 @@ CREATE TABLE IF NOT EXISTS stock_transfers (
   performed_by  TEXT NOT NULL,
   date          TEXT NOT NULL,
   note          TEXT DEFAULT '',
-  status        TEXT NOT NULL DEFAULT 'Completed',  -- 'Completed' | 'Cancelled'
+  status        TEXT NOT NULL DEFAULT 'Completed',  -- 'Waiting Logistics Approval' | 'Completed' | 'Rejected' | 'Cancelled'
   cancelled_by  TEXT,
-  cancelled_at  TEXT
+  cancelled_at  TEXT,
+  rejected_by     TEXT,
+  rejected_reason TEXT
 );
 
 CREATE TABLE IF NOT EXISTS stock_transfer_serials (

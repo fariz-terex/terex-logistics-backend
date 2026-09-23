@@ -586,4 +586,14 @@ if (!transferColumns.includes("status")) {
   db.exec("ALTER TABLE stock_transfers ADD COLUMN cancelled_at TEXT");
 }
 
+// Transfer Stock now goes through a Logistics-approval step before its
+// stock movement actually happens (previously instant) — needs somewhere
+// to record who rejected one and why, same idea as Delivery Request's
+// rejection_reason.
+if (!transferColumns.includes("rejected_by")) {
+  console.log("[db] adding rejected_by/rejected_reason columns to stock_transfers");
+  db.exec("ALTER TABLE stock_transfers ADD COLUMN rejected_by TEXT");
+  db.exec("ALTER TABLE stock_transfers ADD COLUMN rejected_reason TEXT");
+}
+
 module.exports = db;
