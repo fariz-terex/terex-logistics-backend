@@ -31,6 +31,8 @@ function buildPrompt(materialNames) {
 DAFTAR MASTER MATERIAL YANG VALID DI SISTEM:
 ${materialList}
 
+Setiap foto diberi label "Foto 1", "Foto 2", dst. sesuai urutannya.
+
 Tugas Anda, dari SEMUA foto yang dilampirkan (anggap sebagai satu kumpulan, bisa saja beberapa foto adalah sudut berbeda dari barang yang sama):
 1. Kenali jenis material apa saja yang terlihat di foto-foto ini, HANYA dari DAFTAR MASTER MATERIAL di atas — cocokkan berdasarkan kemiripan visual (bentuk, label, warna, ukuran), bukan membaca teks pada dokumen.
 2. Untuk SETIAP jenis material yang teridentifikasi, perkirakan berapa jumlah unit yang terlihat.
@@ -40,11 +42,12 @@ Untuk setiap material, hasilkan:
 - "material": nama yang paling cocok dari DAFTAR MASTER MATERIAL — HARUS disalin PERSIS karakter demi karakter dari daftar itu. Kalau tidak yakin sama sekali material apa ini, JANGAN dimasukkan ke hasil (jangan mengarang nama yang tidak ada di daftar).
 - "qty": perkiraan jumlah unit yang terlihat (angka bulat)
 - "confidence": "tinggi" kalau yakin jenis materialnya, "rendah" kalau hanya perkiraan (termasuk kalau jumlahnya sulit dipastikan karena menumpuk/kecil-kecil)
-- "serials": array Serial Number/barcode yang benar-benar terbaca jelas untuk unit-unit material ini (boleh kosong — JANGAN mengarang isinya, dan boleh kurang dari qty kalau hanya sebagian yang terbaca)
+- "photos": array nomor foto (angka, mulai dari 1) tempat material ini terlihat
+- "serials": array Serial Number/barcode yang benar-benar terbaca jelas untuk unit-unit material ini, masing-masing sebagai {"sn": "...", "photo": nomor foto tempat SN itu terbaca} (boleh kosong — JANGAN mengarang isinya, dan boleh kurang dari qty kalau hanya sebagian yang terbaca)
 - "note": catatan singkat jika ada hal yang perlu diperhatikan user (mis. "jumlah sulit dipastikan, unit menumpuk", atau "SN tidak terbaca jelas, isi manual") — string kosong jika tidak ada
 
 Balas HANYA dengan JSON valid, tanpa penjelasan atau teks lain, persis format ini:
-{"items": [{"material": "...", "qty": 0, "confidence": "...", "serials": [], "note": "..."}]}
+{"items": [{"material": "...", "qty": 0, "confidence": "...", "photos": [1], "serials": [{"sn": "...", "photo": 1}], "note": "..."}]}
 
 Jika tidak ada material yang bisa dikenali sama sekali dari daftar, balas: {"items": []}`;
 }
@@ -67,7 +70,12 @@ async function callClaude(photos, prompt) {
         messages: [{
           role: "user",
           content: [
-            ...photos.map(({ mimeType, base64 }) => ({ type: "image", source: { type: "base64", media_type: mimeType, data: base64 } })),
+            // Each image is preceded by its "Foto N" label so the response
+            // can say which photo a material/SN came from (photoIndexes).
+            ...photos.flatMap(({ mimeType, base64 }, i) => [
+              { type: "text", text: `Foto ${i + 1}:` },
+              { type: "image", source: { type: "base64", media_type: mimeType, data: base64 } },
+            ]),
             { type: "text", text: prompt },
           ],
         }],
@@ -91,7 +99,14 @@ async function callClaude(photos, prompt) {
   return (data.content || []).map((b) => b.text || "").join("");
 }
 
-function parseResponse(text) {
+// Claude's 1-based "Foto N" number -> 0-based index into the request's
+// photos, or null if missing/out of range (never trusted blindly).
+function toPhotoIndex(n, photoCount) {
+  const i = Math.round(Number(n)) - 1;
+  return Number.isInteger(i) && i >= 0 && i < photoCount ? i : null;
+}
+
+function parseResponse(text, photoCount) {
   const cleaned = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
   let parsed;
   try {
@@ -108,13 +123,27 @@ function parseResponse(text) {
   }
   return {
     items: parsed.items
-      .map((it) => ({
-        material: it.material == null ? null : String(it.material).trim(),
-        qty: Math.max(0, Math.round(Number(it.qty) || 0)),
-        confidence: ["tinggi", "rendah", "tidak_ada"].includes(it.confidence) ? it.confidence : "tidak_ada",
-        serials: Array.isArray(it.serials) ? it.serials.map((s) => String(s).trim()).filter(Boolean) : [],
-        note: String(it.note || "").trim(),
-      }))
+      .map((it) => {
+        // serials may come back as plain strings (older prompt shape) or as
+        // {sn, photo}; kept as two parallel arrays so `serials` stays a
+        // plain string list for every existing caller.
+        const serialEntries = (Array.isArray(it.serials) ? it.serials : [])
+          .map((s) => (s && typeof s === "object" ? { sn: String(s.sn ?? "").trim(), photo: toPhotoIndex(s.photo, photoCount) } : { sn: String(s).trim(), photo: null }))
+          .filter((s) => s.sn);
+        const photoIndexes = [...new Set([
+          ...(Array.isArray(it.photos) ? it.photos : []).map((n) => toPhotoIndex(n, photoCount)),
+          ...serialEntries.map((s) => s.photo),
+        ].filter((i) => i !== null))].sort((a, b) => a - b);
+        return {
+          material: it.material == null ? null : String(it.material).trim(),
+          qty: Math.max(0, Math.round(Number(it.qty) || 0)),
+          confidence: ["tinggi", "rendah", "tidak_ada"].includes(it.confidence) ? it.confidence : "tidak_ada",
+          serials: serialEntries.map((s) => s.sn),
+          serialPhotoIndexes: serialEntries.map((s) => s.photo),
+          photoIndexes,
+          note: String(it.note || "").trim(),
+        };
+      })
       .filter((it) => it.material),
   };
 }
@@ -148,7 +177,7 @@ async function detectMaterialsFromPhotos(dataUrls, { materialNames }) {
   });
 
   const text = await callClaude(photos, buildPrompt(materialNames));
-  const result = parseResponse(text);
+  const result = parseResponse(text, photos.length);
 
   // Defense against hallucination: only trust a `material` that's an EXACT
   // match to a name we actually gave Claude — anything else (a name it

@@ -33,7 +33,7 @@ test("detectMaterialsFromPhotos keeps only materials in the given whitelist", as
     }),
     async () => {
       const result = await detectMaterialsFromPhotos([ONE_PX_PNG], { materialNames: ["Antenna Sector", "Kabel Feeder"] });
-      assert.deepEqual(result.items, [{ material: "Antenna Sector", qty: 3, confidence: "tinggi", serials: ["SN-001"], note: "" }]);
+      assert.deepEqual(result.items, [{ material: "Antenna Sector", qty: 3, confidence: "tinggi", serials: ["SN-001"], serialPhotoIndexes: [null], photoIndexes: [], note: "" }]);
     }
   );
 });
@@ -55,7 +55,7 @@ test("detectMaterialsFromPhotos rounds/clamps qty, normalizes confidence, and sa
     JSON.stringify({ items: [{ material: "Antenna Sector", qty: -3.7, confidence: "bogus", serials: ["  SN-1  ", "", 42], note: 123 }] }),
     async () => {
       const result = await detectMaterialsFromPhotos([ONE_PX_PNG], { materialNames: ["Antenna Sector"] });
-      assert.deepEqual(result.items, [{ material: "Antenna Sector", qty: 0, confidence: "tidak_ada", serials: ["SN-1", "42"], note: "123" }]);
+      assert.deepEqual(result.items, [{ material: "Antenna Sector", qty: 0, confidence: "tidak_ada", serials: ["SN-1", "42"], serialPhotoIndexes: [null, null], photoIndexes: [], note: "123" }]);
     }
   );
 });
@@ -66,7 +66,7 @@ test("detectMaterialsFromPhotos defaults serials to an empty array when omitted 
     JSON.stringify({ items: [{ material: "Antenna Sector", qty: 1, confidence: "tinggi", serials: "not-an-array", note: "" }] }),
     async () => {
       const result = await detectMaterialsFromPhotos([ONE_PX_PNG], { materialNames: ["Antenna Sector"] });
-      assert.deepEqual(result.items, [{ material: "Antenna Sector", qty: 1, confidence: "tinggi", serials: [], note: "" }]);
+      assert.deepEqual(result.items, [{ material: "Antenna Sector", qty: 1, confidence: "tinggi", serials: [], serialPhotoIndexes: [], photoIndexes: [], note: "" }]);
     }
   );
 });
@@ -93,4 +93,22 @@ test("detectMaterialsFromPhotos rejects with no photos or too many photos", asyn
       /Maksimal 6 foto/
     );
   });
+});
+
+test("detectMaterialsFromPhotos maps each material/SN to the photo it came from (1-based -> 0-based, out of range dropped)", async () => {
+  const { detectMaterialsFromPhotos } = require("../src/utils/materialPhotoDetector");
+  await withStubbedFetch(
+    JSON.stringify({ items: [
+      { material: "Antenna Sector", qty: 2, confidence: "tinggi", photos: [2], serials: [{ sn: "SN-A", photo: 2 }, { sn: "SN-B", photo: 3 }], note: "" },
+      { material: "Kabel Feeder", qty: 1, confidence: "tinggi", photos: [1, 9], serials: [{ sn: "SN-C", photo: 7 }], note: "" },
+    ] }),
+    async () => {
+      const result = await detectMaterialsFromPhotos([ONE_PX_PNG, ONE_PX_PNG, ONE_PX_PNG], { materialNames: ["Antenna Sector", "Kabel Feeder"] });
+      assert.deepEqual(result.items[0].serialPhotoIndexes, [1, 2]);
+      assert.deepEqual(result.items[0].photoIndexes, [1, 2]);
+      assert.deepEqual(result.items[1].serials, ["SN-C"]);
+      assert.deepEqual(result.items[1].serialPhotoIndexes, [null]);
+      assert.deepEqual(result.items[1].photoIndexes, [0]);
+    }
+  );
 });
