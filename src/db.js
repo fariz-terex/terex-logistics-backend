@@ -161,6 +161,12 @@ if (!reconColumns.includes("photo")) {
   console.log("[db] adding photo column to reconciliations");
   db.exec("ALTER TABLE reconciliations ADD COLUMN photo TEXT");
 }
+if (!reconColumns.includes("reason")) {
+  // One discrepancy reason for the whole reconciliation instead of one per
+  // item. reconciliation_items.reason stays for older records.
+  console.log("[db] adding reason column to reconciliations");
+  db.exec("ALTER TABLE reconciliations ADD COLUMN reason TEXT");
+}
 
 const movementColumns = db.prepare("PRAGMA table_info(stock_movements)").all().map((c) => c.name);
 if (!movementColumns.includes("customer")) {

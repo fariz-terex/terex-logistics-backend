@@ -51,7 +51,7 @@ function loadReconciliation(id) {
   const history = db.prepare("SELECT time, text FROM reconciliation_history WHERE reconciliation_id = ? ORDER BY id").all(id);
   // `photo` is ONE photo for the whole reconciliation (all materials
   // together in one frame), not per item — see reconciliations.photo.
-  return { id: rc.id, homebase: rc.homebase, period: rc.period, status: rc.status, date: rc.date, revisionNote: rc.revision_note, customer: rc.customer, photo: rc.photo, items, history };
+  return { id: rc.id, homebase: rc.homebase, period: rc.period, status: rc.status, date: rc.date, revisionNote: rc.revision_note, customer: rc.customer, photo: rc.photo, reason: rc.reason || "", items, history };
 }
 
 function addHistory(id, text) {
@@ -88,9 +88,11 @@ router.get("/:id", requireAuth, (req, res) => {
   res.json(rc);
 });
 
-function validateItems(items, excludeReconId) {
+// `reason` is the one reconciliation-level explanation; an item's own
+// reason (older clients) also satisfies it.
+function validateItems(items, excludeReconId, reason) {
   for (const item of items) {
-    if (item.systemQty !== item.actualQty && !item.reason?.trim()) return `Reason wajib jika ada discrepancy pada ${item.material}`;
+    if (item.systemQty !== item.actualQty && !item.reason?.trim() && !reason?.trim()) return `Alasan discrepancy wajib diisi (selisih pada ${item.material})`;
     if (item.serialized) {
       const serials = item.serials || [];
       if (serials.some((s) => !s?.trim())) return `Semua Serial Number wajib diisi untuk ${item.material}`;
@@ -126,12 +128,13 @@ router.post("/", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
   const customer = resolved.customer;
 
   const items = withSystemQty(db, req.body.items, customer, homebase);
-  const err = validateItems(items, null);
+  const reason = (req.body.reason || "").trim();
+  const err = validateItems(items, null, reason);
   if (err) return res.status(409).json({ error: err });
 
   const id = dailySequenceId(db, "reconciliations", "RC");
   const tx = db.transaction(() => {
-    db.prepare(`INSERT INTO reconciliations (id, homebase, period, status, date, customer, photo) VALUES (?, ?, ?, 'Waiting Logistics Review', ?, ?, ?)`).run(id, homebase, period, isoDate(), customer, photo);
+    db.prepare(`INSERT INTO reconciliations (id, homebase, period, status, date, customer, photo, reason) VALUES (?, ?, ?, 'Waiting Logistics Review', ?, ?, ?, ?)`).run(id, homebase, period, isoDate(), customer, photo, reason);
     writeItems(id, items);
     addHistory(id, `Draft dibuat dan disubmit oleh Technician ${req.user.name}`);
   });
@@ -162,11 +165,12 @@ router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), (req, res)
   if (!Array.isArray(req.body.items) || req.body.items.length === 0) return res.status(400).json({ error: "items are required" });
   if (!photo) return res.status(400).json({ error: "Foto keseluruhan material wajib" });
   const items = withSystemQty(db, req.body.items, rc.customer, rc.homebase);
-  const err = validateItems(items, rc.id);
+  const reason = (req.body.reason || "").trim();
+  const err = validateItems(items, rc.id, reason);
   if (err) return res.status(409).json({ error: err });
 
   const tx = db.transaction(() => {
-    db.prepare("UPDATE reconciliations SET status = 'Waiting Logistics Review', revision_note = NULL, photo = ? WHERE id = ?").run(photo, rc.id);
+    db.prepare("UPDATE reconciliations SET status = 'Waiting Logistics Review', revision_note = NULL, photo = ?, reason = ? WHERE id = ?").run(photo, reason, rc.id);
     db.prepare("DELETE FROM reconciliation_items WHERE reconciliation_id = ?").run(rc.id); // cascades to serials
     writeItems(rc.id, items);
     addHistory(rc.id, `Diperbaiki dan dikirim ulang oleh Technician ${req.user.name}`);

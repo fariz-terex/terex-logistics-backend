@@ -177,3 +177,11 @@ set `input.files`, dispatch `change` event — lihat riwayat commit
   actual); serialized tidak mengubah status SN (belum ada status "Hilang")
   tapi SN yang tidak ditemukan / tidak tercatat dicatat di history.
   Keputusan user 2026-09-24.
+- **Reconciliation punya SATU "Alasan Discrepancy" untuk seluruh form**
+  (`reconciliations.reason`, kolom via ALTER TABLE), bukan per item —
+  permintaan user. `reconciliation_items.reason` hanya untuk data lama.
+  Form menampilkan daftar "Belum bisa submit — lengkapi dulu" (array
+  `missing` di `ReconciliationCreate`) — tambah item ke situ kalau ada
+  syarat submit baru, jangan biarkan tombol disabled tanpa penjelasan.
+  Foto referensi per baris (`detectionPhotos`) bisa diganti lewat
+  `ReplacePhotoButton`, tapi TIDAK dikirim/disimpan ke server.

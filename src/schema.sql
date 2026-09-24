@@ -201,7 +201,8 @@ CREATE TABLE IF NOT EXISTS reconciliations (
   date          TEXT NOT NULL,
   revision_note TEXT,
   customer      TEXT,  -- division this reconciliation belongs to (the reporting technician's division)
-  photo         TEXT   -- one photo of ALL materials together (e.g. a geotagged site photo), not per item
+  photo         TEXT,  -- one photo of ALL materials together (e.g. a geotagged site photo), not per item
+  reason        TEXT   -- one discrepancy explanation for the whole reconciliation (items' own reason is legacy)
 );
 
 CREATE TABLE IF NOT EXISTS reconciliation_items (
