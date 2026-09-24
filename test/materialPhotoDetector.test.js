@@ -112,3 +112,17 @@ test("detectMaterialsFromPhotos maps each material/SN to the photo it came from 
     }
   );
 });
+
+test("readSerialsFromPhoto returns trimmed, de-duplicated serials and tolerates a code fence", async () => {
+  const { readSerialsFromPhoto } = require("../src/utils/materialPhotoDetector");
+  await withStubbedFetch("```json\n" + JSON.stringify({ serials: [" 34605JAE49 ", "34605JAE49", "", 7] }) + "\n```", async () => {
+    assert.deepEqual(await readSerialsFromPhoto(ONE_PX_PNG), { serials: ["34605JAE49", "7"] });
+  });
+});
+
+test("readSerialsFromPhoto returns an empty list when nothing is legible", async () => {
+  const { readSerialsFromPhoto } = require("../src/utils/materialPhotoDetector");
+  await withStubbedFetch(JSON.stringify({ serials: [] }), async () => {
+    assert.deepEqual(await readSerialsFromPhoto(ONE_PX_PNG), { serials: [] });
+  });
+});

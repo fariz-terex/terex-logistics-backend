@@ -190,4 +190,41 @@ async function detectMaterialsFromPhotos(dataUrls, { materialNames }) {
   };
 }
 
-module.exports = { detectMaterialsFromPhotos, isConfigured };
+// Reads just the Serial Number(s) printed on a label in ONE photo — no
+// material matching, so it works for anything with an SN sticker (materials,
+// tools, a faulty unit that isn't in the catalog). Used as the fallback when
+// the browser's barcode decoder finds nothing in a per-SN photo. Never
+// invents: an unreadable label means an empty list.
+async function readSerialsFromPhoto(dataUrl) {
+  if (!isConfigured()) {
+    const err = new Error("Fitur baca SN dari foto belum dikonfigurasi di server (ANTHROPIC_API_KEY belum di-set)");
+    err.status = 503;
+    throw err;
+  }
+  const { mimeType, base64 } = parseDataUrl(dataUrl);
+  if (!/^image\//.test(mimeType)) {
+    const err = new Error("File harus berupa foto (JPG/PNG)");
+    err.status = 400;
+    throw err;
+  }
+  const prompt = `Foto ini adalah foto label/stiker pada perangkat (material telekomunikasi atau alat kerja). Baca Serial Number (S/N, SN, Serial No.) yang tercetak dan BENAR-BENAR TERBACA JELAS di label.
+
+Aturan:
+- Hanya Serial Number — BUKAN MAC address, IMEI, part number/model/P/N, tanggal, atau kode lain, kecuali label tersebut jelas menandai kode itu sebagai S/N.
+- Salin persis karakter demi karakter, tanpa spasi tambahan di awal/akhir.
+- JANGAN mengarang atau menebak karakter yang kabur. Kalau tidak ada SN yang terbaca jelas, kembalikan array kosong.
+
+Balas HANYA dengan JSON valid, tanpa teks lain: {"serials": ["..."]}`;
+  const text = await callClaude([{ mimeType, base64 }], prompt);
+  const cleaned = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+  let parsed;
+  try { parsed = JSON.parse(cleaned); } catch {
+    const err = new Error("Gagal membaca hasil — format dari Claude tidak sesuai");
+    err.status = 502;
+    throw err;
+  }
+  const serials = Array.isArray(parsed?.serials) ? parsed.serials.map((s) => String(s).trim()).filter(Boolean) : [];
+  return { serials: [...new Set(serials)] };
+}
+
+module.exports = { detectMaterialsFromPhotos, readSerialsFromPhoto, isConfigured };

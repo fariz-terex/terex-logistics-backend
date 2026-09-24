@@ -8,7 +8,7 @@ const { createTransferRequest, approveTransfer, rejectTransfer, cancelTransfer }
 const { notifyWebhook } = require("../utils/webhook");
 const { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild, planInstalledStatusFix } = require("../utils/stockConsistency");
 const { parseBkbDocument } = require("../utils/bkbParser");
-const { detectMaterialsFromPhotos } = require("../utils/materialPhotoDetector");
+const { detectMaterialsFromPhotos, readSerialsFromPhoto } = require("../utils/materialPhotoDetector");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -355,6 +355,16 @@ router.post("/parse-bkb", requireAuth, requireRole(LOGISTICS, MANAGER), async (r
 // to a specific role — each flow's own submit endpoint (POST /returns,
 // POST /stock/transfers, POST /reconciliations) keeps its own role gate
 // unchanged, so nothing here widens who can actually create a record.
+// Reads the SN(s) off one label photo — the per-SN "Upload/Ganti Foto"
+// fallback when the browser can't decode a barcode. Read-only, like above.
+router.post("/read-serial-photo", requireAuth, async (req, res) => {
+  try {
+    res.json(await readSerialsFromPhoto((req.body || {}).photo));
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message || "Gagal membaca Serial Number dari foto" });
+  }
+});
+
 router.post("/detect-materials-photo", requireAuth, async (req, res) => {
   const { photos } = req.body || {};
   try {

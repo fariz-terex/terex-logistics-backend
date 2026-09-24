@@ -183,5 +183,17 @@ set `input.files`, dispatch `change` event — lihat riwayat commit
   Form menampilkan daftar "Belum bisa submit — lengkapi dulu" (array
   `missing` di `ReconciliationCreate`) — tambah item ke situ kalau ada
   syarat submit baru, jangan biarkan tombol disabled tanpa penjelasan.
-  Foto referensi per baris (`detectionPhotos`) bisa diganti lewat
-  `ReplacePhotoButton`, tapi TIDAK dikirim/disimpan ke server.
+  Foto referensi per baris TIDAK dikirim/disimpan ke server: baris
+  serialized pakai SATU foto per slot SN (`serialPhotos`), non-serialized
+  pakai set foto (`detectionPhotos`, `ReplacePhotoButton` multi-pilih).
+- **Baca SN dari foto — satu helper untuk semua menu**:
+  `readSerialsFromPhoto` di `App.jsx` (barcode dulu via `@zxing` dari file
+  ASLI, fallback Claude lewat `POST /stock/read-serial-photo` =
+  `readSerialsFromPhoto` di `utils/materialPhotoDetector.js`, tanpa
+  whitelist material jadi bisa untuk alat juga). Dipakai lewat
+  `PhotoUpload ... detectBarcode api={api} onDetected` (Reconciliation per
+  SN, Return Faulty per SN, Material Swap foto bukti) dan `SnPhotoButton`
+  (Goods Receipt, Tool Receipt — fotonya tidak disimpan). Foto yang
+  diganti SELALU menimpa SN slot-nya (permintaan user). Deteksi batch
+  (`detect-materials-photo`) juga mengembalikan `serialPhotoIndexes`
+  supaya tiap SN dapat foto asalnya (`serialSlotPhoto`).
