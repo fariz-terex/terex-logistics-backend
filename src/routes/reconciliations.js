@@ -91,6 +91,16 @@ router.get("/:id", requireAuth, (req, res) => {
 // `reason` is the one reconciliation-level explanation; an item's own
 // reason (older clients) also satisfies it.
 function validateItems(items, excludeReconId, reason) {
+  // The same physical unit can't be counted twice in one reconciliation.
+  const seen = new Set();
+  for (const item of items) {
+    for (const sn of item.serials || []) {
+      const key = sn?.trim().toUpperCase();
+      if (!key) continue;
+      if (seen.has(key)) return `Serial Number ${sn.trim()} tercatat lebih dari sekali`;
+      seen.add(key);
+    }
+  }
   for (const item of items) {
     if (item.systemQty !== item.actualQty && !item.reason?.trim() && !reason?.trim()) return `Alasan discrepancy wajib diisi (selisih pada ${item.material})`;
     if (item.serialized) {
