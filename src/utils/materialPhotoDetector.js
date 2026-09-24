@@ -190,12 +190,13 @@ async function detectMaterialsFromPhotos(dataUrls, { materialNames }) {
   };
 }
 
-// Reads just the Serial Number(s) printed on a label in ONE photo — no
-// material matching, so it works for anything with an SN sticker (materials,
-// tools, a faulty unit that isn't in the catalog). Used as the fallback when
-// the browser's barcode decoder finds nothing in a per-SN photo. Never
-// invents: an unreadable label means an empty list.
-async function readSerialsFromPhoto(dataUrl) {
+// Reads the Serial Number(s) printed on a label in ONE photo, plus — when
+// `materialNames` is given — which catalog material the unit in the photo
+// is (so a per-SN photo swapped for a different device can move that SN to
+// the right material). SNs aren't tied to the whitelist, so this still
+// works for tools or a unit that isn't in the catalog (material = null).
+// Never invents: unreadable -> empty list; unsure material -> null.
+async function readSerialsFromPhoto(dataUrl, { materialNames = [] } = {}) {
   if (!isConfigured()) {
     const err = new Error("Fitur baca SN dari foto belum dikonfigurasi di server (ANTHROPIC_API_KEY belum di-set)");
     err.status = 503;
@@ -213,8 +214,11 @@ Aturan:
 - Hanya Serial Number — BUKAN MAC address, IMEI, part number/model/P/N, tanggal, atau kode lain, kecuali label tersebut jelas menandai kode itu sebagai S/N.
 - Salin persis karakter demi karakter, tanpa spasi tambahan di awal/akhir.
 - JANGAN mengarang atau menebak karakter yang kabur. Kalau tidak ada SN yang terbaca jelas, kembalikan array kosong.
-
-Balas HANYA dengan JSON valid, tanpa teks lain: {"serials": ["..."]}`;
+${materialNames.length ? `
+Selain itu, tentukan perangkat di foto ini termasuk material yang mana dari DAFTAR MASTER MATERIAL berikut (cocokkan dari merek/model di label dan bentuk perangkat). Salin namanya PERSIS dari daftar. Kalau tidak yakin atau tidak ada yang cocok, isi null — jangan mengarang.
+${materialNames.map((n) => `- ${n}`).join("\n")}
+` : ""}
+Balas HANYA dengan JSON valid, tanpa teks lain: {"serials": ["..."], "material": ${materialNames.length ? `"..." atau null` : "null"}}`;
   const text = await callClaude([{ mimeType, base64 }], prompt);
   const cleaned = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
   let parsed;
@@ -224,7 +228,9 @@ Balas HANYA dengan JSON valid, tanpa teks lain: {"serials": ["..."]}`;
     throw err;
   }
   const serials = Array.isArray(parsed?.serials) ? parsed.serials.map((s) => String(s).trim()).filter(Boolean) : [];
-  return { serials: [...new Set(serials)] };
+  // Same whitelist defense as detectMaterialsFromPhotos: an exact catalog name or nothing.
+  const material = typeof parsed?.material === "string" && materialNames.includes(parsed.material.trim()) ? parsed.material.trim() : null;
+  return { serials: [...new Set(serials)], material };
 }
 
 module.exports = { detectMaterialsFromPhotos, readSerialsFromPhoto, isConfigured };

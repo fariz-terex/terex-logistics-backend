@@ -197,3 +197,8 @@ set `input.files`, dispatch `change` event — lihat riwayat commit
   diganti SELALU menimpa SN slot-nya (permintaan user). Deteksi batch
   (`detect-materials-photo`) juga mengembalikan `serialPhotoIndexes`
   supaya tiap SN dapat foto asalnya (`serialSlotPhoto`).
+  `read-serial-photo` juga mengembalikan `material` (whitelist-only). Di
+  Reconciliation (`applySlotRead`) & Return Faulty (`applyDetectedSN`),
+  foto per-SN dengan `identifyMaterial`: kalau fotonya ternyata material
+  LAIN, SN + fotonya DIPINDAH ke card material itu (dibuat kalau belum
+  ada, qty ikut; card asal yang jadi kosong dihapus) + `notice` di card.

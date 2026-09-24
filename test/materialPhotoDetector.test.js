@@ -116,13 +116,23 @@ test("detectMaterialsFromPhotos maps each material/SN to the photo it came from 
 test("readSerialsFromPhoto returns trimmed, de-duplicated serials and tolerates a code fence", async () => {
   const { readSerialsFromPhoto } = require("../src/utils/materialPhotoDetector");
   await withStubbedFetch("```json\n" + JSON.stringify({ serials: [" 34605JAE49 ", "34605JAE49", "", 7] }) + "\n```", async () => {
-    assert.deepEqual(await readSerialsFromPhoto(ONE_PX_PNG), { serials: ["34605JAE49", "7"] });
+    assert.deepEqual(await readSerialsFromPhoto(ONE_PX_PNG), { serials: ["34605JAE49", "7"], material: null });
   });
 });
 
 test("readSerialsFromPhoto returns an empty list when nothing is legible", async () => {
   const { readSerialsFromPhoto } = require("../src/utils/materialPhotoDetector");
   await withStubbedFetch(JSON.stringify({ serials: [] }), async () => {
-    assert.deepEqual(await readSerialsFromPhoto(ONE_PX_PNG), { serials: [] });
+    assert.deepEqual(await readSerialsFromPhoto(ONE_PX_PNG), { serials: [], material: null });
+  });
+});
+
+test("readSerialsFromPhoto identifies the material only from the given whitelist", async () => {
+  const { readSerialsFromPhoto } = require("../src/utils/materialPhotoDetector");
+  await withStubbedFetch(JSON.stringify({ serials: ["E3 0018403039 AC"], material: "Modem Hughes HT2010" }), async () => {
+    assert.deepEqual(await readSerialsFromPhoto(ONE_PX_PNG, { materialNames: ["Modem Hughes HT2010", "Router Grandstream GWN7003"] }), { serials: ["E3 0018403039 AC"], material: "Modem Hughes HT2010" });
+  });
+  await withStubbedFetch(JSON.stringify({ serials: ["X1"], material: "Modem Karangan" }), async () => {
+    assert.deepEqual(await readSerialsFromPhoto(ONE_PX_PNG, { materialNames: ["Modem Hughes HT2010"] }), { serials: ["X1"], material: null });
   });
 });

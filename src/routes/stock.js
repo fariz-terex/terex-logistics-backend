@@ -359,7 +359,8 @@ router.post("/parse-bkb", requireAuth, requireRole(LOGISTICS, MANAGER), async (r
 // fallback when the browser can't decode a barcode. Read-only, like above.
 router.post("/read-serial-photo", requireAuth, async (req, res) => {
   try {
-    res.json(await readSerialsFromPhoto((req.body || {}).photo));
+    const materialNames = db.prepare("SELECT name FROM materials WHERE status = 'Active'").all().map((r) => r.name);
+    res.json(await readSerialsFromPhoto((req.body || {}).photo, { materialNames }));
   } catch (err) {
     res.status(err.status || 500).json({ error: err.message || "Gagal membaca Serial Number dari foto" });
   }
