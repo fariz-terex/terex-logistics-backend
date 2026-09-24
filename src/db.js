@@ -154,6 +154,13 @@ if (!reconColumns.includes("customer")) {
   console.log("[db] adding customer (division) column to reconciliations");
   db.exec("ALTER TABLE reconciliations ADD COLUMN customer TEXT");
 }
+if (!reconColumns.includes("photo")) {
+  // One photo for the WHOLE reconciliation (all materials laid out
+  // together in one frame, e.g. a geotagged site photo) — not per item.
+  // reconciliation_items.photo (a different, older column) is unused now.
+  console.log("[db] adding photo column to reconciliations");
+  db.exec("ALTER TABLE reconciliations ADD COLUMN photo TEXT");
+}
 
 const movementColumns = db.prepare("PRAGMA table_info(stock_movements)").all().map((c) => c.name);
 if (!movementColumns.includes("customer")) {
