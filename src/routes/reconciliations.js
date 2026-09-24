@@ -78,7 +78,6 @@ router.get("/:id", requireAuth, (req, res) => {
 
 function validateItems(items, excludeReconId) {
   for (const item of items) {
-    if (!item.photo) return `Foto keseluruhan material wajib untuk ${item.material}`;
     if (item.systemQty !== item.actualQty && !item.reason?.trim()) return `Reason wajib jika ada discrepancy pada ${item.material}`;
     if (item.serialized) {
       const serials = item.serials || [];
@@ -96,7 +95,12 @@ function writeItems(reconId, items) {
   const insertItem = db.prepare(`INSERT INTO reconciliation_items (reconciliation_id, material, serialized, system_qty, actual_qty, photo, reason) VALUES (?, ?, ?, ?, ?, ?, ?)`);
   const insertSerial = db.prepare("INSERT INTO reconciliation_serials (reconciliation_item_id, sn) VALUES (?, ?)");
   items.forEach((item) => {
-    const itemId = insertItem.run(reconId, item.material, item.serialized ? 1 : 0, item.systemQty, item.actualQty, item.photo, item.reason || "").lastInsertRowid;
+    // Per-item "Foto Keseluruhan Material" was dropped from the create
+    // form (the batch photos from "Deteksi dari Foto" cover that need now,
+    // shown for reference but not resubmitted here) — `photo` defaults to
+    // "" for a caller that no longer sends it, rather than binding
+    // `undefined` to the insert.
+    const itemId = insertItem.run(reconId, item.material, item.serialized ? 1 : 0, item.systemQty, item.actualQty, item.photo || "", item.reason || "").lastInsertRowid;
     (item.serials || []).forEach((sn) => insertSerial.run(itemId, sn.trim()));
   });
 }
