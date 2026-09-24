@@ -9,6 +9,7 @@ const { notifyWebhook } = require("../utils/webhook");
 const { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild, planInstalledStatusFix } = require("../utils/stockConsistency");
 const { parseBkbDocument } = require("../utils/bkbParser");
 const { detectMaterialsFromPhotos, readSerialsFromPhoto } = require("../utils/materialPhotoDetector");
+const { storePhoto, storePhotos, discardPhotos, photoUrl } = require("../utils/photos");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -225,24 +226,39 @@ router.get("/serials", requireAuth, (req, res) => {
 
   query += " ORDER BY sn";
   if (q) query += " LIMIT 10"; // free-text search only — the SN-picker use case (material+status) needs the full list
-  res.json(db.prepare(query).all(...params));
+  res.json(db.prepare(query).all(...params).map((r) => ({ ...r, receipt_photo: photoUrl(r.receipt_photo) })));
 });
 
 router.get("/receipts", requireAuth, (req, res) => {
   const scope = scopeOf(req.user);
-  if (!scope) return res.json(db.prepare("SELECT * FROM receipts ORDER BY id DESC").all());
-  if (scope.length === 0) return res.json([]);
-  const rows = db.prepare(`SELECT * FROM receipts WHERE customer IN (${scope.map(() => "?").join(",")}) ORDER BY id DESC`).all(...scope);
-  res.json(rows);
+  let rows;
+  if (!scope) rows = db.prepare("SELECT * FROM receipts ORDER BY id DESC").all();
+  else if (scope.length === 0) rows = [];
+  else rows = db.prepare(`SELECT * FROM receipts WHERE customer IN (${scope.map(() => "?").join(",")}) ORDER BY id DESC`).all(...scope);
+  res.json(rows.map((r) => ({ ...r, photo: photoUrl(r.photo) })));
+});
+
+// One receipt with its photos: the overall photo plus each unit's label
+// photo (serialized materials). Older receipts simply have none.
+router.get("/receipts/:id", requireAuth, (req, res) => {
+  const r = db.prepare("SELECT * FROM receipts WHERE id = ?").get(req.params.id);
+  if (!r) return res.status(404).json({ error: "Penerimaan barang tidak ditemukan" });
+  if (!scopeAllows(scopeOf(req.user), r.customer)) return res.status(403).json({ error: "Penerimaan ini bukan milik divisi Anda" });
+  const units = db.prepare("SELECT sn, receipt_photo FROM serial_numbers WHERE received_ref = ? ORDER BY sn").all(r.id)
+    .map((u) => ({ sn: u.sn, photo: photoUrl(u.receipt_photo) }));
+  res.json({ ...r, photo: photoUrl(r.photo), units });
 });
 
 // Goods Receipt: the only place new stock (and new Serial Numbers) enters
 // the warehouse. Serialized materials require one SN per unit; everything
-// else is just a quantity. Wrapped in one transaction so the receipt record,
-// the serial rows, the material total, and the stock movement can never
-// partially apply.
-router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
-  const { material, serials, qty, note } = req.body;
+// else is just a quantity. Every receipt needs an overall photo of the goods,
+// and every serialized unit its own label photo — `serials` is
+// [{ sn, photo }]. Photos are validated first, uploaded to the bucket, and
+// only then is everything written in one transaction (receipt record,
+// serial rows, material total, stock movement) so it can never partially
+// apply; if that write fails the just-uploaded photos are deleted again.
+router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), async (req, res) => {
+  const { material, serials, qty, note, photo } = req.body;
   const mat = db.prepare("SELECT * FROM materials WHERE name = ?").get(material);
   if (!mat) return res.status(400).json({ error: "Unknown material" });
 
@@ -275,30 +291,50 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
   }
   const clusterToStore = divisionUsesClusters && mat.serialized ? cluster : null;
 
+  if (!photo) return res.status(400).json({ error: "Foto keseluruhan penerimaan barang wajib" });
+  let units = [];
+  if (mat.serialized) {
+    if (!Array.isArray(serials) || serials.length === 0) return res.status(409).json({ error: "Serial Number wajib diisi untuk material serialized" });
+    units = serials.map((s) => (s && typeof s === "object" ? { sn: String(s.sn || "").trim(), photo: s.photo || null } : { sn: String(s || "").trim(), photo: null }));
+    const seen = new Set();
+    for (const u of units) {
+      if (!u.sn) return res.status(409).json({ error: "Ada Serial Number kosong" });
+      const key = u.sn.toUpperCase();
+      if (seen.has(key)) return res.status(409).json({ error: `Serial Number duplikat dalam penerimaan ini: ${u.sn}` });
+      seen.add(key);
+      if (db.prepare("SELECT 1 FROM serial_numbers WHERE sn = ?").get(u.sn)) return res.status(409).json({ error: `Serial Number sudah terdaftar di sistem: ${u.sn}` });
+      if (!u.photo) return res.status(400).json({ error: `Foto label wajib untuk setiap Serial Number (${u.sn})` });
+    }
+  } else if (!(Number(qty) > 0)) {
+    return res.status(409).json({ error: "Qty harus lebih dari 0" });
+  }
+
+  let photoRef, unitRefs = [];
+  try {
+    photoRef = await storePhoto(photo, "receipts");
+    unitRefs = await storePhotos(units.map((u) => u.photo), "receipts/units");
+  } catch (err) {
+    return res.status(err.status || 502).json({ error: err.message || "Gagal menyimpan foto" });
+  }
+
   const id = dailySequenceId(db, "receipts", "WR");
   let addedQty = 0;
 
   const tx = db.transaction(() => {
     if (mat.serialized) {
-      if (!Array.isArray(serials) || serials.length === 0) throw new Error("Serial Number wajib diisi untuk material serialized");
-      const seen = new Set();
-      serials.forEach((raw) => {
-        const sn = (raw || "").trim();
-        if (!sn) throw new Error("Ada Serial Number kosong");
-        if (seen.has(sn)) throw new Error(`Serial Number duplikat dalam penerimaan ini: ${sn}`);
-        seen.add(sn);
-        if (db.prepare("SELECT 1 FROM serial_numbers WHERE sn = ?").get(sn)) throw new Error(`Serial Number sudah terdaftar di sistem: ${sn}`);
+      // Re-checked inside the transaction: the uploads above took time.
+      units.forEach((u) => {
+        if (db.prepare("SELECT 1 FROM serial_numbers WHERE sn = ?").get(u.sn)) throw new Error(`Serial Number sudah terdaftar di sistem: ${u.sn}`);
       });
-      const insertSn = db.prepare("INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref, customer, cluster) VALUES (?, ?, 'Ready', NULL, ?, ?, ?, ?)");
-      serials.forEach((raw) => insertSn.run(raw.trim(), material, isoDate(), id, customer, clusterToStore));
-      addedQty = serials.length;
+      const insertSn = db.prepare("INSERT INTO serial_numbers (sn, material, status, current_ref, received_date, received_ref, customer, cluster, receipt_photo) VALUES (?, ?, 'Ready', NULL, ?, ?, ?, ?, ?)");
+      units.forEach((u, i) => insertSn.run(u.sn, material, isoDate(), id, customer, clusterToStore, unitRefs[i]));
+      addedQty = units.length;
     } else {
-      addedQty = Number(qty) || 0;
-      if (addedQty <= 0) throw new Error("Qty harus lebih dari 0");
+      addedQty = Number(qty);
     }
 
-    db.prepare("INSERT INTO receipts (id, date, material, qty, note, created_by, customer) VALUES (?, ?, ?, ?, ?, ?, ?)")
-      .run(id, isoDate(), material, addedQty, note || "", req.user.name, customer);
+    db.prepare("INSERT INTO receipts (id, date, material, qty, note, created_by, customer, photo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+      .run(id, isoDate(), material, addedQty, note || "", req.user.name, customer, photoRef);
 
     db.prepare(`
       INSERT INTO material_stock (material, customer, ready) VALUES (?, ?, ?)
@@ -315,6 +351,7 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
   try {
     tx();
   } catch (err) {
+    await discardPhotos([photoRef, ...unitRefs]);
     return res.status(409).json({ error: err.message });
   }
 

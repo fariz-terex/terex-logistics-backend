@@ -97,4 +97,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`TEREX Logistics backend listening on http://localhost:${PORT}`);
+  require("./utils/photos").selfTest()
+    .then((status) => console.log(`[photos] bucket ${status}`))
+    .catch((err) => console.error(`[photos] bucket self-test FAILED: ${err.message}`));
 });

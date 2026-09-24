@@ -390,7 +390,8 @@ CREATE TABLE IF NOT EXISTS receipts (
   qty        INTEGER NOT NULL,
   note       TEXT DEFAULT '',
   created_by TEXT,
-  customer   TEXT   -- division this receipt's stock was credited to
+  customer   TEXT,  -- division this receipt's stock was credited to
+  photo      TEXT   -- overall photo of the received goods ("obj:" bucket ref); NULL for receipts made before it was required
 );
 
 -- Penggantian Material: swapping a faulty Installed unit at a site for a

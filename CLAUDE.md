@@ -62,6 +62,33 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
   sumber terpisah dari `serial_numbers`; keduanya bisa tidak sinkron kalau
   data dimasukkan lewat jalur non-normal (mis. import).
 
+## Penyimpanan foto (Railway Storage Bucket)
+
+- Foto BARU disimpan di bucket Railway `terex-photos` (S3-compatible,
+  privat), DB hanya menyimpan ref `obj:<folder>/<yyyy>/<mm>/<uuid>.<ext>`.
+  Env di service backend (variable reference ke bucket): `PHOTO_BUCKET`,
+  `PHOTO_BUCKET_ENDPOINT`, `PHOTO_BUCKET_REGION`, `PHOTO_BUCKET_KEY_ID`,
+  `PHOTO_BUCKET_SECRET`.
+- `utils/objectStore.js`: SigV4 ditulis sendiri (PUT/DELETE/presigned GET,
+  tanpa @aws-sdk), dites terhadap contoh resmi AWS. `utils/photos.js`:
+  `storePhoto` (data URL → upload → ref; URL presigned yang dikirim balik
+  → dipetakan ke ref lagi), `photoUrl` (ref → presigned URL 12 jam; data
+  URL lama dikembalikan apa adanya — foto lama di DB tetap jalan).
+  **Setiap route yang mengembalikan kolom foto harus lewat `photoUrl()`.**
+  Tanpa env bucket (lokal/test), foto tetap data URL.
+- Saat start, log `[photos] bucket OK` / `FAILED` (self-test put/get/delete).
+- Sudah pakai bucket: Goods Receipt (`receipts.photo`,
+  `serial_numbers.receipt_photo`). Rencana berikutnya (keputusan user
+  2026-09-24): foto per-SN Reconciliation WAJIB & disimpan, lalu foto ASLI
+  (tidak dikompres) diarsip ke Google Drive (Gmail biasa, OAuth akun user)
+  sementara versi kompres tetap di bucket untuk web app; lalu diperluas ke
+  menu lain & migrasi foto lama dari DB.
+- Goods Receipt: foto keseluruhan wajib + foto label per unit wajib
+  (`SerialPhotoRows` di App.jsx: upload banyak foto label → satu baris per
+  foto, SN dibaca otomatis). Receipt sebelum 2026-09-24 tidak punya foto
+  (boleh). Dilihat di Stock Movements (tombol "Foto" → `GET
+  /stock/receipts/:id`) dan ikon kamera di daftar Serial Number.
+
 ## Aturan wajib (hasil pelajaran pahit — jangan diulang)
 
 1. **Tambah kolom ke `serial_numbers` HANYA dengan `ALTER TABLE ADD COLUMN`

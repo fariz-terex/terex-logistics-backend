@@ -609,4 +609,19 @@ if (!transferColumns.includes("rejected_by")) {
   db.exec("ALTER TABLE stock_transfers ADD COLUMN rejected_reason TEXT");
 }
 
+// Goods Receipt photos (required for every receipt from now on; receipts
+// made before this stay without). One overall photo per receipt, and one
+// label photo per serialized unit — stored as "obj:" bucket refs (see
+// utils/photos.js). Plain ADD COLUMN per rule 1 in CLAUDE.md.
+const receiptPhotoColumns = db.prepare("PRAGMA table_info(receipts)").all().map((c) => c.name);
+if (!receiptPhotoColumns.includes("photo")) {
+  console.log("[db] adding photo column to receipts");
+  db.exec("ALTER TABLE receipts ADD COLUMN photo TEXT");
+}
+const serialColumnsForReceiptPhoto = db.prepare("PRAGMA table_info(serial_numbers)").all().map((c) => c.name);
+if (!serialColumnsForReceiptPhoto.includes("receipt_photo")) {
+  console.log("[db] adding receipt_photo column to serial_numbers");
+  db.exec("ALTER TABLE serial_numbers ADD COLUMN receipt_photo TEXT");
+}
+
 module.exports = db;
