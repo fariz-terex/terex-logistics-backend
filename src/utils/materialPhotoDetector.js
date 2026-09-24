@@ -1,12 +1,17 @@
 // Reads one or more photos of PHYSICAL MATERIALS/GOODS sitting at a
 // homebase or warehouse (not a document/paper form — see bkbParser.js for
 // that) via the Claude API and guesses which material(s) from this system's
-// own catalog are visible, plus an estimated qty of each. Same shape and
-// same defenses as bkbParser.js (whitelist-only matching, never trust an
-// invented name), reused across Reconciliation / Transfer Stock / Return
-// Material Faulty's "Deteksi dari Foto" panels. Never touches the DB or any
-// stock; the caller always shows the result to a human to review/complete
-// before it goes through that flow's own normal submit endpoint.
+// own catalog are visible, plus an estimated qty of each and — best-effort,
+// never required — any Serial Number/barcode that's actually legible in
+// the same photos, so a close-up shot of the units can skip retyping the SN
+// too, not just the material picker. Same shape and same defenses as
+// bkbParser.js (whitelist-only material matching, never trust an invented
+// name; SNs are never invented either — an unreadable/missing label just
+// means an empty serials array), reused across Reconciliation / Transfer
+// Stock / Return Material Faulty's "Deteksi dari Foto" panels. Never
+// touches the DB or any stock; the caller always shows the result to a
+// human to review/complete before it goes through that flow's own normal
+// submit endpoint.
 
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
@@ -29,16 +34,17 @@ ${materialList}
 Tugas Anda, dari SEMUA foto yang dilampirkan (anggap sebagai satu kumpulan, bisa saja beberapa foto adalah sudut berbeda dari barang yang sama):
 1. Kenali jenis material apa saja yang terlihat di foto-foto ini, HANYA dari DAFTAR MASTER MATERIAL di atas — cocokkan berdasarkan kemiripan visual (bentuk, label, warna, ukuran), bukan membaca teks pada dokumen.
 2. Untuk SETIAP jenis material yang teridentifikasi, perkirakan berapa jumlah unit yang terlihat.
-3. INI BUKAN tugas membaca barcode atau Serial Number — jangan mencoba membaca angka SN, fokus hanya pada jenis material dan perkiraan jumlah.
+3. Kalau ada label/stiker Serial Number atau barcode pada unit-unit tersebut yang BENAR-BENAR TERBACA JELAS di foto (bukan menebak), catat nomornya. Ini best-effort saja, bukan tugas utama — kalau tidak ada foto close-up label SN, atau tulisannya kabur/kekecilan/miring/silau, JANGAN dipaksakan dan JANGAN MENGARANG nomor — cukup biarkan kosong untuk material itu, user akan mengisi manual.
 
 Untuk setiap material, hasilkan:
 - "material": nama yang paling cocok dari DAFTAR MASTER MATERIAL — HARUS disalin PERSIS karakter demi karakter dari daftar itu. Kalau tidak yakin sama sekali material apa ini, JANGAN dimasukkan ke hasil (jangan mengarang nama yang tidak ada di daftar).
 - "qty": perkiraan jumlah unit yang terlihat (angka bulat)
 - "confidence": "tinggi" kalau yakin jenis materialnya, "rendah" kalau hanya perkiraan (termasuk kalau jumlahnya sulit dipastikan karena menumpuk/kecil-kecil)
-- "note": catatan singkat jika ada hal yang perlu diperhatikan user (mis. "jumlah sulit dipastikan, unit menumpuk") — string kosong jika tidak ada
+- "serials": array Serial Number/barcode yang benar-benar terbaca jelas untuk unit-unit material ini (boleh kosong — JANGAN mengarang isinya, dan boleh kurang dari qty kalau hanya sebagian yang terbaca)
+- "note": catatan singkat jika ada hal yang perlu diperhatikan user (mis. "jumlah sulit dipastikan, unit menumpuk", atau "SN tidak terbaca jelas, isi manual") — string kosong jika tidak ada
 
 Balas HANYA dengan JSON valid, tanpa penjelasan atau teks lain, persis format ini:
-{"items": [{"material": "...", "qty": 0, "confidence": "...", "note": "..."}]}
+{"items": [{"material": "...", "qty": 0, "confidence": "...", "serials": [], "note": "..."}]}
 
 Jika tidak ada material yang bisa dikenali sama sekali dari daftar, balas: {"items": []}`;
 }
@@ -106,6 +112,7 @@ function parseResponse(text) {
         material: it.material == null ? null : String(it.material).trim(),
         qty: Math.max(0, Math.round(Number(it.qty) || 0)),
         confidence: ["tinggi", "rendah", "tidak_ada"].includes(it.confidence) ? it.confidence : "tidak_ada",
+        serials: Array.isArray(it.serials) ? it.serials.map((s) => String(s).trim()).filter(Boolean) : [],
         note: String(it.note || "").trim(),
       }))
       .filter((it) => it.material),

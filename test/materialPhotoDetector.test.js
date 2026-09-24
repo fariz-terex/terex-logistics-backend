@@ -27,13 +27,13 @@ test("detectMaterialsFromPhotos keeps only materials in the given whitelist", as
   await withStubbedFetch(
     JSON.stringify({
       items: [
-        { material: "Antenna Sector", qty: 3, confidence: "tinggi", note: "" },
-        { material: "Barang Yang Tidak Ada Di Katalog", qty: 5, confidence: "tinggi", note: "" }, // hallucinated — not in whitelist
+        { material: "Antenna Sector", qty: 3, confidence: "tinggi", serials: ["SN-001"], note: "" },
+        { material: "Barang Yang Tidak Ada Di Katalog", qty: 5, confidence: "tinggi", serials: [], note: "" }, // hallucinated — not in whitelist
       ],
     }),
     async () => {
       const result = await detectMaterialsFromPhotos([ONE_PX_PNG], { materialNames: ["Antenna Sector", "Kabel Feeder"] });
-      assert.deepEqual(result.items, [{ material: "Antenna Sector", qty: 3, confidence: "tinggi", note: "" }]);
+      assert.deepEqual(result.items, [{ material: "Antenna Sector", qty: 3, confidence: "tinggi", serials: ["SN-001"], note: "" }]);
     }
   );
 });
@@ -41,7 +41,7 @@ test("detectMaterialsFromPhotos keeps only materials in the given whitelist", as
 test("detectMaterialsFromPhotos drops items with no material match", async () => {
   const { detectMaterialsFromPhotos } = require("../src/utils/materialPhotoDetector");
   await withStubbedFetch(
-    JSON.stringify({ items: [{ material: null, qty: 2, confidence: "tidak_ada", note: "tidak jelas" }] }),
+    JSON.stringify({ items: [{ material: null, qty: 2, confidence: "tidak_ada", serials: [], note: "tidak jelas" }] }),
     async () => {
       const result = await detectMaterialsFromPhotos([ONE_PX_PNG], { materialNames: ["Antenna Sector"] });
       assert.deepEqual(result.items, []);
@@ -49,13 +49,24 @@ test("detectMaterialsFromPhotos drops items with no material match", async () =>
   );
 });
 
-test("detectMaterialsFromPhotos rounds/clamps qty and normalizes confidence", async () => {
+test("detectMaterialsFromPhotos rounds/clamps qty, normalizes confidence, and sanitizes serials", async () => {
   const { detectMaterialsFromPhotos } = require("../src/utils/materialPhotoDetector");
   await withStubbedFetch(
-    JSON.stringify({ items: [{ material: "Antenna Sector", qty: -3.7, confidence: "bogus", note: 123 }] }),
+    JSON.stringify({ items: [{ material: "Antenna Sector", qty: -3.7, confidence: "bogus", serials: ["  SN-1  ", "", 42], note: 123 }] }),
     async () => {
       const result = await detectMaterialsFromPhotos([ONE_PX_PNG], { materialNames: ["Antenna Sector"] });
-      assert.deepEqual(result.items, [{ material: "Antenna Sector", qty: 0, confidence: "tidak_ada", note: "123" }]);
+      assert.deepEqual(result.items, [{ material: "Antenna Sector", qty: 0, confidence: "tidak_ada", serials: ["SN-1", "42"], note: "123" }]);
+    }
+  );
+});
+
+test("detectMaterialsFromPhotos defaults serials to an empty array when omitted or not an array", async () => {
+  const { detectMaterialsFromPhotos } = require("../src/utils/materialPhotoDetector");
+  await withStubbedFetch(
+    JSON.stringify({ items: [{ material: "Antenna Sector", qty: 1, confidence: "tinggi", serials: "not-an-array", note: "" }] }),
+    async () => {
+      const result = await detectMaterialsFromPhotos([ONE_PX_PNG], { materialNames: ["Antenna Sector"] });
+      assert.deepEqual(result.items, [{ material: "Antenna Sector", qty: 1, confidence: "tinggi", serials: [], note: "" }]);
     }
   );
 });
