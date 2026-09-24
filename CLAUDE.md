@@ -164,8 +164,16 @@ set `input.files`, dispatch `change` event — lihat riwayat commit
     dihapus dari Return Faulty & Reconciliation (redundant dengan fitur
     foto di atas) — masih ada di Tool Receipt & Material Swap karena
     keduanya belum punya foto-detect sebagai pengganti.
-  - **Celah lama, belum diperbaiki (di luar scope sesi ini):**
-    Reconciliation `systemQty` tidak diambil dari stock nyata — selalu
-    angka yang diketik user (dulu placeholder hardcoded). Auto-created row
-    dari deteksi foto set `systemQty = actualQty` (asumsi 0 discrepancy)
-    karena tidak ada sumber lain.
+- **Reconciliation System Qty = stock HOMEBASE nyata** (bukan lagi angka
+  ketikan user): serialized = jumlah SN `Delivered` di homebase itu,
+  non-serialized = `material_stock_homebase.qty` — definisi yang sama
+  dengan Transfer Stock. Logika di `utils/reconciliation.js` (+ test).
+  Frontend ambil lewat `GET /reconciliations/system-qty?customer&homebase`
+  dan tampilkan read-only; server SELALU hitung ulang saat create/resubmit
+  (nilai dari client diabaikan). **Approve sekarang menyesuaikan stock
+  homebase, BUKAN warehouse Ready** (dulu `adjustStock(..., "ready")` —
+  salah, barang Delivered sudah keluar dari Ready): non-serialized geser
+  `material_stock_homebase` sebesar discrepancy (delta, bukan set ke
+  actual); serialized tidak mengubah status SN (belum ada status "Hilang")
+  tapi SN yang tidak ditemukan / tidak tercatat dicatat di history.
+  Keputusan user 2026-09-24.

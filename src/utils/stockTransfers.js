@@ -166,4 +166,4 @@ function cancelTransfer(db, id, { cancelledBy }) {
   return db.prepare("SELECT * FROM stock_transfers WHERE id = ?").get(id);
 }
 
-module.exports = { createTransferRequest, approveTransfer, rejectTransfer, cancelTransfer };
+module.exports = { createTransferRequest, approveTransfer, rejectTransfer, cancelTransfer, withTransaction };
