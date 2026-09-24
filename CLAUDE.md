@@ -7,14 +7,28 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
 ## Arsitektur
 
 - **Backend**: Node.js + Express, database **SQLite** (`better-sqlite3`).
-  - Entry: `server.js` (root). DB layer: `db.js` (root). Seed: `seed.js` (root).
-  - Routes di `routes/` — di-mount di `server.js`. File route memakai
-    `require("../db")`, `require("../middleware/auth")`, `require("../utils/...")`
-    (naik satu folder dari `routes/` ke root). **Jangan pakai `./db` di dalam
-    routes/** — itu bug yang pernah bikin server crash (mencari `routes/db.js`).
-  - Helpers: `utils/ids.js` (generate ID), `utils/stock.js` (scope & adjust
-    stok), `utils/faultyCycle.js`. Auth: `middleware/auth.js`
-    (`requireAuth`, `requireRole`).
+  - Everything lives under **`src/`** (not repo root — this CLAUDE.md used to
+    say root, that was stale). Entry: `src/server.js`. DB layer: `src/db.js`.
+    Seed: `src/seed.js`. Schema: `src/schema.sql`.
+  - Routes di `src/routes/` — di-mount di `src/server.js`. File route
+    memakai `require("../db")`, `require("../middleware/auth")`,
+    `require("../utils/...")` (naik satu folder dari `routes/` ke `src/`).
+    **Jangan pakai `./db` di dalam routes/** — itu bug yang pernah bikin
+    server crash (mencari `routes/db.js`).
+  - Helpers di `src/utils/`: `ids.js` (generate ID), `stock.js` (scope &
+    adjust stok), `faultyCycle.js`, `stockTransfers.js` (Transfer Stock
+    lifecycle — create/approve/reject/cancel), `bkbParser.js` (Claude reads
+    a BKB document → line items), `materialPhotoDetector.js` (Claude reads
+    photo(s) of physical goods → material+qty+SN guesses). Auth:
+    `src/middleware/auth.js` (`requireAuth`, `requireRole`).
+  - **No `node_modules` in the sandbox this CLAUDE.md is usually read in**
+    (`npm install` fails — `better-sqlite3` needs node-gyp/Python, unavailable
+    there). Backend tests use Node's built-in `node:sqlite`
+    (`DatabaseSync`) + `node:test`, never better-sqlite3-only APIs like
+    `db.transaction(fn)` — use a raw `BEGIN`/`COMMIT`/`ROLLBACK` helper
+    instead (see `withTransaction` in `utils/stockTransfers.js`) so the same
+    code runs against both drivers. Run tests with
+    `node --test test/*.test.js` from `terex-backend/`.
 - **Frontend**: React satu file besar **`App.jsx`** (~7000+ baris) di repo
   frontend terpisah. Styling Tailwind. Semua komponen, `createApiClient`, dan
   routing halaman ada di file ini.
@@ -78,6 +92,24 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
   `index.html` no-cache, `assets/**` immutable. Reload biasa sudah cukup
   untuk lihat versi terbaru setelah deploy, tidak perlu hard refresh lagi.
 
+## Testing pola frontend (tidak ada login/credentials asli di sandbox ini)
+
+`npx vite build` dulu untuk cek syntax error, lalu manual pass:
+`node <scratchpad>/mock-server.js` (Node `http`, in-memory, endpoint-endpoint
+yang dipakai layar yang sedang diuji) + `npx vite preview --port 4173`, buka
+lewat Claude Browser tools, inject sesi lewat `javascript_exec`:
+```js
+function b64url(o){return btoa(JSON.stringify(o)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+const token = `${b64url({alg:"none",typ:"JWT"})}.${b64url({sub:"USR001",exp:Math.floor(Date.now()/1000)+3600*12})}.sig`;
+sessionStorage.setItem("terex_session", JSON.stringify({token, user:{id:"USR001",name:"...",role:"...",customers:[]}, apiBase:"http://localhost:8787"}));
+```
+lalu `navigate` ke URL dengan query-string berbeda (bukan sekadar hash) supaya
+benar-benar reload dan pakai sesi baru — perubahan hash saja tidak reload
+halaman. Untuk simulasi pilih file foto (tidak ada file dialog asli di
+browser otomatis ini): buat `File` dari base64 PNG kecil, `DataTransfer`,
+set `input.files`, dispatch `change` event — lihat riwayat commit
+`terex-frontend` untuk contoh lengkap.
+
 ## Status saat ini
 
 - Data historis **MSG sudah diimport** (418 unit, snapshot + 5 tanggal per
@@ -88,3 +120,52 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
   `server.js`. `/api/admin/*` sekarang balas 404. Salinan arsipnya disimpan
   di luar repo (`Downloads/terex-admin-import-archive/`) kalau perlu import
   lagi. Ketiga tugas di TUGAS_LANJUTAN.md sudah selesai.
+- **UI/UX roadmap (8 item) sudah selesai & deploy** (routing, draft form,
+  pagination/sort, dashboard per-role, dll) — lihat `[[project_ux_roadmap]]`
+  di memory kalau ada, jangan disarankan ulang.
+- **Delivery/Return Faulty/Transfer Stock digabung jadi satu menu "Delivery"**
+  (`UnifiedRequestList` + `RequestCreate` di `App.jsx`), dengan Alamat/Area
+  Pengirim+Tujuan di step pertama yang menentukan jenis request-nya secara
+  otomatis (Warehouse→Homebase = Delivery, Homebase→Warehouse = Return,
+  Homebase→Homebase = Transfer). Transfer Stock sekarang punya approval gate
+  (dulu langsung eksekusi) — lihat `utils/stockTransfers.js` (backend) dan
+  `TransferCreate`/`TransferDetail` (frontend). `hasAccess("delivery")` di
+  frontend adalah UNION dari 3 role-set lama — jangan dipersempit lagi, itu
+  akan mengunci Technician dari satu-satunya jalan mereka ke Return Faulty.
+- **Deteksi foto berbasis AI (Claude vision) ditambahkan ke 3 flow**
+  (Reconciliation, Transfer Stock, Return Material Faulty):
+  - `POST /stock/detect-materials-photo` (`utils/materialPhotoDetector.js`,
+    pola yang sama persis dengan `parse-bkb`/`bkbParser.js` yang sudah ada
+    duluan — whitelist-only match, tidak pernah percaya nama material yang
+    di-"karang" Claude) — terima 1-6 foto FISIK barang (bukan dokumen),
+    balas `{material, qty, confidence, serials, note}` per item. `serials`
+    itu best-effort (SN yang benar-benar terbaca jelas di foto yang sama,
+    boleh kosong) — Claude TIDAK diminta membaca barcode di sini, ini murni
+    baca teks tercetak.
+  - Reuse `ANTHROPIC_API_KEY`/`ANTHROPIC_MODEL` yang sudah ada untuk fitur
+    BKB — tidak perlu key baru.
+  - Frontend: `PhotoMaterialDetect` (komponen dropzone drag-and-drop, dekat
+    `BkbReceiptPanel`) dipakai di ketiga flow, tiap flow beda cara
+    memakai hasilnya (lihat komentar di `applyDetected`/`applyDetectedItems`/
+    `applyDetectedQueue` di `App.jsx`) — jangan disamakan modelnya, coba
+    baca dulu bedanya sebelum ubah.
+  - **"Foto Keseluruhan Material" (Reconciliation) itu SATU foto untuk
+    SELURUH reconciliation** (semua material digabung satu frame, mis. foto
+    geotag lokasi) — field mandiri di level form (`reconciliations.photo`,
+    kolom baru via ALTER TABLE), BUKAN per-item, dan BUKAN foto yang sama
+    dengan "Deteksi dari Foto". Sempat salah paham 2x sebelum benar — kalau
+    ada permintaan serupa lagi, baca histori chat lama sebelum menebak.
+  - Barcode-dari-foto (beda dari deteksi-material-dari-foto di atas): tombol
+    "Upload Foto" per-SN di Return Faulty men-decode barcode dari FOTO ASLI
+    (bukan versi terkompresi) pakai `@zxing/browser` yang sama dengan
+    `ScanButton` (live camera) — kompresi terbukti bisa merusak keterbacaan
+    barcode kalau barcode-nya kecil dalam frame foto (lihat komentar di
+    `PhotoUpload`'s `detectBarcode` path). `ScanButton` (live camera) sudah
+    dihapus dari Return Faulty & Reconciliation (redundant dengan fitur
+    foto di atas) — masih ada di Tool Receipt & Material Swap karena
+    keduanya belum punya foto-detect sebagai pengganti.
+  - **Celah lama, belum diperbaiki (di luar scope sesi ini):**
+    Reconciliation `systemQty` tidak diambil dari stock nyata — selalu
+    angka yang diketik user (dulu placeholder hardcoded). Auto-created row
+    dari deteksi foto set `systemQty = actualQty` (asumsi 0 discrepancy)
+    karena tidak ada sumber lain.
