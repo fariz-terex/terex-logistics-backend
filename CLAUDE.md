@@ -89,6 +89,31 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
   (boleh). Dilihat di Stock Movements (tombol "Foto" → `GET
   /stock/receipts/:id`) dan ikon kamera di daftar Serial Number.
 
+## Navigasi (disederhanakan 2026-09-30)
+
+- Sidebar: Dashboard, Request (Delivery, Replacement, Return Material,
+  Reconciliation), Stock, Database Unit, Reports, Master Data. Panduan
+  Penggunaan / Settings / Logout ada di menu profil (TopBar).
+- Grup ber-tab lewat `PAGE_GROUPS` + `PageTabs` di App.jsx: Stock
+  (Material|Alat|Consumable), Database Unit (per divisi yang boleh
+  dilihat), Master Data (7 master + User), Delivery (Delivery/Return/
+  Transfer | Transfer Antar Cluster PIM). **Route key & komponen tiap
+  halaman TIDAK berubah** — tab cuma navigasi; tab yang tidak boleh
+  diakses tidak tampil, grup dengan 1 tab tidak menampilkan strip.
+- Transfer Antar Cluster sengaja TIDAK digabung ke `RequestCreate`
+  (bukan pengiriman fisik, approver-nya SPV cluster pemilik) — cuma jadi
+  tab di halaman Delivery. Return Material tetap menu sendiri (keputusan
+  user).
+- Halaman `movement` (Stock Movement) & report selain Delivery adalah
+  WIP tersembunyi (`HIDDEN_PAGES` → dialihkan ke dashboard). Foto
+  penerimaan barang dibuka dari ikon kamera di daftar Serial Number.
+- Dashboard: `TaskInbox` ("Perlu Tindakan Anda") paling atas — dokumen
+  yang menunggu langkah dari role user, dikelompokkan per langkah, klik →
+  detail (`gotoDetail`), "Lihat semua" → daftar ter-filter lewat
+  `uiStateStore`. Siapa-melakukan-apa mengikuti `requireRole` backend
+  (mis. approve Delivery = Manager saja). Kalau menambah status/langkah
+  baru, tambahkan kelompoknya di `TaskInbox`.
+
 ## Aturan wajib (hasil pelajaran pahit — jangan diulang)
 
 1. **Tambah kolom ke `serial_numbers` HANYA dengan `ALTER TABLE ADD COLUMN`
