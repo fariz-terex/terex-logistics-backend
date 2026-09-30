@@ -103,6 +103,11 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
     ke `shipping_ref` Surat Jalan.
   - BKB + SJ `return_to_customer`: kirim faulty ke customer (single &
     batch) — satu pasang per divisi.
+- Terima Barang = barang yang DISERAHKAN CUSTOMER dan masuk stok Ready:
+  barang baru ATAU material eks-site (site terminasi/dismantle) kondisi
+  baik — keduanya sah (koreksi user 2026-09-30). `parse-bkb`
+  `documentType`: penerimaan_baru | material_eks_site (info saja) | faulty
+  | pengiriman_keluar | lainnya | tidak_jelas (4 terakhir = peringatan).
 - Nomor: `TRX/<BMB|BKB|SJ>/<DIVISI>/<YYYY>/<MM>/<NNNN>`, per jenis per
   divisi per bulan, MAX+1 (keputusan user: per divisi).
 - Baca: `GET /api/documents?type=…` & `/:id` (`routes/documents.js`).

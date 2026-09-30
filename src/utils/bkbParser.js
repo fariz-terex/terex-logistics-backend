@@ -32,14 +32,16 @@ ${materialList}
 DAFTAR DIVISI YANG VALID DI SISTEM:
 ${divisionList}
 
-PENTING — dokumen ini akan dipakai untuk fitur "Penerimaan Barang Baru" (Goods Receipt): barang baru yang masuk ke gudang dari SUPPLIER/VENDOR EKSTERNAL. Dokumen lain yang sekilas mirip tapi BUKAN ini, misalnya:
-- Tanda terima PENGEMBALIAN material dari site/customer/teknisi kembali ke gudang ("Pengembalian Material", "Retur", material yang tadinya sudah terpasang/terkirim lalu ditarik balik)
-- Berita Acara Serah Terima (BAST) instalasi
-- Surat jalan PENGIRIMAN KELUAR dari gudang ke site (bukan barang masuk)
-- Dokumen lain yang tidak ada hubungannya dengan pergerakan barang gudang
+PENTING — dokumen ini dipakai untuk "Terima Barang": barang yang DISERAHKAN CUSTOMER ke gudang Terex dan masuk ke stok siap pakai. Barang itu bisa barang baru, ATAU material eks-site (dibongkar/ditarik dari site yang sudah terminasi/dismantle) yang KONDISINYA MASIH BAIK — keduanya sama-sama sah diterima di sini. Yang BUKAN untuk fitur ini: barang RUSAK/FAULTY (itu lewat Return Faulty), surat jalan PENGIRIMAN KELUAR dari gudang Terex ke site, BAST instalasi, atau dokumen yang tidak berisi penyerahan barang.
 
 Tugas Anda:
-1. Tentukan "documentType": "penerimaan_baru" HANYA jika dokumen ini benar-benar barang baru masuk gudang dari supplier/vendor eksternal. Kalau dokumen ini pengembalian/retur material dari site/customer, isi "pengembalian_material". Kalau BAST atau lainnya, isi "lainnya". Kalau benar-benar tidak jelas, isi "tidak_jelas".
+1. Tentukan "documentType":
+   - "penerimaan_baru": barang baru diserahkan ke Terex
+   - "material_eks_site": material dari site terminasi/dismantle/pengembalian material yang TIDAK disebut rusak/faulty (kondisi baik/layak pakai atau kondisi tidak disebut)
+   - "faulty": dokumen menyebut barangnya rusak/faulty/tidak berfungsi
+   - "pengiriman_keluar": surat jalan/BKB barang KELUAR dari gudang Terex ke site/teknisi
+   - "lainnya": BAST atau dokumen lain tanpa penyerahan barang ke gudang
+   - "tidak_jelas": benar-benar tidak bisa ditentukan
 2. Tentukan divisi tujuan penerimaan barang ini berdasarkan isi dokumen (kop surat, nama pengirim/penerima, referensi site/project, catatan, dll). Jawab HANYA salah satu nama persis dari DAFTAR DIVISI di atas, atau null jika sama sekali tidak yakin.
 2b. Tentukan "documentNumber": nomor dokumen BKB/Surat Jalan ini PERSIS seperti tertulis (mis. di kop/judul, "No.", "Nomor BKB"). Isi null kalau tidak ada atau tidak terbaca jelas — JANGAN mengarang.
 3. Untuk SETIAP baris barang di dokumen, ekstrak (tetap ekstrak baris barangnya walaupun documentType bukan "penerimaan_baru" — biarkan manusia yang memutuskan):
@@ -117,7 +119,7 @@ function parseResponse(text) {
     throw err;
   }
   return {
-    documentType: ["penerimaan_baru", "pengembalian_material", "lainnya"].includes(parsed.documentType) ? parsed.documentType : "tidak_jelas",
+    documentType: ["penerimaan_baru", "material_eks_site", "faulty", "pengiriman_keluar", "lainnya"].includes(parsed.documentType) ? parsed.documentType : "tidak_jelas",
     division: parsed.division == null ? null : String(parsed.division).trim(),
     documentNumber: parsed.documentNumber == null ? null : String(parsed.documentNumber).trim() || null,
     items: parsed.items
