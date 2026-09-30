@@ -19,11 +19,15 @@ const SCOPE = "https://www.googleapis.com/auth/drive.file";
 const FOLDER_MIME = "application/vnd.google-apps.folder";
 const EXPECTED_ACCOUNT = "logistik.terex@gmail.com";
 
+// Values pasted into Railway often carry stray whitespace/newlines or
+// surrounding quotes — Google then answers "invalid_client".
+const clean = (v) => String(v || "").trim().replace(/^["']+|["']+$/g, "").trim();
+
 function oauthConfig(env = process.env) {
   return {
-    clientId: env.GOOGLE_CLIENT_ID || "",
-    clientSecret: env.GOOGLE_CLIENT_SECRET || "",
-    redirectUri: env.GOOGLE_REDIRECT_URI || "https://backend-production-5543.up.railway.app/api/gdrive/callback",
+    clientId: clean(env.GOOGLE_CLIENT_ID),
+    clientSecret: clean(env.GOOGLE_CLIENT_SECRET),
+    redirectUri: clean(env.GOOGLE_REDIRECT_URI) || "https://backend-production-5543.up.railway.app/api/gdrive/callback",
   };
 }
 const isConfigured = (env = process.env) => { const c = oauthConfig(env); return !!(c.clientId && c.clientSecret); };

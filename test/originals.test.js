@@ -136,3 +136,11 @@ test("authUrl asks for offline drive.file access for the logistik account", () =
   assert.equal(url.searchParams.get("login_hint"), "logistik.terex@gmail.com");
   assert.equal(url.searchParams.get("state"), "STATE");
 });
+
+test("oauth config tolerates pasted whitespace / quotes around the Railway values", () => {
+  const { oauthConfig } = require("../src/utils/googleDrive");
+  const c = oauthConfig({ GOOGLE_CLIENT_ID: '  "123-abc.apps.googleusercontent.com"\n', GOOGLE_CLIENT_SECRET: " GOCSPX-xyz \n" });
+  assert.equal(c.clientId, "123-abc.apps.googleusercontent.com");
+  assert.equal(c.clientSecret, "GOCSPX-xyz");
+  assert.equal(c.redirectUri, "https://backend-production-5543.up.railway.app/api/gdrive/callback");
+});
