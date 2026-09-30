@@ -21,7 +21,7 @@ function parseDataUrl(dataUrl) {
   return { mimeType: m[1], base64: m[2] };
 }
 
-function buildPrompt(materialNames, divisionNames) {
+function buildPrompt(materialNames, divisionNames, clusterNames = []) {
   const materialList = materialNames.map((n) => `- ${n}`).join("\n");
   const divisionList = divisionNames.map((n) => `- ${n}`).join("\n");
   return `Anda membantu membaca dokumen BKB (Bukti/Berita Kirim Barang) atau surat jalan penerimaan barang gudang logistik. Baca dokumen terlampir.
@@ -31,7 +31,10 @@ ${materialList}
 
 DAFTAR DIVISI YANG VALID DI SISTEM:
 ${divisionList}
-
+${clusterNames.length ? `
+DAFTAR CLUSTER YANG VALID (khusus divisi PIM — nama di dokumen bisa beda spasi/tanda baca, mis. "JABAR 1B" = "JABAR-1B"):
+${clusterNames.map((n) => `- ${n}`).join("\n")}
+` : ""}
 PENTING — dokumen ini dipakai untuk "Terima Barang": barang yang DISERAHKAN CUSTOMER ke gudang Terex dan masuk ke stok siap pakai. Barang itu bisa barang baru, ATAU material eks-site (dibongkar/ditarik dari site yang sudah terminasi/dismantle) yang KONDISINYA MASIH BAIK — keduanya sama-sama sah diterima di sini. Yang BUKAN untuk fitur ini: barang RUSAK/FAULTY (itu lewat Return Faulty), surat jalan PENGIRIMAN KELUAR dari gudang Terex ke site, BAST instalasi, atau dokumen yang tidak berisi penyerahan barang.
 
 Tugas Anda:
@@ -44,6 +47,7 @@ Tugas Anda:
    - "tidak_jelas": benar-benar tidak bisa ditentukan
 2. Tentukan divisi tujuan penerimaan barang ini berdasarkan isi dokumen (kop surat, nama pengirim/penerima, referensi site/project, catatan, dll). Jawab HANYA salah satu nama persis dari DAFTAR DIVISI di atas, atau null jika sama sekali tidak yakin.
 2a. Kalau documentType "material_eks_site": isi "sourceSite" dengan nama/ID site asal material PERSIS seperti tertulis (null kalau tidak disebut), dan "condition" dengan kondisi barang seperti disebut di dokumen, singkat (mis. "baik", "layak pakai"; null kalau tidak disebut). Untuk documentType lain, keduanya null.
+2c. Kalau barang ini untuk divisi PIM, tentukan "cluster" tujuan dari isi dokumen (kop, alamat/area, referensi project/MR/NOD, catatan). Jawab HANYA salah satu nama PERSIS dari DAFTAR CLUSTER di atas, atau null kalau tidak disebut/tidak yakin.
 2b. Tentukan "documentNumber": nomor dokumen BKB/Surat Jalan ini PERSIS seperti tertulis (mis. di kop/judul, "No.", "Nomor BKB"). Isi null kalau tidak ada atau tidak terbaca jelas — JANGAN mengarang.
 3. Untuk SETIAP baris barang di dokumen, ekstrak (tetap ekstrak baris barangnya walaupun documentType bukan "penerimaan_baru" — biarkan manusia yang memutuskan):
    - "rawMaterial": nama barang PERSIS seperti tertulis di dokumen (jangan diterjemahkan/disingkat)
@@ -54,7 +58,7 @@ Tugas Anda:
    - "note": catatan tambahan pada baris itu jika ada (kondisi, nomor PO/BKB, dll) — string kosong jika tidak ada
 
 Balas HANYA dengan JSON valid, tanpa penjelasan atau teks lain, persis format ini:
-{"documentType": "...", "division": "...", "documentNumber": "...", "sourceSite": null, "condition": null, "items": [{"rawMaterial": "...", "matchedMaterial": "...", "confidence": "...", "qty": 0, "serials": [], "note": "..."}]}
+{"documentType": "...", "division": "...", "documentNumber": "...", "sourceSite": null, "condition": null, "cluster": null, "items": [{"rawMaterial": "...", "matchedMaterial": "...", "confidence": "...", "qty": 0, "serials": [], "note": "..."}]}
 
 Jika dokumen tidak terbaca sama sekali atau tidak berisi daftar barang, balas: {"documentType": "tidak_jelas", "division": null, "items": []}`;
 }
@@ -125,6 +129,7 @@ function parseResponse(text) {
     documentNumber: parsed.documentNumber == null ? null : String(parsed.documentNumber).trim() || null,
     sourceSite: parsed.sourceSite == null ? null : String(parsed.sourceSite).trim() || null,
     condition: parsed.condition == null ? null : String(parsed.condition).trim() || null,
+    cluster: parsed.cluster == null ? null : String(parsed.cluster).trim() || null,
     items: parsed.items
       .map((it) => ({
         rawMaterial: String(it.rawMaterial || "").trim(),
@@ -140,7 +145,7 @@ function parseResponse(text) {
 
 // materials/divisions: the actual Active names in this system, given to
 // Claude as the only valid targets it may match against.
-async function parseBkbDocument(dataUrl, { materialNames, divisionNames }) {
+async function parseBkbDocument(dataUrl, { materialNames, divisionNames, clusterNames = [] }) {
   if (!isConfigured()) {
     const err = new Error("Fitur deteksi BKB belum dikonfigurasi di server (ANTHROPIC_API_KEY belum di-set)");
     err.status = 503;
@@ -152,7 +157,7 @@ async function parseBkbDocument(dataUrl, { materialNames, divisionNames }) {
     err.status = 400;
     throw err;
   }
-  const text = await callClaude(mimeType, base64, buildPrompt(materialNames, divisionNames));
+  const text = await callClaude(mimeType, base64, buildPrompt(materialNames, divisionNames, clusterNames));
   const result = parseResponse(text);
 
   // Defense against hallucination: only trust a matchedMaterial/division
@@ -167,6 +172,7 @@ async function parseBkbDocument(dataUrl, { materialNames, divisionNames }) {
     documentNumber: result.documentNumber,
     sourceSite: result.sourceSite,
     condition: result.condition,
+    cluster: result.cluster && clusterNames.includes(result.cluster) ? result.cluster : null,
     items: result.items.map((it) => ({
       ...it,
       matchedMaterial: it.matchedMaterial && materialSet.has(it.matchedMaterial) ? it.matchedMaterial : null,
@@ -175,4 +181,17 @@ async function parseBkbDocument(dataUrl, { materialNames, divisionNames }) {
   };
 }
 
-module.exports = { parseBkbDocument, isConfigured };
+// Finds which cluster name appears in a piece of text (e.g. the uploaded
+// file name "NOD 4885317 - JABAR 1B.pdf"), ignoring case, spaces and
+// punctuation so "JABAR 1B" matches "JABAR-1B". Longest match wins; null
+// when none appears. Deterministic fallback for when the document body
+// doesn't name the cluster.
+function matchClusterName(text, clusterNames) {
+  const norm = (v) => String(v || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const hay = norm(text);
+  if (!hay) return null;
+  const hits = clusterNames.filter((c) => norm(c) && hay.includes(norm(c)));
+  return hits.sort((a, b) => norm(b).length - norm(a).length)[0] || null;
+}
+
+module.exports = { parseBkbDocument, isConfigured, matchClusterName };

@@ -7,7 +7,7 @@ const { sendToCustomer, receiveFromCustomer } = require("../utils/faultyCycle");
 const { createTransferRequest, approveTransfer, rejectTransfer, cancelTransfer } = require("../utils/stockTransfers");
 const { notifyWebhook } = require("../utils/webhook");
 const { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketRebuild, planInstalledStatusFix } = require("../utils/stockConsistency");
-const { parseBkbDocument } = require("../utils/bkbParser");
+const { parseBkbDocument, matchClusterName } = require("../utils/bkbParser");
 const { detectMaterialsFromPhotos, readSerialsFromPhoto } = require("../utils/materialPhotoDetector");
 const { storePhoto, storePhotos, discardPhotos, photoUrl } = require("../utils/photos");
 const { createDocument, addItems, createShipmentDocuments, itemsFromSerials, WAREHOUSE } = require("../utils/documents");
@@ -395,7 +395,7 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), async (re
 // Writes nothing to the database; the actual receipt still goes through
 // POST /receipts above, once per item, only after a human confirms it.
 router.post("/parse-bkb", requireAuth, requireRole(LOGISTICS, MANAGER), async (req, res) => {
-  const { document } = req.body;
+  const { document, fileName } = req.body;
   if (!document) return res.status(400).json({ error: "Dokumen BKB wajib diupload" });
   try {
     const materialNames = db.prepare("SELECT name FROM materials WHERE status = 'Active'").all().map((r) => r.name);
@@ -403,12 +403,20 @@ router.post("/parse-bkb", requireAuth, requireRole(LOGISTICS, MANAGER), async (r
     const materialsByName = new Map(
       db.prepare("SELECT name, serialized FROM materials WHERE status = 'Active'").all().map((m) => [m.name, !!m.serialized])
     );
-    const result = await parseBkbDocument(document, { materialNames, divisionNames });
+    const clusters = db.prepare("SELECT name, customer FROM clusters WHERE status = 'Active'").all();
+    const result = await parseBkbDocument(document, { materialNames, divisionNames, clusterNames: clusters.map((c) => c.name) });
+    // Cluster: from the document body, else from the file name (people name
+    // BKB files like "NOD 4885317 - JABAR 1B.pdf"). A cluster also pins its
+    // division when the document didn't name one.
+    let division = result.division;
+    const inDivision = clusters.filter((c) => !division || c.customer === division).map((c) => c.name);
+    const cluster = (result.cluster && inDivision.includes(result.cluster) ? result.cluster : null) || matchClusterName(fileName, inDivision);
+    if (cluster && !division) division = clusters.find((c) => c.name === cluster).customer;
     const items = result.items.map((it) => ({
       ...it,
       matchedSerialized: it.matchedMaterial ? materialsByName.get(it.matchedMaterial) : null,
     }));
-    res.json({ documentType: result.documentType, division: result.division, documentNumber: result.documentNumber, sourceSite: result.sourceSite, condition: result.condition, items });
+    res.json({ documentType: result.documentType, division, cluster, documentNumber: result.documentNumber, sourceSite: result.sourceSite, condition: result.condition, items });
   } catch (err) {
     res.status(err.status || 500).json({ error: err.message || "Gagal membaca dokumen BKB" });
   }

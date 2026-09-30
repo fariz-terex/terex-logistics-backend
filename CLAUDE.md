@@ -111,6 +111,10 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
   baik — keduanya sah (koreksi user 2026-09-30). `parse-bkb`
   `documentType`: penerimaan_baru | material_eks_site (info saja) | faulty
   | pengiriman_keluar | lainnya | tidak_jelas (4 terakhir = peringatan).
+  `cluster` (PIM): dari isi dokumen (AI, whitelist cluster aktif), kalau
+  kosong dari NAMA FILE (`matchClusterName`, abaikan spasi/strip —
+  "NOD 4885317 - JABAR 1B.pdf" → JABAR-1B; frontend kirim `fileName`).
+  Cluster juga menentukan divisi kalau dokumen tidak menyebut divisi.
   Juga `sourceSite` + `condition` (eks-site) → frontend isi "Asal barang /
   Keterangan BMB", dikirim sebagai `bmbNote` → `documents.note` BMB
   (tercetak "Asal / Keterangan", ikut dicari).
