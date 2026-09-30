@@ -41,6 +41,7 @@ PENTING — dokumen ini akan dipakai untuk fitur "Penerimaan Barang Baru" (Goods
 Tugas Anda:
 1. Tentukan "documentType": "penerimaan_baru" HANYA jika dokumen ini benar-benar barang baru masuk gudang dari supplier/vendor eksternal. Kalau dokumen ini pengembalian/retur material dari site/customer, isi "pengembalian_material". Kalau BAST atau lainnya, isi "lainnya". Kalau benar-benar tidak jelas, isi "tidak_jelas".
 2. Tentukan divisi tujuan penerimaan barang ini berdasarkan isi dokumen (kop surat, nama pengirim/penerima, referensi site/project, catatan, dll). Jawab HANYA salah satu nama persis dari DAFTAR DIVISI di atas, atau null jika sama sekali tidak yakin.
+2b. Tentukan "documentNumber": nomor dokumen BKB/Surat Jalan ini PERSIS seperti tertulis (mis. di kop/judul, "No.", "Nomor BKB"). Isi null kalau tidak ada atau tidak terbaca jelas — JANGAN mengarang.
 3. Untuk SETIAP baris barang di dokumen, ekstrak (tetap ekstrak baris barangnya walaupun documentType bukan "penerimaan_baru" — biarkan manusia yang memutuskan):
    - "rawMaterial": nama barang PERSIS seperti tertulis di dokumen (jangan diterjemahkan/disingkat)
    - "matchedMaterial": nama yang paling cocok dari DAFTAR MASTER MATERIAL di atas — HARUS disalin PERSIS karakter demi karakter dari daftar itu (bukan dari dokumen). Kalau benar-benar tidak ada yang cocok maknanya, isi null. JANGAN mengarang nama yang tidak ada di daftar.
@@ -50,7 +51,7 @@ Tugas Anda:
    - "note": catatan tambahan pada baris itu jika ada (kondisi, nomor PO/BKB, dll) — string kosong jika tidak ada
 
 Balas HANYA dengan JSON valid, tanpa penjelasan atau teks lain, persis format ini:
-{"documentType": "...", "division": "...", "items": [{"rawMaterial": "...", "matchedMaterial": "...", "confidence": "...", "qty": 0, "serials": [], "note": "..."}]}
+{"documentType": "...", "division": "...", "documentNumber": "...", "items": [{"rawMaterial": "...", "matchedMaterial": "...", "confidence": "...", "qty": 0, "serials": [], "note": "..."}]}
 
 Jika dokumen tidak terbaca sama sekali atau tidak berisi daftar barang, balas: {"documentType": "tidak_jelas", "division": null, "items": []}`;
 }
@@ -118,6 +119,7 @@ function parseResponse(text) {
   return {
     documentType: ["penerimaan_baru", "pengembalian_material", "lainnya"].includes(parsed.documentType) ? parsed.documentType : "tidak_jelas",
     division: parsed.division == null ? null : String(parsed.division).trim(),
+    documentNumber: parsed.documentNumber == null ? null : String(parsed.documentNumber).trim() || null,
     items: parsed.items
       .map((it) => ({
         rawMaterial: String(it.rawMaterial || "").trim(),
@@ -157,6 +159,7 @@ async function parseBkbDocument(dataUrl, { materialNames, divisionNames }) {
   return {
     documentType: result.documentType,
     division: result.division && divisionSet.has(result.division) ? result.division : null,
+    documentNumber: result.documentNumber,
     items: result.items.map((it) => ({
       ...it,
       matchedMaterial: it.matchedMaterial && materialSet.has(it.matchedMaterial) ? it.matchedMaterial : null,

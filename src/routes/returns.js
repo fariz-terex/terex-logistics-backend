@@ -4,6 +4,7 @@ const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
 const { scopeOf, scopeAllows, adjustStock, resolveCreateCustomer } = require("../utils/stock");
 const { notifyWebhook } = require("../utils/webhook");
+const { createDocument, WAREHOUSE } = require("../utils/documents");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -216,8 +217,18 @@ router.post("/:id/receive", requireAuth, requireRole(LOGISTICS, MANAGER), (req, 
   if (!ret) return res.status(404).json({ error: "Return Faulty not found" });
   if (!scopeAllows(scopeOf(req.user), ret.customer)) return res.status(403).json({ error: "Return Faulty ini bukan milik divisi Anda" });
   if (ret.status !== "On Delivery") return res.status(409).json({ error: `Cannot receive status "${ret.status}"` });
-  db.prepare("UPDATE returns SET status = 'Received by Warehouse' WHERE id = ?").run(ret.id);
-  addHistory(ret.id, `Received by Warehouse (${req.user.name})`);
+  const full = loadReturn(ret.id);
+  db.transaction(() => {
+    db.prepare("UPDATE returns SET status = 'Received by Warehouse' WHERE id = ?").run(ret.id);
+    // Faulty units physically enter the warehouse now: BMB (faulty_return).
+    const bmb = createDocument(db, {
+      type: "BMB", kind: "faulty_return", customer: ret.customer || "Unassigned", sourceType: "return", sourceRef: ret.id,
+      partyFrom: `${ret.technician} — ${ret.homebase}${ret.site ? ` / ${ret.site}` : ""}`, partyTo: WAREHOUSE,
+      externalRef: ret.resi_number || null, createdBy: req.user.name,
+      items: full.items.map((it) => ({ material: it.material, qty: it.qty, serials: it.serials.map((s) => s.sn) })),
+    });
+    addHistory(ret.id, `Received by Warehouse (${req.user.name}) · BMB ${bmb.number}`);
+  })();
   res.json(loadReturn(ret.id));
 });
 

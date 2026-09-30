@@ -89,6 +89,33 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
   (boleh). Dilihat di Stock Movements (tombol "Foto" → `GET
   /stock/receipts/:id`) dan ikon kamera di daftar Serial Number.
 
+## Dokumen resmi: BMB / BKB / Surat Jalan (2026-09-30)
+
+- Dibuat OTOMATIS oleh alur yang memindahkan barang, di dalam transaksi
+  yang sama (`utils/documents.js`, tabel `documents` + `document_items`,
+  isi = snapshot saat barang bergerak). Tidak ada input manual.
+  - BMB `customer_receipt`: Goods Receipt (`POST /stock/receipts`) — wajib
+    `bkbNumber` (Nomor BKB Customer), `bkbFile` opsional (PDF/foto → bucket
+    `documents/bkb-customer`). Panel BKB menyimpan per material; item
+    pertama bikin BMB, item berikutnya kirim `bmbId` → masuk BMB yang sama.
+  - BMB `faulty_return`: Return Faulty `/:id/receive` (Received by Warehouse).
+  - BKB + SJ `delivery`: Delivery `/:id/ship`; resi dari `/:id/resi` ikut
+    ke `shipping_ref` Surat Jalan.
+  - BKB + SJ `return_to_customer`: kirim faulty ke customer (single &
+    batch) — satu pasang per divisi.
+- Nomor: `TRX/<BMB|BKB|SJ>/<DIVISI>/<YYYY>/<MM>/<NNNN>`, per jenis per
+  divisi per bulan, MAX+1 (keputusan user: per divisi).
+- Baca: `GET /api/documents?type=…` & `/:id` (`routes/documents.js`).
+  Frontend: menu Dokumen (tab BMB | BKB | Surat Jalan), `DocumentViewer`
+  = HTML cetak (`documentHtml`, kop PT. Terex + logo
+  `terex-frontend/public/terex-logo.png` + kolom TTD) di iframe → Cetak /
+  Simpan PDF lewat dialog print browser. Chip "Dokumen" di detail Delivery
+  & Return Faulty (`RelatedDocuments`).
+- Dokumen hanya dibuat untuk kejadian SETELAH fitur ini live — data lama
+  tidak punya dokumen (belum di-backfill). Rute automation
+  (`routes/automation.js`) yang memakai `sendToCustomer` TIDAK membuat
+  dokumen.
+
 ## Navigasi (disederhanakan 2026-09-30)
 
 - Sidebar: Dashboard, Request (Delivery, Replacement, Return Material,

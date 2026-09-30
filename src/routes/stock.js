@@ -10,6 +10,7 @@ const { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketReb
 const { parseBkbDocument } = require("../utils/bkbParser");
 const { detectMaterialsFromPhotos, readSerialsFromPhoto } = require("../utils/materialPhotoDetector");
 const { storePhoto, storePhotos, discardPhotos, photoUrl } = require("../utils/photos");
+const { createDocument, addItems, createShipmentDocuments, itemsFromSerials, WAREHOUSE } = require("../utils/documents");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -257,8 +258,12 @@ router.get("/receipts/:id", requireAuth, (req, res) => {
 // only then is everything written in one transaction (receipt record,
 // serial rows, material total, stock movement) so it can never partially
 // apply; if that write fails the just-uploaded photos are deleted again.
+// Every receipt also lands on a BMB (Bukti Masuk Barang) referencing the
+// customer's BKB: a new BMB per receipt, unless `bmbId` is given — then the
+// item is added to that BMB (the BKB panel saves several materials from one
+// customer BKB this way, one call per material, all on one BMB).
 router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), async (req, res) => {
-  const { material, serials, qty, note, photo } = req.body;
+  const { material, serials, qty, note, photo, bkbNumber, bkbFile, bmbId } = req.body;
   const mat = db.prepare("SELECT * FROM materials WHERE name = ?").get(material);
   if (!mat) return res.status(400).json({ error: "Unknown material" });
 
@@ -292,6 +297,15 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), async (re
   const clusterToStore = divisionUsesClusters && mat.serialized ? cluster : null;
 
   if (!photo) return res.status(400).json({ error: "Foto keseluruhan penerimaan barang wajib" });
+  let bmb = null;
+  if (bmbId) {
+    bmb = db.prepare("SELECT * FROM documents WHERE id = ?").get(bmbId);
+    if (!bmb || bmb.type !== "BMB" || bmb.kind !== "customer_receipt" || bmb.customer !== customer || bmb.created_by !== req.user.name || bmb.date !== isoDate()) {
+      return res.status(409).json({ error: "BMB yang dirujuk tidak bisa ditambah dari sini (beda divisi/tanggal/pembuat)" });
+    }
+  } else if (!String(bkbNumber || "").trim()) {
+    return res.status(400).json({ error: "Nomor BKB Customer wajib diisi" });
+  }
   let units = [];
   if (mat.serialized) {
     if (!Array.isArray(serials) || serials.length === 0) return res.status(409).json({ error: "Serial Number wajib diisi untuk material serialized" });
@@ -309,10 +323,11 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), async (re
     return res.status(409).json({ error: "Qty harus lebih dari 0" });
   }
 
-  let photoRef, unitRefs = [];
+  let photoRef, unitRefs = [], bkbFileRef = null;
   try {
     photoRef = await storePhoto(photo, "receipts");
     unitRefs = await storePhotos(units.map((u) => u.photo), "receipts/units");
+    if (!bmb && bkbFile) bkbFileRef = await storePhoto(bkbFile, "documents/bkb-customer", undefined, { allowPdf: true });
   } catch (err) {
     return res.status(err.status || 502).json({ error: err.message || "Gagal menyimpan foto" });
   }
@@ -336,6 +351,18 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), async (re
     db.prepare("INSERT INTO receipts (id, date, material, qty, note, created_by, customer, photo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
       .run(id, isoDate(), material, addedQty, note || "", req.user.name, customer, photoRef);
 
+    const docItem = mat.serialized ? { material, serials: units.map((u) => u.sn) } : { material, qty: addedQty };
+    if (bmb) {
+      addItems(db, bmb.id, [docItem]);
+      db.prepare("UPDATE documents SET source_ref = source_ref || ',' || ? WHERE id = ?").run(id, bmb.id);
+    } else {
+      bmb = createDocument(db, {
+        type: "BMB", kind: "customer_receipt", customer, sourceType: "receipt", sourceRef: id,
+        partyFrom: customer, partyTo: WAREHOUSE, externalRef: String(bkbNumber).trim(), externalFile: bkbFileRef,
+        note: note || "", createdBy: req.user.name, items: [docItem],
+      });
+    }
+
     db.prepare(`
       INSERT INTO material_stock (material, customer, ready) VALUES (?, ?, ?)
       ON CONFLICT(material, customer) DO UPDATE SET ready = ready + excluded.ready
@@ -351,11 +378,12 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), async (re
   try {
     tx();
   } catch (err) {
-    await discardPhotos([photoRef, ...unitRefs]);
+    await discardPhotos([photoRef, ...unitRefs, bkbFileRef]);
     return res.status(409).json({ error: err.message });
   }
 
-  res.status(201).json({ id, material, qty: addedQty, serialized: !!mat.serialized, customer });
+  const bmbDoc = db.prepare("SELECT id, number FROM documents WHERE id = ?").get(bmb.id);
+  res.status(201).json({ id, material, qty: addedQty, serialized: !!mat.serialized, customer, bmb: bmbDoc });
 });
 
 // Reads an uploaded BKB (photo or PDF) via Claude and returns the line
@@ -379,7 +407,7 @@ router.post("/parse-bkb", requireAuth, requireRole(LOGISTICS, MANAGER), async (r
       ...it,
       matchedSerialized: it.matchedMaterial ? materialsByName.get(it.matchedMaterial) : null,
     }));
-    res.json({ documentType: result.documentType, division: result.division, items });
+    res.json({ documentType: result.documentType, division: result.division, documentNumber: result.documentNumber, items });
   } catch (err) {
     res.status(err.status || 500).json({ error: err.message || "Gagal membaca dokumen BKB" });
   }
@@ -670,6 +698,18 @@ router.post("/cluster-transfers/:id/reject", requireAuth, requireRole(SPV, LOGIS
 // round trip is its own row in faulty_customer_returns — a unit can cycle
 // through this more than once over its life.
 
+// BKB + Surat Jalan for units sent back to the customer — one pair per
+// division (numbering is per division, and a batch can mix divisions).
+function customerReturnDocuments(results, { ref, note, user }) {
+  const byCustomer = new Map();
+  results.forEach((r) => { const c = r.customer || "Unassigned"; if (!byCustomer.has(c)) byCustomer.set(c, []); byCustomer.get(c).push(r); });
+  return [...byCustomer.entries()].map(([customer, rows]) => createShipmentDocuments(db, {
+    kind: "return_to_customer", customer, sourceType: "customer_return", sourceRef: rows.map((r) => r.id).join(","),
+    partyFrom: WAREHOUSE, partyTo: customer, externalRef: ref ? String(ref).trim() : null, note: note || "", createdBy: user,
+    items: itemsFromSerials(rows),
+  }));
+}
+
 router.get("/serials/:sn/customer-return-history", requireAuth, (req, res) => {
   const rows = db.prepare("SELECT * FROM faulty_customer_returns WHERE sn = ? ORDER BY sent_date DESC, id DESC").all(req.params.sn);
   res.json(rows);
@@ -683,9 +723,12 @@ router.post("/serials/:sn/send-to-customer", requireAuth, requireRole(LOGISTICS,
     if (!scopeAllows(scope, row.customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
   }
   try {
-    const result = sendToCustomer({ sn: req.params.sn, ref, note, performedBy: req.user.name });
+    const { result, documents } = db.transaction(() => {
+      const r = sendToCustomer({ sn: req.params.sn, ref, note, performedBy: req.user.name });
+      return { result: r, documents: customerReturnDocuments([r], { ref, note, user: req.user.name }) };
+    })();
     notifyWebhook("sent_to_customer", { sn: result.sn, material: result.material, division: result.customer, ref, performedBy: req.user.name });
-    res.status(201).json(result);
+    res.status(201).json({ ...result, documents });
   } catch (err) {
     const status = /not found/i.test(err.message) ? 404 : /wajib diisi/i.test(err.message) ? 400 : 409;
     res.status(status).json({ error: err.message });
@@ -710,9 +753,12 @@ router.post("/serials/send-to-customer-batch", requireAuth, requireRole(LOGISTIC
   }
 
   try {
-    const results = db.transaction(() => sns.map((sn) => sendToCustomer({ sn, ref, note, performedBy: req.user.name })))();
+    const { results, documents } = db.transaction(() => {
+      const rs = sns.map((sn) => sendToCustomer({ sn, ref, note, performedBy: req.user.name }));
+      return { results: rs, documents: customerReturnDocuments(rs, { ref, note, user: req.user.name }) };
+    })();
     results.forEach((result) => notifyWebhook("sent_to_customer", { sn: result.sn, material: result.material, division: result.customer, ref, performedBy: req.user.name }));
-    res.status(201).json({ results });
+    res.status(201).json({ results, documents });
   } catch (err) {
     const status = /not found/i.test(err.message) ? 404 : /wajib diisi/i.test(err.message) ? 400 : 409;
     res.status(status).json({ error: err.message });

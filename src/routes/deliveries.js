@@ -4,6 +4,7 @@ const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids");
 const { scopeOf, scopeAllows, getDivisionStock, adjustStock, adjustConsumable, resolveCreateCustomer } = require("../utils/stock");
 const { announceDelivery } = require("../utils/deliveryNotify");
+const { createShipmentDocuments, WAREHOUSE } = require("../utils/documents");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -396,7 +397,14 @@ router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
 
     db.prepare("UPDATE deliveries SET status = 'Shipped', doc_overall = ?, doc_after_packing = ? WHERE id = ?")
       .run(docOverall, docAfterPacking, delivery.id);
-    addHistory(delivery.id, `Ditandai Shipped oleh ${req.user.name} — dokumentasi pengiriman lengkap`);
+    // Goods leave the warehouse now: BKB + Surat Jalan (snapshot of what shipped).
+    const docs = createShipmentDocuments(db, {
+      kind: "delivery", customer: delivery.customer || "Unassigned", sourceType: "delivery", sourceRef: delivery.id,
+      partyFrom: WAREHOUSE, partyTo: `${delivery.requester} — ${delivery.homebase}${delivery.site ? ` / ${delivery.site}` : ""}`,
+      shippingRef: delivery.resi_number || null, note: delivery.keperluan || "", createdBy: req.user.name,
+      items: delivery.items.map((i) => ({ material: i.material, qty: i.qty, serials: i.serials, itemType: i.type || "material" })),
+    });
+    addHistory(delivery.id, `Ditandai Shipped oleh ${req.user.name} — dokumentasi pengiriman lengkap · BKB ${docs.bkb.number} · Surat Jalan ${docs.sj.number}`);
   });
   tx();
 
@@ -430,6 +438,7 @@ router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
       ${etaChanged ? ", reminder_h2_sent_at = NULL, reminder_h1_sent_at = NULL" : ""}
     WHERE id = ?
   `).run(nextNumber, nextPhoto, nextEstArrival, delivery.id);
+  if (nextNumber) db.prepare("UPDATE documents SET shipping_ref = ? WHERE type = 'SJ' AND source_type = 'delivery' AND source_ref = ?").run(nextNumber, delivery.id);
   addHistory(delivery.id, `Resi ditambahkan${nextNumber ? `: ${nextNumber}` : " (foto)"} — estimasi sampai ${nextEstArrival}`);
   res.json(loadDelivery(delivery.id));
 });

@@ -22,7 +22,7 @@ function badRequest(message) {
 //  - a URL we presigned  -> mapped back to its "obj:" ref (nothing re-uploaded)
 //  - an "obj:" ref        -> kept as-is
 // Anything else is rejected.
-async function storePhoto(value, folder, store = getObjectStore()) {
+async function storePhoto(value, folder, store = getObjectStore(), { allowPdf = false } = {}) {
   if (!value) return null;
   if (typeof value !== "string") throw badRequest("Format foto tidak valid");
   if (value.startsWith(REF_PREFIX)) return value;
@@ -31,13 +31,13 @@ async function storePhoto(value, folder, store = getObjectStore()) {
     if (!key) throw badRequest("Link foto tidak dikenali");
     return REF_PREFIX + key;
   }
-  const m = /^data:(image\/(jpeg|png|webp|gif));base64,(.+)$/.exec(value);
-  if (!m) throw badRequest("Setiap file harus berupa foto (JPG/PNG)");
+  const m = /^data:(image\/(jpeg|png|webp|gif)|application\/(pdf));base64,(.+)$/.exec(value);
+  if (!m || (m[3] === "pdf" && !allowPdf)) throw badRequest(allowPdf ? "File harus berupa foto (JPG/PNG) atau PDF" : "Setiap file harus berupa foto (JPG/PNG)");
   if (!store) return value; // no bucket configured — legacy behaviour
-  const body = Buffer.from(m[3], "base64");
+  const body = Buffer.from(m[4], "base64");
   if (body.length > MAX_BYTES) throw badRequest("Ukuran foto terlalu besar");
   const now = new Date();
-  const ext = m[2] === "jpeg" ? "jpg" : m[2];
+  const ext = m[3] || (m[2] === "jpeg" ? "jpg" : m[2]);
   const key = `${folder}/${now.getUTCFullYear()}/${String(now.getUTCMonth() + 1).padStart(2, "0")}/${crypto.randomUUID()}.${ext}`;
   await store.putObject(key, body, m[1]);
   return REF_PREFIX + key;

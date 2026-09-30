@@ -394,6 +394,42 @@ CREATE TABLE IF NOT EXISTS receipts (
   photo      TEXT   -- overall photo of the received goods ("obj:" bucket ref); NULL for receipts made before it was required
 );
 
+-- ===================== DOKUMEN (BMB / BKB / Surat Jalan) =====================
+-- Official Terex documents, generated automatically when goods move — see
+-- utils/documents.js for the types/kinds and numbering. Items are a snapshot
+-- taken at that moment (serials as a JSON array).
+CREATE TABLE IF NOT EXISTS documents (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  number        TEXT NOT NULL UNIQUE,   -- TRX/<BMB|BKB|SJ>/<DIVISI>/<YYYY>/<MM>/<NNNN>
+  type          TEXT NOT NULL,          -- BMB | BKB | SJ
+  kind          TEXT NOT NULL,          -- customer_receipt | faulty_return | delivery | return_to_customer
+  customer      TEXT NOT NULL,          -- division
+  date          TEXT NOT NULL,
+  source_type   TEXT NOT NULL,          -- receipt | return | delivery | customer_return
+  source_ref    TEXT,                   -- WR/RF/DR/FCR id(s), comma-separated when several
+  party_from    TEXT DEFAULT '',
+  party_to      TEXT DEFAULT '',
+  external_ref  TEXT,                   -- BMB: customer's BKB number · return_to_customer: surat/BA number
+  external_file TEXT,                   -- BMB: customer's BKB file ("obj:" bucket ref)
+  shipping_ref  TEXT,                   -- Surat Jalan: resi / ekspedisi
+  related_id    INTEGER,                -- BKB <-> its Surat Jalan
+  note          TEXT DEFAULT '',
+  created_by    TEXT,
+  created_at    TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_documents_type_customer ON documents(type, customer, date);
+CREATE INDEX IF NOT EXISTS idx_documents_source ON documents(source_type, source_ref);
+
+CREATE TABLE IF NOT EXISTS document_items (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  document_id INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+  material    TEXT NOT NULL,
+  item_type   TEXT NOT NULL DEFAULT 'material',  -- material | tool | consumable
+  qty         INTEGER NOT NULL,
+  unit        TEXT DEFAULT '',
+  serials     TEXT NOT NULL DEFAULT '[]'
+);
+
 -- Penggantian Material: swapping a faulty Installed unit at a site for a
 -- new one. Records the history (old unit vs new unit, per site) and is the
 -- trigger point that feeds the old unit into the existing Return Material
