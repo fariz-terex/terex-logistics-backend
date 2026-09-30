@@ -103,6 +103,9 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
     ke `shipping_ref` Surat Jalan.
   - BKB + SJ `return_to_customer`: kirim faulty ke customer (single &
     batch) — satu pasang per divisi.
+- Tombol "Terima Barang" (Stock) langsung membuka alur upload & deteksi
+  BKB Customer (`BkbReceiptPanel`) — itu jalur UTAMA. `GoodsReceiptForm`
+  (input manual) hanya cadangan lewat link "Tidak ada file BKB? Isi manual".
 - Terima Barang = barang yang DISERAHKAN CUSTOMER dan masuk stok Ready:
   barang baru ATAU material eks-site (site terminasi/dismantle) kondisi
   baik — keduanya sah (koreksi user 2026-09-30). `parse-bkb`
