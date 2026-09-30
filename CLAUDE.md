@@ -247,10 +247,10 @@ set `input.files`, dispatch `change` event — lihat riwayat commit
     (bukan versi terkompresi) pakai `@zxing/browser` yang sama dengan
     `ScanButton` (live camera) — kompresi terbukti bisa merusak keterbacaan
     barcode kalau barcode-nya kecil dalam frame foto (lihat komentar di
-    `PhotoUpload`'s `detectBarcode` path). `ScanButton` (live camera) sudah
-    dihapus dari Return Faulty & Reconciliation (redundant dengan fitur
-    foto di atas) — masih ada di Tool Receipt & Material Swap karena
-    keduanya belum punya foto-detect sebagai pengganti.
+    `PhotoUpload`'s `detectBarcode` path). **Tombol scan barcode live
+    kamera (`ScanButton`/`BarcodeScannerModal`) sudah DIHAPUS dari semua
+    menu** (permintaan user 2026-09-30) — jangan ditambahkan lagi; SN
+    diketik atau dibaca dari foto label.
 - **Reconciliation System Qty = stock HOMEBASE nyata** (bukan lagi angka
   ketikan user): serialized = jumlah SN `Delivered` di homebase itu,
   non-serialized = `material_stock_homebase.qty` — definisi yang sama
