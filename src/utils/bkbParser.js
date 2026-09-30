@@ -43,6 +43,7 @@ Tugas Anda:
    - "lainnya": BAST atau dokumen lain tanpa penyerahan barang ke gudang
    - "tidak_jelas": benar-benar tidak bisa ditentukan
 2. Tentukan divisi tujuan penerimaan barang ini berdasarkan isi dokumen (kop surat, nama pengirim/penerima, referensi site/project, catatan, dll). Jawab HANYA salah satu nama persis dari DAFTAR DIVISI di atas, atau null jika sama sekali tidak yakin.
+2a. Kalau documentType "material_eks_site": isi "sourceSite" dengan nama/ID site asal material PERSIS seperti tertulis (null kalau tidak disebut), dan "condition" dengan kondisi barang seperti disebut di dokumen, singkat (mis. "baik", "layak pakai"; null kalau tidak disebut). Untuk documentType lain, keduanya null.
 2b. Tentukan "documentNumber": nomor dokumen BKB/Surat Jalan ini PERSIS seperti tertulis (mis. di kop/judul, "No.", "Nomor BKB"). Isi null kalau tidak ada atau tidak terbaca jelas — JANGAN mengarang.
 3. Untuk SETIAP baris barang di dokumen, ekstrak (tetap ekstrak baris barangnya walaupun documentType bukan "penerimaan_baru" — biarkan manusia yang memutuskan):
    - "rawMaterial": nama barang PERSIS seperti tertulis di dokumen (jangan diterjemahkan/disingkat)
@@ -53,7 +54,7 @@ Tugas Anda:
    - "note": catatan tambahan pada baris itu jika ada (kondisi, nomor PO/BKB, dll) — string kosong jika tidak ada
 
 Balas HANYA dengan JSON valid, tanpa penjelasan atau teks lain, persis format ini:
-{"documentType": "...", "division": "...", "documentNumber": "...", "items": [{"rawMaterial": "...", "matchedMaterial": "...", "confidence": "...", "qty": 0, "serials": [], "note": "..."}]}
+{"documentType": "...", "division": "...", "documentNumber": "...", "sourceSite": null, "condition": null, "items": [{"rawMaterial": "...", "matchedMaterial": "...", "confidence": "...", "qty": 0, "serials": [], "note": "..."}]}
 
 Jika dokumen tidak terbaca sama sekali atau tidak berisi daftar barang, balas: {"documentType": "tidak_jelas", "division": null, "items": []}`;
 }
@@ -122,6 +123,8 @@ function parseResponse(text) {
     documentType: ["penerimaan_baru", "material_eks_site", "faulty", "pengiriman_keluar", "lainnya"].includes(parsed.documentType) ? parsed.documentType : "tidak_jelas",
     division: parsed.division == null ? null : String(parsed.division).trim(),
     documentNumber: parsed.documentNumber == null ? null : String(parsed.documentNumber).trim() || null,
+    sourceSite: parsed.sourceSite == null ? null : String(parsed.sourceSite).trim() || null,
+    condition: parsed.condition == null ? null : String(parsed.condition).trim() || null,
     items: parsed.items
       .map((it) => ({
         rawMaterial: String(it.rawMaterial || "").trim(),
@@ -162,6 +165,8 @@ async function parseBkbDocument(dataUrl, { materialNames, divisionNames }) {
     documentType: result.documentType,
     division: result.division && divisionSet.has(result.division) ? result.division : null,
     documentNumber: result.documentNumber,
+    sourceSite: result.sourceSite,
+    condition: result.condition,
     items: result.items.map((it) => ({
       ...it,
       matchedMaterial: it.matchedMaterial && materialSet.has(it.matchedMaterial) ? it.matchedMaterial : null,

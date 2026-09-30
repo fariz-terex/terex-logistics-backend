@@ -108,6 +108,9 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
   baik — keduanya sah (koreksi user 2026-09-30). `parse-bkb`
   `documentType`: penerimaan_baru | material_eks_site (info saja) | faulty
   | pengiriman_keluar | lainnya | tidak_jelas (4 terakhir = peringatan).
+  Juga `sourceSite` + `condition` (eks-site) → frontend isi "Asal barang /
+  Keterangan BMB", dikirim sebagai `bmbNote` → `documents.note` BMB
+  (tercetak "Asal / Keterangan", ikut dicari).
 - Nomor: `TRX/<BMB|BKB|SJ>/<DIVISI>/<YYYY>/<MM>/<NNNN>`, per jenis per
   divisi per bulan, MAX+1 (keputusan user: per divisi).
 - Baca: `GET /api/documents?type=…` & `/:id` (`routes/documents.js`).

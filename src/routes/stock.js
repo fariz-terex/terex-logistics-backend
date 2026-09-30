@@ -263,7 +263,8 @@ router.get("/receipts/:id", requireAuth, (req, res) => {
 // item is added to that BMB (the BKB panel saves several materials from one
 // customer BKB this way, one call per material, all on one BMB).
 router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), async (req, res) => {
-  const { material, serials, qty, note, photo, bkbNumber, bkbFile, bmbId } = req.body;
+  // bmbNote: where the goods come from (e.g. "Material eks-site MP Waan, kondisi baik") — the new BMB's Keterangan.
+  const { material, serials, qty, note, photo, bkbNumber, bkbFile, bmbId, bmbNote } = req.body;
   const mat = db.prepare("SELECT * FROM materials WHERE name = ?").get(material);
   if (!mat) return res.status(400).json({ error: "Unknown material" });
 
@@ -359,7 +360,7 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), async (re
       bmb = createDocument(db, {
         type: "BMB", kind: "customer_receipt", customer, sourceType: "receipt", sourceRef: id,
         partyFrom: customer, partyTo: WAREHOUSE, externalRef: String(bkbNumber).trim(), externalFile: bkbFileRef,
-        note: note || "", createdBy: req.user.name, items: [docItem],
+        note: String(bmbNote || "").trim() || note || "", createdBy: req.user.name, items: [docItem],
       });
     }
 
@@ -407,7 +408,7 @@ router.post("/parse-bkb", requireAuth, requireRole(LOGISTICS, MANAGER), async (r
       ...it,
       matchedSerialized: it.matchedMaterial ? materialsByName.get(it.matchedMaterial) : null,
     }));
-    res.json({ documentType: result.documentType, division: result.division, documentNumber: result.documentNumber, items });
+    res.json({ documentType: result.documentType, division: result.division, documentNumber: result.documentNumber, sourceSite: result.sourceSite, condition: result.condition, items });
   } catch (err) {
     res.status(err.status || 500).json({ error: err.message || "Gagal membaca dokumen BKB" });
   }

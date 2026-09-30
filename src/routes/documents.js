@@ -26,14 +26,14 @@ router.get("/", requireAuth, (req, res) => {
   if (kind) { where.push("d.kind = ?"); params.push(kind); }
   if (q) {
     // number, references, parties, or any item/SN on the document
-    where.push(`(d.number LIKE ? OR d.source_ref LIKE ? OR d.external_ref LIKE ? OR d.party_from LIKE ? OR d.party_to LIKE ?
+    where.push(`(d.number LIKE ? OR d.source_ref LIKE ? OR d.external_ref LIKE ? OR d.party_from LIKE ? OR d.party_to LIKE ? OR d.note LIKE ?
       OR EXISTS (SELECT 1 FROM document_items i WHERE i.document_id = d.id AND (i.material LIKE ? OR i.serials LIKE ?)))`);
     const like = `%${q}%`;
-    params.push(like, like, like, like, like, like, like);
+    params.push(like, like, like, like, like, like, like, like);
   }
   const rows = db.prepare(`
     SELECT d.id, d.number, d.type, d.kind, d.customer, d.date, d.source_type, d.source_ref, d.party_from, d.party_to,
-           d.external_ref, d.shipping_ref, d.created_by,
+           d.external_ref, d.shipping_ref, d.note, d.created_by,
            (SELECT number FROM documents r WHERE r.id = d.related_id) AS related_number,
            (SELECT COUNT(*) FROM document_items i WHERE i.document_id = d.id) AS item_count,
            (SELECT COALESCE(SUM(qty), 0) FROM document_items i WHERE i.document_id = d.id) AS total_qty
