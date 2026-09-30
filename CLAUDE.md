@@ -77,6 +77,21 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
   **Setiap route yang mengembalikan kolom foto harus lewat `photoUrl()`.**
   Tanpa env bucket (lokal/test), foto tetap data URL.
 - Saat start, log `[photos] bucket OK` / `FAILED` (self-test put/get/delete).
+- **Foto ASLI → Google Drive** (akun `logistik.terex@gmail.com`, scope
+  `drive.file` = app hanya lihat file buatannya sendiri). Env backend:
+  `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (diisi user sendiri di
+  Railway — JANGAN diisi Claude), opsional `GOOGLE_REDIRECT_URI` (default
+  `https://backend-production-5543.up.railway.app/api/gdrive/callback`).
+  Refresh token didapat lewat tombol "Hubungkan Google Drive" (Settings,
+  Manager) → disimpan di `app_settings`, tidak pernah ke browser.
+  Alur: `compressImage` di frontend men-stage file asli ke
+  `POST /api/gdrive/originals` (hash SHA-256 foto kompres, antrian 2) →
+  bucket `originals/…` + `photo_originals`; route yang menyimpan foto
+  (Reconciliation, Terima Barang) memanggil `claimOriginals` dengan path
+  Drive (`LMS Terex/Reconciliation/<RC>`, `LMS Terex/Terima Barang/<WR>`);
+  `archiveWorker` (tiap 60 dtk) upload ke Drive, hapus salinan staging,
+  retry s/d 5x; staging yg tak diklaim dihapus setelah 3 hari. Link
+  "Asli (Drive)" di detail (`originalLink`). Menu lain belum ikut.
 - Sudah pakai bucket: Goods Receipt (`receipts.photo`,
   `serial_numbers.receipt_photo`), Reconciliation (`reconciliations.photo`
   + `reconciliation_serials.photo`), file BKB Customer. Rencana berikutnya (keputusan user

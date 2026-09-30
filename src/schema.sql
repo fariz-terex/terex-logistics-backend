@@ -395,6 +395,45 @@ CREATE TABLE IF NOT EXISTS receipts (
   photo      TEXT   -- overall photo of the received goods ("obj:" bucket ref); NULL for receipts made before it was required
 );
 
+-- ===================== ARSIP FOTO ASLI (Google Drive) =====================
+-- Small key/value store for app-level settings (e.g. the Google Drive
+-- refresh token of the connected account) — never exposed to the browser.
+CREATE TABLE IF NOT EXISTS app_settings (
+  key   TEXT PRIMARY KEY,
+  value TEXT
+);
+
+-- One row per photo whose ORIGINAL (uncompressed) file is archived to Google
+-- Drive. The browser stages the original (staging_key, keyed by the SHA-256
+-- of the compressed copy) and the form later stores the compressed copy
+-- (compressed_ref) — the two arrive in either order and meet on
+-- compressed_hash. Once a route says where it belongs (drive_path/name),
+-- the archive worker uploads it to Drive and deletes the staged original.
+-- See utils/originals.js and utils/archiveWorker.js.
+CREATE TABLE IF NOT EXISTS photo_originals (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  compressed_hash TEXT NOT NULL UNIQUE,
+  staging_key     TEXT,                  -- bucket key of the staged original
+  compressed_ref  TEXT,                  -- "obj:" ref of the compressed copy the app shows
+  drive_path      TEXT,                  -- e.g. "LMS Terex/Reconciliation/RC-260930-001"
+  drive_name      TEXT,                  -- e.g. "SN-ABC123.jpg"
+  status          TEXT NOT NULL DEFAULT 'staged',  -- staged | claimed | archived | failed
+  attempts        INTEGER NOT NULL DEFAULT 0,
+  error           TEXT,
+  drive_file_id   TEXT,
+  drive_link      TEXT,
+  created_at      TEXT NOT NULL,
+  updated_at      TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_photo_originals_ref ON photo_originals(compressed_ref);
+CREATE INDEX IF NOT EXISTS idx_photo_originals_status ON photo_originals(status);
+
+-- Drive folder ids by path, so a folder is created once and reused.
+CREATE TABLE IF NOT EXISTS drive_folders (
+  path TEXT PRIMARY KEY,
+  id   TEXT NOT NULL
+);
+
 -- ===================== DOKUMEN (BMB / BKB / Surat Jalan) =====================
 -- Official Terex documents, generated automatically when goods move — see
 -- utils/documents.js for the types/kinds and numbering. Items are a snapshot

@@ -97,6 +97,12 @@ function createObjectStore({ bucket, endpoint, region, keyId, secret, fetchImpl 
     return `${origin}${path}?${canonicalQuery}&X-Amz-Signature=${signature}`;
   }
 
+  async function getObject(key) {
+    const res = await fetchImpl(presignGet(key, 300));
+    if (!res.ok) throw new Error(`Ambil file dari bucket gagal (${res.status})`);
+    return { body: Buffer.from(await res.arrayBuffer()), contentType: res.headers.get("content-type") || "application/octet-stream" };
+  }
+
   // Maps a presigned URL we issued back to its object key (or null if it
   // isn't one of this bucket's URLs) — lets a form echo back a photo it was
   // shown (e.g. a resubmit) without re-uploading it.
@@ -110,7 +116,7 @@ function createObjectStore({ bucket, endpoint, region, keyId, secret, fetchImpl 
     }
   }
 
-  return { putObject, deleteObject, presignGet, keyFromUrl, host };
+  return { putObject, getObject, deleteObject, presignGet, keyFromUrl, host };
 }
 
 let defaultStore;

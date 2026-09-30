@@ -10,6 +10,7 @@ const { computeStockConsistency, planGlobalAggregateRebuild, planSerialBucketReb
 const { parseBkbDocument, matchClusterName } = require("../utils/bkbParser");
 const { detectMaterialsFromPhotos, readSerialsFromPhoto } = require("../utils/materialPhotoDetector");
 const { storePhoto, storePhotos, discardPhotos, photoUrl } = require("../utils/photos");
+const originals = require("../utils/originals");
 const { createDocument, addItems, createShipmentDocuments, itemsFromSerials, WAREHOUSE } = require("../utils/documents");
 
 const router = express.Router();
@@ -246,8 +247,8 @@ router.get("/receipts/:id", requireAuth, (req, res) => {
   if (!r) return res.status(404).json({ error: "Penerimaan barang tidak ditemukan" });
   if (!scopeAllows(scopeOf(req.user), r.customer)) return res.status(403).json({ error: "Penerimaan ini bukan milik divisi Anda" });
   const units = db.prepare("SELECT sn, receipt_photo FROM serial_numbers WHERE received_ref = ? ORDER BY sn").all(r.id)
-    .map((u) => ({ sn: u.sn, photo: photoUrl(u.receipt_photo) }));
-  res.json({ ...r, photo: photoUrl(r.photo), units });
+    .map((u) => ({ sn: u.sn, photo: photoUrl(u.receipt_photo), original: originals.originalLink(db, u.receipt_photo) }));
+  res.json({ ...r, photo: photoUrl(r.photo), photoOriginal: originals.originalLink(db, r.photo), units });
 });
 
 // Goods Receipt: the only place new stock (and new Serial Numbers) enters
@@ -383,6 +384,14 @@ router.post("/receipts", requireAuth, requireRole(LOGISTICS, MANAGER), async (re
     return res.status(409).json({ error: err.message });
   }
 
+  // Originals of these photos go to Drive under "LMS Terex/Terima Barang/<WR id>".
+  try {
+    const path = `LMS Terex/Terima Barang/${id}`;
+    originals.claimOriginals(db, [
+      { value: photo, ref: photoRef, path, name: "Foto-Keseluruhan-Penerimaan" },
+      ...units.map((u, i) => ({ value: u.photo, ref: unitRefs[i], path, name: `SN-${u.sn.replace(/[\\/:*?"<>|]+/g, "-")}` })),
+    ]);
+  } catch (e) { console.error(`[originals] claim ${id}: ${e.message}`); }
   const bmbDoc = db.prepare("SELECT id, number FROM documents WHERE id = ?").get(bmb.id);
   res.status(201).json({ id, material, qty: addedQty, serialized: !!mat.serialized, customer, bmb: bmbDoc });
 });

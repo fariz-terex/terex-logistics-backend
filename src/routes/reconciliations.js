@@ -5,6 +5,19 @@ const { dailySequenceId, isoDate } = require("../utils/ids");
 const { scopeOf, scopeAllows, resolveCreateCustomer } = require("../utils/stock");
 const { homebaseSystemQtyMap, withSystemQty, applyApproval } = require("../utils/reconciliation");
 const { storePhoto, storePhotos, discardPhotos, photoUrl } = require("../utils/photos");
+const originals = require("../utils/originals");
+
+// Original (uncompressed) photos of a saved reconciliation go to Drive under
+// "LMS Terex/Reconciliation/<id>" — see utils/originals.js.
+const safeName = (s) => String(s || "").replace(/[\\/:*?"<>|]+/g, "-").trim();
+function claimReconOriginals(id, photo, photoRef, items, storedItems) {
+  const path = `LMS Terex/Reconciliation/${id}`;
+  const entries = [{ value: photo, ref: photoRef, path, name: "Foto-Keseluruhan-Material" }];
+  items.forEach((item, x) => (item.serials || []).forEach((sn, i) => entries.push({
+    value: (item.serialPhotos || [])[i], ref: (storedItems[x].serialPhotos || [])[i], path, name: `SN-${safeName(sn)}`,
+  })));
+  try { originals.claimOriginals(db, entries); } catch (e) { console.error(`[originals] claim ${id}: ${e.message}`); }
+}
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -43,6 +56,7 @@ function loadReconciliation(id) {
   if (!rc) return null;
   const items = db.prepare("SELECT * FROM reconciliation_items WHERE reconciliation_id = ?").all(id).map((item) => {
     const serialRows = item.serialized ? db.prepare("SELECT sn, photo FROM reconciliation_serials WHERE reconciliation_item_id = ? ORDER BY id").all(item.id) : [];
+    // (serialOriginals below: Google Drive link of each unit's original photo, once archived)
     return {
       material: item.material,
       serialized: !!item.serialized,
@@ -52,12 +66,13 @@ function loadReconciliation(id) {
       serials: serialRows.map((s) => s.sn),
       // Parallel to serials: each unit's label photo (viewable URL), null on older records.
       serialPhotos: serialRows.map((s) => photoUrl(s.photo)),
+      serialOriginals: serialRows.map((s) => originals.originalLink(db, s.photo)),
     };
   });
   const history = db.prepare("SELECT time, text FROM reconciliation_history WHERE reconciliation_id = ? ORDER BY id").all(id);
   // `photo` is ONE photo for the whole reconciliation (all materials
   // together in one frame), not per item — see reconciliations.photo.
-  return { id: rc.id, homebase: rc.homebase, period: rc.period, status: rc.status, date: rc.date, revisionNote: rc.revision_note, customer: rc.customer, photo: photoUrl(rc.photo), reason: rc.reason || "", items, history };
+  return { id: rc.id, homebase: rc.homebase, period: rc.period, status: rc.status, date: rc.date, revisionNote: rc.revision_note, customer: rc.customer, photo: photoUrl(rc.photo), photoOriginal: originals.originalLink(db, rc.photo), reason: rc.reason || "", items, history };
 }
 
 function addHistory(id, text) {
@@ -182,6 +197,7 @@ router.post("/", requireAuth, requireRole(TECH, MANAGER), async (req, res) => {
     await discardPhotos([photoRef, ...stored.refs]);
     return res.status(409).json({ error: e.message });
   }
+  claimReconOriginals(id, photo, photoRef, items, stored.items);
 
   res.status(201).json(loadReconciliation(id));
 });
@@ -237,6 +253,7 @@ router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), async (req
     await discardPhotos([photoRef, ...stored.refs].filter((r) => !oldSet.has(r)));
     return res.status(409).json({ error: e.message });
   }
+  claimReconOriginals(rc.id, photo, photoRef, items, stored.items);
   const kept = new Set([photoRef, ...stored.refs]);
   await discardPhotos(oldRefs.filter((r) => r && !kept.has(r)));
 
