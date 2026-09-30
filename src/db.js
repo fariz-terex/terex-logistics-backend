@@ -161,6 +161,12 @@ if (!reconColumns.includes("photo")) {
   console.log("[db] adding photo column to reconciliations");
   db.exec("ALTER TABLE reconciliations ADD COLUMN photo TEXT");
 }
+// Label photo per SN on a reconciliation (required for new submissions).
+const reconSerialColumns = db.prepare("PRAGMA table_info(reconciliation_serials)").all().map((c) => c.name);
+if (!reconSerialColumns.includes("photo")) {
+  console.log("[db] adding photo column to reconciliation_serials");
+  db.exec("ALTER TABLE reconciliation_serials ADD COLUMN photo TEXT");
+}
 if (!reconColumns.includes("reason")) {
   // One discrepancy reason for the whole reconciliation instead of one per
   // item. reconciliation_items.reason stays for older records.

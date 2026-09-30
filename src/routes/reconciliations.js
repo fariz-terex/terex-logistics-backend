@@ -4,6 +4,7 @@ const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate } = require("../utils/ids");
 const { scopeOf, scopeAllows, resolveCreateCustomer } = require("../utils/stock");
 const { homebaseSystemQtyMap, withSystemQty, applyApproval } = require("../utils/reconciliation");
+const { storePhoto, storePhotos, discardPhotos, photoUrl } = require("../utils/photos");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -40,18 +41,23 @@ function findSNConflict(sn, excludeReconId = null) {
 function loadReconciliation(id) {
   const rc = db.prepare("SELECT * FROM reconciliations WHERE id = ?").get(id);
   if (!rc) return null;
-  const items = db.prepare("SELECT * FROM reconciliation_items WHERE reconciliation_id = ?").all(id).map((item) => ({
-    material: item.material,
-    serialized: !!item.serialized,
-    systemQty: item.system_qty,
-    actualQty: item.actual_qty,
-    reason: item.reason,
-    serials: item.serialized ? db.prepare("SELECT sn FROM reconciliation_serials WHERE reconciliation_item_id = ?").all(item.id).map((s) => s.sn) : [],
-  }));
+  const items = db.prepare("SELECT * FROM reconciliation_items WHERE reconciliation_id = ?").all(id).map((item) => {
+    const serialRows = item.serialized ? db.prepare("SELECT sn, photo FROM reconciliation_serials WHERE reconciliation_item_id = ? ORDER BY id").all(item.id) : [];
+    return {
+      material: item.material,
+      serialized: !!item.serialized,
+      systemQty: item.system_qty,
+      actualQty: item.actual_qty,
+      reason: item.reason,
+      serials: serialRows.map((s) => s.sn),
+      // Parallel to serials: each unit's label photo (viewable URL), null on older records.
+      serialPhotos: serialRows.map((s) => photoUrl(s.photo)),
+    };
+  });
   const history = db.prepare("SELECT time, text FROM reconciliation_history WHERE reconciliation_id = ? ORDER BY id").all(id);
   // `photo` is ONE photo for the whole reconciliation (all materials
   // together in one frame), not per item — see reconciliations.photo.
-  return { id: rc.id, homebase: rc.homebase, period: rc.period, status: rc.status, date: rc.date, revisionNote: rc.revision_note, customer: rc.customer, photo: rc.photo, reason: rc.reason || "", items, history };
+  return { id: rc.id, homebase: rc.homebase, period: rc.period, status: rc.status, date: rc.date, revisionNote: rc.revision_note, customer: rc.customer, photo: photoUrl(rc.photo), reason: rc.reason || "", items, history };
 }
 
 function addHistory(id, text) {
@@ -106,6 +112,8 @@ function validateItems(items, excludeReconId, reason) {
     if (item.serialized) {
       const serials = item.serials || [];
       if (serials.some((s) => !s?.trim())) return `Semua Serial Number wajib diisi untuk ${item.material}`;
+      const missingPhoto = serials.filter((_, i) => !(item.serialPhotos || [])[i]);
+      if (missingPhoto.length) return `Foto label wajib untuk setiap Serial Number (${item.material}: ${missingPhoto.join(", ")})`;
       for (const sn of serials) {
         const conflict = findSNConflict(sn.trim(), excludeReconId);
         if (conflict) return `Serial Number ${sn} sedang digunakan pada ${conflict}`;
@@ -115,18 +123,32 @@ function validateItems(items, excludeReconId, reason) {
   return null;
 }
 
+// Uploads every unit's label photo (a URL we issued earlier — e.g. on a
+// resubmit — maps back to its stored ref without re-uploading) and returns
+// items with serialPhotos replaced by refs, plus every ref for cleanup.
+async function storeItemPhotos(items) {
+  const refs = [];
+  const out = [];
+  for (const item of items) {
+    const stored = item.serialized ? await storePhotos((item.serials || []).map((_, i) => (item.serialPhotos || [])[i] || null), "reconciliations/units") : [];
+    refs.push(...stored);
+    out.push({ ...item, serialPhotos: stored });
+  }
+  return { items: out, refs };
+}
+
 function writeItems(reconId, items) {
   const insertItem = db.prepare(`INSERT INTO reconciliation_items (reconciliation_id, material, serialized, system_qty, actual_qty, reason) VALUES (?, ?, ?, ?, ?, ?)`);
-  const insertSerial = db.prepare("INSERT INTO reconciliation_serials (reconciliation_item_id, sn) VALUES (?, ?)");
+  const insertSerial = db.prepare("INSERT INTO reconciliation_serials (reconciliation_item_id, sn, photo) VALUES (?, ?, ?)");
   items.forEach((item) => {
     const itemId = insertItem.run(reconId, item.material, item.serialized ? 1 : 0, item.systemQty, item.actualQty, item.reason || "").lastInsertRowid;
-    (item.serials || []).forEach((sn) => insertSerial.run(itemId, sn.trim()));
+    (item.serials || []).forEach((sn, i) => insertSerial.run(itemId, sn.trim(), (item.serialPhotos || [])[i] || null));
   });
 }
 
 // The report is credited to the reporting technician's own division;
 // Manager (unscoped) must say explicitly which division it's for.
-router.post("/", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
+router.post("/", requireAuth, requireRole(TECH, MANAGER), async (req, res) => {
   const { homebase, period, photo } = req.body;
   if (!homebase || !period || !Array.isArray(req.body.items) || req.body.items.length === 0) {
     return res.status(400).json({ error: "homebase, period, and at least one item are required" });
@@ -142,13 +164,24 @@ router.post("/", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
   const err = validateItems(items, null, reason);
   if (err) return res.status(409).json({ error: err });
 
+  let photoRef, stored;
+  try {
+    photoRef = await storePhoto(photo, "reconciliations");
+    stored = await storeItemPhotos(items);
+  } catch (e) {
+    return res.status(e.status || 502).json({ error: e.message || "Gagal menyimpan foto" });
+  }
   const id = dailySequenceId(db, "reconciliations", "RC");
-  const tx = db.transaction(() => {
-    db.prepare(`INSERT INTO reconciliations (id, homebase, period, status, date, customer, photo, reason) VALUES (?, ?, ?, 'Waiting Logistics Review', ?, ?, ?, ?)`).run(id, homebase, period, isoDate(), customer, photo, reason);
-    writeItems(id, items);
-    addHistory(id, `Draft dibuat dan disubmit oleh Technician ${req.user.name}`);
-  });
-  tx();
+  try {
+    db.transaction(() => {
+      db.prepare(`INSERT INTO reconciliations (id, homebase, period, status, date, customer, photo, reason) VALUES (?, ?, ?, 'Waiting Logistics Review', ?, ?, ?, ?)`).run(id, homebase, period, isoDate(), customer, photoRef, reason);
+      writeItems(id, stored.items);
+      addHistory(id, `Draft dibuat dan disubmit oleh Technician ${req.user.name}`);
+    })();
+  } catch (e) {
+    await discardPhotos([photoRef, ...stored.refs]);
+    return res.status(409).json({ error: e.message });
+  }
 
   res.status(201).json(loadReconciliation(id));
 });
@@ -165,7 +198,7 @@ router.post("/:id/revise", requireAuth, requireRole(LOGISTICS, MANAGER), (req, r
   res.json(loadReconciliation(rc.id));
 });
 
-router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
+router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), async (req, res) => {
   const rc = db.prepare("SELECT * FROM reconciliations WHERE id = ?").get(req.params.id);
   if (!rc) return res.status(404).json({ error: "Reconciliation not found" });
   if (!scopeAllows(scopeOf(req.user), rc.customer)) return res.status(403).json({ error: "Reconciliation ini bukan milik divisi Anda" });
@@ -179,13 +212,33 @@ router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), (req, res)
   const err = validateItems(items, rc.id, reason);
   if (err) return res.status(409).json({ error: err });
 
-  const tx = db.transaction(() => {
-    db.prepare("UPDATE reconciliations SET status = 'Waiting Logistics Review', revision_note = NULL, photo = ?, reason = ? WHERE id = ?").run(photo, reason, rc.id);
-    db.prepare("DELETE FROM reconciliation_items WHERE reconciliation_id = ?").run(rc.id); // cascades to serials
-    writeItems(rc.id, items);
-    addHistory(rc.id, `Diperbaiki dan dikirim ulang oleh Technician ${req.user.name}`);
-  });
-  tx();
+  let photoRef, stored;
+  try {
+    photoRef = await storePhoto(photo, "reconciliations");
+    stored = await storeItemPhotos(items);
+  } catch (e) {
+    return res.status(e.status || 502).json({ error: e.message || "Gagal menyimpan foto" });
+  }
+  // Photos the old version used that the new one no longer references get
+  // removed from the bucket after the swap (unchanged ones map back to the
+  // same ref, so they're kept).
+  const oldRefs = [rc.photo, ...db.prepare(`
+    SELECT rs.photo FROM reconciliation_serials rs JOIN reconciliation_items ri ON ri.id = rs.reconciliation_item_id
+    WHERE ri.reconciliation_id = ?`).all(rc.id).map((r) => r.photo)];
+  try {
+    db.transaction(() => {
+      db.prepare("UPDATE reconciliations SET status = 'Waiting Logistics Review', revision_note = NULL, photo = ?, reason = ? WHERE id = ?").run(photoRef, reason, rc.id);
+      db.prepare("DELETE FROM reconciliation_items WHERE reconciliation_id = ?").run(rc.id); // cascades to serials
+      writeItems(rc.id, stored.items);
+      addHistory(rc.id, `Diperbaiki dan dikirim ulang oleh Technician ${req.user.name}`);
+    })();
+  } catch (e) {
+    const oldSet = new Set(oldRefs);
+    await discardPhotos([photoRef, ...stored.refs].filter((r) => !oldSet.has(r)));
+    return res.status(409).json({ error: e.message });
+  }
+  const kept = new Set([photoRef, ...stored.refs]);
+  await discardPhotos(oldRefs.filter((r) => r && !kept.has(r)));
 
   res.json(loadReconciliation(rc.id));
 });

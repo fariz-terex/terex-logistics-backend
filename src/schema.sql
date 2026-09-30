@@ -219,7 +219,8 @@ CREATE TABLE IF NOT EXISTS reconciliation_items (
 CREATE TABLE IF NOT EXISTS reconciliation_serials (
   id                     INTEGER PRIMARY KEY AUTOINCREMENT,
   reconciliation_item_id INTEGER NOT NULL REFERENCES reconciliation_items(id) ON DELETE CASCADE,
-  sn                     TEXT NOT NULL
+  sn                     TEXT NOT NULL,
+  photo                  TEXT   -- label photo of this unit ("obj:" bucket ref); required from 2026-09-30, NULL on older records
 );
 
 CREATE TABLE IF NOT EXISTS reconciliation_history (

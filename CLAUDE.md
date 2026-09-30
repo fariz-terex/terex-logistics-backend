@@ -78,7 +78,8 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
   Tanpa env bucket (lokal/test), foto tetap data URL.
 - Saat start, log `[photos] bucket OK` / `FAILED` (self-test put/get/delete).
 - Sudah pakai bucket: Goods Receipt (`receipts.photo`,
-  `serial_numbers.receipt_photo`). Rencana berikutnya (keputusan user
+  `serial_numbers.receipt_photo`), Reconciliation (`reconciliations.photo`
+  + `reconciliation_serials.photo`), file BKB Customer. Rencana berikutnya (keputusan user
   2026-09-24): foto per-SN Reconciliation WAJIB & disimpan, lalu foto ASLI
   (tidak dikompres) diarsip ke Google Drive (Gmail biasa, OAuth akun user)
   sementara versi kompres tetap di bucket untuk web app; lalu diperluas ke
@@ -277,9 +278,12 @@ set `input.files`, dispatch `change` event — lihat riwayat commit
   Form menampilkan daftar "Belum bisa submit — lengkapi dulu" (array
   `missing` di `ReconciliationCreate`) — tambah item ke situ kalau ada
   syarat submit baru, jangan biarkan tombol disabled tanpa penjelasan.
-  Foto referensi per baris TIDAK dikirim/disimpan ke server: baris
-  serialized pakai SATU foto per slot SN (`serialPhotos`), non-serialized
-  pakai set foto (`detectionPhotos`, `ReplacePhotoButton` multi-pilih).
+  Baris serialized: SATU foto label per slot SN (`serialPhotos`) — WAJIB
+  & DISIMPAN sejak 2026-09-30 (`reconciliation_serials.photo`, bucket
+  `reconciliations/units`; server tolak SN tanpa foto; resubmit memetakan
+  URL lama balik ke ref & menghapus foto yang diganti). Detail menampilkan
+  foto per SN. Non-serialized: set foto referensi (`detectionPhotos`)
+  masih TIDAK disimpan.
 - **Baca SN dari foto — satu helper untuk semua menu**:
   `readSerialsFromPhoto` di `App.jsx` (barcode dulu via `@zxing` dari file
   ASLI, fallback Claude lewat `POST /stock/read-serial-photo` =
