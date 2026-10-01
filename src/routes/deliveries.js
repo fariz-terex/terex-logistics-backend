@@ -6,6 +6,9 @@ const { scopeOf, scopeAllows, getDivisionStock, adjustStock, adjustConsumable, r
 const { announceDelivery } = require("../utils/deliveryNotify");
 const { createShipmentDocuments, WAREHOUSE } = require("../utils/documents");
 const { intake, asyncRoute } = require("../utils/photoIntake");
+const { lightSelect, hasValue, flag } = require("../utils/lightRows");
+
+const DELIVERY_PHOTO_COLUMNS = ["doc_overall", "doc_after_packing", "resi_photo", "delivered_photo", "bast_document"];
 
 const deliveryDrivePath = (id) => `LMS Terex/Delivery/${id}`;
 
@@ -20,26 +23,33 @@ function adjustToolStock(tool, field, delta) {
   db.prepare(`UPDATE tools SET ${field} = MAX(0, ${field} + ?) WHERE name = ?`).run(delta, tool);
 }
 
-function loadDelivery(id) {
-  const delivery = db.prepare("SELECT * FROM deliveries WHERE id = ?").get(id);
+// `light` (the list endpoint): every photo is replaced by a true/null "has
+// one" flag and never read from the database — see utils/lightRows.js. The
+// frontend fetches GET /:id when a detail page opens.
+function loadDelivery(id, { light = false } = {}) {
+  const delivery = db.prepare(`SELECT ${light ? lightSelect(db, "deliveries", DELIVERY_PHOTO_COLUMNS) : "*"} FROM deliveries WHERE id = ?`).get(id);
   if (!delivery) return null;
+  if (light) {
+    DELIVERY_PHOTO_COLUMNS.forEach((c) => { delivery[c] = flag(delivery[c]); });
+    delivery.light = true;
+  }
   const items = db.prepare("SELECT material, qty, item_type FROM delivery_items WHERE delivery_id = ?").all(id).map((item) => {
     const isTool = item.item_type === "tool";
     const serialRows = isTool
       ? db.prepare("SELECT sn, status FROM tool_serials WHERE current_ref = ? AND tool = ?").all(id, item.material)
-      : db.prepare("SELECT sn, status, installed_date, installed_by, install_site, install_photo FROM serial_numbers WHERE current_ref = ? AND material = ?").all(id, item.material);
+      : db.prepare(`SELECT sn, status, installed_date, installed_by, install_site, ${light ? hasValue("install_photo") : "install_photo"} FROM serial_numbers WHERE current_ref = ? AND material = ?`).all(id, item.material);
     return {
       material: item.material, qty: item.qty, type: item.item_type,
       serials: serialRows.map((s) => s.sn),
       serialStatuses: Object.fromEntries(serialRows.map((s) => [s.sn, s.status])),
       serialInstallInfo: isTool ? undefined : Object.fromEntries(serialRows.map((s) => [
-        s.sn, { installedDate: s.installed_date, installedBy: s.installed_by, installSite: s.install_site, installPhoto: s.install_photo },
+        s.sn, { installedDate: s.installed_date, installedBy: s.installed_by, installSite: s.install_site, installPhoto: light ? flag(s.install_photo) : s.install_photo },
       ])),
     };
   });
   const history = db.prepare("SELECT time, text FROM delivery_history WHERE delivery_id = ? ORDER BY id").all(id);
-  const serialPhotoRows = db.prepare("SELECT sn, photo FROM delivery_serial_photos WHERE delivery_id = ?").all(id);
-  const serialPhotos = Object.fromEntries(serialPhotoRows.map((r) => [r.sn, r.photo]));
+  const serialPhotoRows = db.prepare(`SELECT sn, ${light ? hasValue("photo") : "photo"} FROM delivery_serial_photos WHERE delivery_id = ?`).all(id);
+  const serialPhotos = Object.fromEntries(serialPhotoRows.map((r) => [r.sn, light ? flag(r.photo) : r.photo]));
   // Any tool unit still Checked Out under this delivery needs to come back
   // eventually, independent of the delivery's own status — surfaced here so
   // the front-end can show a "Kembalikan Alat" panel whenever relevant.
@@ -73,7 +83,7 @@ router.get("/", requireAuth, (req, res) => {
   } else {
     ids = db.prepare(`SELECT id FROM deliveries WHERE customer IN (${scope.map(() => "?").join(",")}) ORDER BY id DESC`).all(...scope).map((r) => r.id);
   }
-  res.json(ids.map(loadDelivery));
+  res.json(ids.map((id) => loadDelivery(id, { light: true })));
 });
 
 router.get("/:id", requireAuth, (req, res) => {

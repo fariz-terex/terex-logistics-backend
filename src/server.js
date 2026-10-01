@@ -74,6 +74,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// A write repeated with the same Idempotency-Key (the browser retrying after
+// a lost answer) gets the first answer back instead of running twice.
+app.use(require("./utils/idempotency").idempotency(db));
+
 app.use("/api/auth", authRoutes);
 app.use("/api/materials", materialRoutes);
 app.use("/api/consumables", consumableRoutes);

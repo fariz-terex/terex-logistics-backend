@@ -428,6 +428,17 @@ CREATE TABLE IF NOT EXISTS photo_originals (
 CREATE INDEX IF NOT EXISTS idx_photo_originals_ref ON photo_originals(compressed_ref);
 CREATE INDEX IF NOT EXISTS idx_photo_originals_status ON photo_originals(status);
 
+-- Answers of recent write requests, by the caller's Idempotency-Key (hashed
+-- together with who/what — see utils/idempotency.js). A retried request gets
+-- the stored answer instead of running twice. Rows older than 24h are purged.
+CREATE TABLE IF NOT EXISTS idempotency_keys (
+  key        TEXT PRIMARY KEY,
+  status     INTEGER NOT NULL,
+  body       TEXT NOT NULL,
+  created_at INTEGER NOT NULL   -- epoch ms
+);
+CREATE INDEX IF NOT EXISTS idx_idempotency_keys_created ON idempotency_keys(created_at);
+
 -- Drive folder ids by path, so a folder is created once and reused.
 CREATE TABLE IF NOT EXISTS drive_folders (
   path TEXT PRIMARY KEY,

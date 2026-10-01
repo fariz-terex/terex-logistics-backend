@@ -65,9 +65,17 @@ async function discardPhotos(refs, store = getObjectStore()) {
     .map((r) => store.deleteObject(r.slice(REF_PREFIX.length)).catch(() => {})));
 }
 
-function photoUrl(value, store = getObjectStore()) {
+// Signed as of the start of the current 6-hour window (still valid 6-12h
+// from now), NOT as of this instant: the same photo then gets the SAME URL on
+// every response within the window. Otherwise each 90-second data refresh
+// hands the browser a brand-new URL per photo — its image cache never hits
+// (every thumbnail re-downloads) and no response is ever a 304.
+const URL_WINDOW_MS = 6 * 60 * 60 * 1000;
+
+function photoUrl(value, store = getObjectStore(), now = Date.now()) {
   if (!value || typeof value !== "string" || !value.startsWith(REF_PREFIX)) return value || null;
-  return store ? store.presignGet(value.slice(REF_PREFIX.length), URL_TTL_SECONDS) : null;
+  const signedAt = new Date(Math.floor(now / URL_WINDOW_MS) * URL_WINDOW_MS);
+  return store ? store.presignGet(value.slice(REF_PREFIX.length), URL_TTL_SECONDS, signedAt) : null;
 }
 
 // Startup check so a misconfigured bucket shows up in the deploy log

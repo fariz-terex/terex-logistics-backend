@@ -192,6 +192,29 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
   (mis. approve Delivery = Manager saja). Kalau menambah status/langkah
   baru, tambahkan kelompoknya di `TaskInbox`.
 
+## Daftar ringan & kirim-ulang aman (insiden 2026-10-01)
+
+Insiden: koneksi SPV putus saat submit Delivery ("Failed to fetch"), diklik
+berulang → 15 request kembar; daftar Delivery admin 5–44 dtk karena tiap
+baris membawa semua fotonya (base64 lama).
+
+- **List TANPA foto**: `GET /deliveries` & `GET /returns` mengirim record
+  `light: true` — tiap field foto cuma `true`/`null` (`utils/lightRows.js`,
+  kolom foto tidak dibaca dari DB). Foto asli hanya di `GET /:id`. Frontend:
+  `FullRecord` (App.jsx) membungkus halaman detail/edit, mengambil record
+  penuh & menaruhnya kembali ke array. **Jangan pernah menaruh foto di
+  endpoint list lagi**; kalau list lain membengkak, pakai pola yang sama.
+- **Idempotency**: `utils/idempotency.js` (middleware di `server.js`, tabel
+  `idempotency_keys`, 24 jam) — write dengan header `Idempotency-Key` yang
+  sama dijawab dari jawaban pertama, route tidak jalan dua kali. Frontend
+  `createApiClient`: write identik yang masih berjalan memakai promise yang
+  sama (`inFlight`), dan retry setelah error JARINGAN memakai key yang sama
+  (`retryKeys`). Dikecualikan: `/auth`, `/gdrive`, panggilan AI, notifikasi.
+- `loadAllData` memuat tiap koleksi sendiri-sendiri — satu gagal tidak
+  mengosongkan semua halaman (banner menyebut yang gagal).
+- URL foto presigned dibulatkan ke jendela 6 jam (`photoUrl`) supaya URL
+  sama antar-refresh → cache gambar browser & 304 jalan.
+
 ## Aturan wajib (hasil pelajaran pahit — jangan diulang)
 
 1. **Tambah kolom ke `serial_numbers` HANYA dengan `ALTER TABLE ADD COLUMN`

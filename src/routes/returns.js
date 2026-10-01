@@ -6,6 +6,7 @@ const { scopeOf, scopeAllows, adjustStock, resolveCreateCustomer } = require("..
 const { notifyWebhook } = require("../utils/webhook");
 const { createDocument, WAREHOUSE } = require("../utils/documents");
 const { intake, asyncRoute } = require("../utils/photoIntake");
+const { lightSelect, hasValue, flag } = require("../utils/lightRows");
 
 // Photos of a Return Faulty: the 3 packing photos, then one per SN (in item
 // order). Stored in the bucket; originals go to Drive under
@@ -56,13 +57,20 @@ function findSNConflict(sn, excludeReturnId = null) {
   return null;
 }
 
-function loadReturn(id) {
-  const ret = db.prepare("SELECT * FROM returns WHERE id = ?").get(id);
+// `light` (the list endpoint): photos become true/null "has one" flags and
+// are never read from the database — see utils/lightRows.js. The frontend
+// fetches GET /:id when a detail / edit page opens.
+const RETURN_PHOTO_COLUMNS = ["doc_before", "doc_after", "doc_weighing", "resi_photo"];
+
+function loadReturn(id, { light = false } = {}) {
+  const ret = db.prepare(`SELECT ${light ? lightSelect(db, "returns", RETURN_PHOTO_COLUMNS) : "*"} FROM returns WHERE id = ?`).get(id);
   if (!ret) return null;
+  if (light) RETURN_PHOTO_COLUMNS.forEach((c) => { ret[c] = flag(ret[c]); });
   const items = db.prepare("SELECT * FROM return_items WHERE return_id = ?").all(id).map((item) => ({
     material: item.material,
     qty: item.qty,
-    serials: db.prepare("SELECT sn, photo FROM return_serials WHERE return_item_id = ?").all(item.id),
+    serials: db.prepare(`SELECT sn, ${light ? hasValue("photo") : "photo"} FROM return_serials WHERE return_item_id = ?`).all(item.id)
+      .map((s) => (light ? { sn: s.sn, photo: flag(s.photo) } : s)),
   }));
   const history = db.prepare("SELECT time, text FROM return_history WHERE return_id = ? ORDER BY id").all(id);
   return {
@@ -70,6 +78,7 @@ function loadReturn(id) {
     status: ret.status, date: ret.date, resiNumber: ret.resi_number, resiPhoto: ret.resi_photo, revisionNote: ret.revision_note,
     docs: { beforePacking: ret.doc_before, afterPacking: ret.doc_after, weighing: ret.doc_weighing },
     items, history,
+    ...(light ? { light: true } : {}),
   };
 }
 
@@ -87,7 +96,7 @@ router.get("/", requireAuth, (req, res) => {
   } else {
     ids = db.prepare(`SELECT id FROM returns WHERE customer IN (${scope.map(() => "?").join(",")}) ORDER BY id DESC`).all(...scope).map((r) => r.id);
   }
-  res.json(ids.map(loadReturn));
+  res.json(ids.map((id) => loadReturn(id, { light: true })));
 });
 
 router.get("/:id", requireAuth, (req, res) => {
