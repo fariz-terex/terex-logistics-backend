@@ -27,6 +27,18 @@ if (userCount === 0) {
   seedDatabase();
 }
 
+// ONE-OFF (2026-10-01, asked by the user): remove the 14 duplicate Delivery
+// Requests a dropped connection created, keeping DR-261001-002. Only exact,
+// untouched copies are deleted — see utils/dedupeDeliveries.js. Remove this
+// block once the deploy log shows it ran.
+try {
+  const dupes = Array.from({ length: 14 }, (_, i) => `DR-261001-${String(i + 3).padStart(3, "0")}`);
+  const r = require("./utils/dedupeDeliveries").removeDuplicateDeliveries(db, "DR-261001-002", dupes);
+  console.log(`[dedupe] kept ${r.kept}; deleted ${r.deleted.length}: ${r.deleted.join(", ") || "-"}; skipped ${r.skipped.length}: ${r.skipped.map((s) => `${s.id} (${s.why})`).join("; ") || "-"}`);
+} catch (err) {
+  console.error(`[dedupe] failed, nothing deleted: ${err.message}`);
+}
+
 const app = express();
 
 // CORS: allow the deployed front-end plus local dev servers. Falls back to
