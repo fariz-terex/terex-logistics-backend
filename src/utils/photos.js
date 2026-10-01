@@ -83,4 +83,19 @@ async function selfTest(store = getObjectStore()) {
   return "OK";
 }
 
-module.exports = { storePhoto, storePhotos, discardPhotos, photoUrl, selfTest, REF_PREFIX };
+// Walks a JSON-able response body and turns every stored photo ref
+// ("obj:...") into a viewable URL. Mounted as response middleware in
+// server.js so NO route can forget it — a ref must never reach the browser.
+// Only plain arrays/objects are traversed; everything else is returned as-is.
+function presignDeep(value, store = getObjectStore()) {
+  if (typeof value === "string") return value.startsWith(REF_PREFIX) ? photoUrl(value, store) : value;
+  if (Array.isArray(value)) return value.map((v) => presignDeep(v, store));
+  if (value && typeof value === "object" && (value.constructor === Object || Object.getPrototypeOf(value) === null)) {
+    const out = {};
+    for (const k of Object.keys(value)) out[k] = presignDeep(value[k], store);
+    return out;
+  }
+  return value;
+}
+
+module.exports = { storePhoto, storePhotos, discardPhotos, photoUrl, presignDeep, selfTest, REF_PREFIX };

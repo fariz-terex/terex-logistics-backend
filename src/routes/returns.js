@@ -5,6 +5,22 @@ const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids"
 const { scopeOf, scopeAllows, adjustStock, resolveCreateCustomer } = require("../utils/stock");
 const { notifyWebhook } = require("../utils/webhook");
 const { createDocument, WAREHOUSE } = require("../utils/documents");
+const { intake, asyncRoute } = require("../utils/photoIntake");
+
+// Photos of a Return Faulty: the 3 packing photos, then one per SN (in item
+// order). Stored in the bucket; originals go to Drive under
+// "LMS Terex/Return Faulty/<id>" once the record is saved.
+async function storeReturnPhotos(items, docs) {
+  const photos = await intake(db, [
+    { value: docs.beforePacking, name: "Foto-Sebelum-Packing" },
+    { value: docs.afterPacking, name: "Foto-Setelah-Packing" },
+    { value: docs.weighing, name: "Foto-Timbangan" },
+    ...items.flatMap((item) => item.serials.map((s) => ({ value: s.photo, name: `SN-${s.sn.trim()}` }))),
+  ], { folder: "returns" });
+  let k = 3;
+  return { photos, docs: photos.refs.slice(0, 3), serialRefs: items.map((item) => item.serials.map(() => photos.refs[k++])) };
+}
+const returnDrivePath = (id) => `LMS Terex/Return Faulty/${id}`;
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -110,7 +126,7 @@ function validateSubmission({ items, docs }, excludeReturnId) {
 
 // The report is credited to the reporting technician's own division;
 // Manager (unscoped) must say explicitly which division it's for.
-router.post("/", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
+router.post("/", requireAuth, requireRole(TECH, MANAGER), asyncRoute(async (req, res) => {
   const err = validateSubmission(req.body, null);
   if (err) return res.status(409).json({ error: err });
 
@@ -119,22 +135,28 @@ router.post("/", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
   const customer = resolved.customer;
 
   const { items, docs } = req.body;
+  const stored = await storeReturnPhotos(items, docs);
   const id = dailySequenceId(db, "returns", "RF");
-  const tx = db.transaction(() => {
-    db.prepare(`INSERT INTO returns (id, technician, homebase, site, status, date, resi_number, doc_before, doc_after, doc_weighing, customer) VALUES (?, ?, ?, ?, 'Waiting Logistics Review', ?, '', ?, ?, ?, ?)`)
-      .run(id, req.user.name, req.body.homebase || req.user.assignment || "", req.body.site || "", isoDate(), docs.beforePacking, docs.afterPacking, docs.weighing, customer);
-    const insertItem = db.prepare("INSERT INTO return_items (return_id, material, qty) VALUES (?, ?, ?)");
-    const insertSerial = db.prepare("INSERT INTO return_serials (return_item_id, sn, photo) VALUES (?, ?, ?)");
-    items.forEach((item) => {
-      const itemId = insertItem.run(id, item.material, item.qty).lastInsertRowid;
-      item.serials.forEach((s) => insertSerial.run(itemId, s.sn.trim(), s.photo));
-    });
-    addHistory(id, `Draft dibuat dan disubmit oleh Technician ${req.user.name}`);
-  });
-  tx();
+  try {
+    db.transaction(() => {
+      db.prepare(`INSERT INTO returns (id, technician, homebase, site, status, date, resi_number, doc_before, doc_after, doc_weighing, customer) VALUES (?, ?, ?, ?, 'Waiting Logistics Review', ?, '', ?, ?, ?, ?)`)
+        .run(id, req.user.name, req.body.homebase || req.user.assignment || "", req.body.site || "", isoDate(), stored.docs[0], stored.docs[1], stored.docs[2], customer);
+      const insertItem = db.prepare("INSERT INTO return_items (return_id, material, qty) VALUES (?, ?, ?)");
+      const insertSerial = db.prepare("INSERT INTO return_serials (return_item_id, sn, photo) VALUES (?, ?, ?)");
+      items.forEach((item, x) => {
+        const itemId = insertItem.run(id, item.material, item.qty).lastInsertRowid;
+        item.serials.forEach((s, i) => insertSerial.run(itemId, s.sn.trim(), stored.serialRefs[x][i]));
+      });
+      addHistory(id, `Draft dibuat dan disubmit oleh Technician ${req.user.name}`);
+    })();
+  } catch (e) {
+    await stored.photos.discard();
+    throw e;
+  }
+  stored.photos.commit(returnDrivePath(id));
 
   res.status(201).json(loadReturn(id));
-});
+}));
 
 router.post("/:id/approve", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const ret = db.prepare("SELECT * FROM returns WHERE id = ?").get(req.params.id);
@@ -160,7 +182,7 @@ router.post("/:id/revise", requireAuth, requireRole(LOGISTICS, MANAGER), (req, r
 
 // Technician fixes the flagged issues and resubmits — same validation as
 // create, minus itself when checking for SN conflicts.
-router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
+router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), asyncRoute(async (req, res) => {
   const ret = db.prepare("SELECT * FROM returns WHERE id = ?").get(req.params.id);
   if (!ret) return res.status(404).json({ error: "Return Faulty not found" });
   if (!scopeAllows(scopeOf(req.user), ret.customer)) return res.status(403).json({ error: "Return Faulty ini bukan milik divisi Anda" });
@@ -170,22 +192,32 @@ router.post("/:id/resubmit", requireAuth, requireRole(TECH, MANAGER), (req, res)
   if (err) return res.status(409).json({ error: err });
 
   const { items, docs } = req.body;
-  const tx = db.transaction(() => {
-    db.prepare("UPDATE returns SET status = 'Waiting Logistics Review', revision_note = NULL, doc_before = ?, doc_after = ?, doc_weighing = ? WHERE id = ?")
-      .run(docs.beforePacking, docs.afterPacking, docs.weighing, ret.id);
-    db.prepare("DELETE FROM return_items WHERE return_id = ?").run(ret.id); // cascades to serials
-    const insertItem = db.prepare("INSERT INTO return_items (return_id, material, qty) VALUES (?, ?, ?)");
-    const insertSerial = db.prepare("INSERT INTO return_serials (return_item_id, sn, photo) VALUES (?, ?, ?)");
-    items.forEach((item) => {
-      const itemId = insertItem.run(ret.id, item.material, item.qty).lastInsertRowid;
-      item.serials.forEach((s) => insertSerial.run(itemId, s.sn.trim(), s.photo));
-    });
-    addHistory(ret.id, `Diperbaiki dan dikirim ulang oleh Technician ${req.user.name}`);
-  });
-  tx();
+  const stored = await storeReturnPhotos(items, docs);
+  // Photos of the old version that the new one doesn't reuse are deleted afterwards.
+  const oldRefs = [ret.doc_before, ret.doc_after, ret.doc_weighing, ...db.prepare(`
+    SELECT rs.photo FROM return_serials rs JOIN return_items ri ON ri.id = rs.return_item_id WHERE ri.return_id = ?`).all(ret.id).map((r) => r.photo)];
+  try {
+    db.transaction(() => {
+      db.prepare("UPDATE returns SET status = 'Waiting Logistics Review', revision_note = NULL, doc_before = ?, doc_after = ?, doc_weighing = ? WHERE id = ?")
+        .run(stored.docs[0], stored.docs[1], stored.docs[2], ret.id);
+      db.prepare("DELETE FROM return_items WHERE return_id = ?").run(ret.id); // cascades to serials
+      const insertItem = db.prepare("INSERT INTO return_items (return_id, material, qty) VALUES (?, ?, ?)");
+      const insertSerial = db.prepare("INSERT INTO return_serials (return_item_id, sn, photo) VALUES (?, ?, ?)");
+      items.forEach((item, x) => {
+        const itemId = insertItem.run(ret.id, item.material, item.qty).lastInsertRowid;
+        item.serials.forEach((s, i) => insertSerial.run(itemId, s.sn.trim(), stored.serialRefs[x][i]));
+      });
+      addHistory(ret.id, `Diperbaiki dan dikirim ulang oleh Technician ${req.user.name}`);
+    })();
+  } catch (e) {
+    await stored.photos.discard();
+    throw e;
+  }
+  stored.photos.commit(returnDrivePath(ret.id));
+  await stored.photos.dropReplaced(oldRefs);
 
   res.json(loadReturn(ret.id));
-});
+}));
 
 router.post("/:id/ship", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
   const ret = db.prepare("SELECT * FROM returns WHERE id = ?").get(req.params.id);
@@ -197,7 +229,7 @@ router.post("/:id/ship", requireAuth, requireRole(TECH, MANAGER), (req, res) => 
   res.json(loadReturn(ret.id));
 });
 
-router.post("/:id/resi", requireAuth, requireRole(TECH, MANAGER), (req, res) => {
+router.post("/:id/resi", requireAuth, requireRole(TECH, MANAGER), asyncRoute(async (req, res) => {
   const { resiNumber, resiPhoto } = req.body;
   if (!resiNumber?.trim() && !resiPhoto) {
     return res.status(400).json({ error: "Isi nomor resi atau upload foto resi" });
@@ -206,11 +238,14 @@ router.post("/:id/resi", requireAuth, requireRole(TECH, MANAGER), (req, res) => 
   if (!ret) return res.status(404).json({ error: "Return Faulty not found" });
   if (!scopeAllows(scopeOf(req.user), ret.customer)) return res.status(403).json({ error: "Return Faulty ini bukan milik divisi Anda" });
   const nextNumber = resiNumber?.trim() || ret.resi_number;
-  const nextPhoto = resiPhoto || ret.resi_photo;
+  const resi = await intake(db, [{ value: resiPhoto, name: "Foto-Resi" }], { folder: "returns" });
+  const nextPhoto = resi.refs[0] || ret.resi_photo;
   db.prepare("UPDATE returns SET resi_number = ?, resi_photo = ? WHERE id = ?").run(nextNumber, nextPhoto, ret.id);
+  resi.commit(returnDrivePath(ret.id));
+  if (resi.refs[0]) await resi.dropReplaced([ret.resi_photo]);
   addHistory(ret.id, `Resi ditambahkan${nextNumber ? `: ${nextNumber}` : " (foto)"}`);
   res.json(loadReturn(ret.id));
-});
+}));
 
 router.post("/:id/receive", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const ret = db.prepare("SELECT * FROM returns WHERE id = ?").get(req.params.id);

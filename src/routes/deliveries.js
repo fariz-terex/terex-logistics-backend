@@ -5,6 +5,9 @@ const { dailySequenceId, isoDate, nextStockMovementId } = require("../utils/ids"
 const { scopeOf, scopeAllows, getDivisionStock, adjustStock, adjustConsumable, resolveCreateCustomer } = require("../utils/stock");
 const { announceDelivery } = require("../utils/deliveryNotify");
 const { createShipmentDocuments, WAREHOUSE } = require("../utils/documents");
+const { intake, asyncRoute } = require("../utils/photoIntake");
+
+const deliveryDrivePath = (id) => `LMS Terex/Delivery/${id}`;
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -348,7 +351,7 @@ router.post("/:id/cancel", requireAuth, requireRole(MANAGER), (req, res) => {
 // plus an overall photo and a post-packing photo. Only material stock moves
 // here (reserved -> in transit) — tool units are already Checked Out since
 // assign-stock, so they just ride along with no further stock change.
-router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), asyncRoute(async (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
   if (!scopeAllows(scopeOf(req.user), delivery.customer)) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
@@ -370,6 +373,13 @@ router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
 
   const materialItems = delivery.items.filter((i) => i.type !== "tool" && i.type !== "consumable");
   const consumableItems = delivery.items.filter((i) => i.type === "consumable");
+
+  // Shipment photos go to the bucket first: overall, after packing, then one per SN.
+  const shipPhotos = await intake(db, [
+    { value: docOverall, name: "Foto-Seluruh-Material" },
+    { value: docAfterPacking, name: "Foto-Setelah-Packing" },
+    ...allSerials.map((sn) => ({ value: photos[sn], name: `SN-${sn}` })),
+  ], { folder: "deliveries" });
 
   const tx = db.transaction(() => {
     materialItems.forEach((item) => {
@@ -393,10 +403,10 @@ router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
     });
 
     const insertPhoto = db.prepare("INSERT INTO delivery_serial_photos (delivery_id, sn, photo) VALUES (?, ?, ?)");
-    allSerials.forEach((sn) => insertPhoto.run(delivery.id, sn, photos[sn]));
+    allSerials.forEach((sn, i) => insertPhoto.run(delivery.id, sn, shipPhotos.refs[2 + i]));
 
     db.prepare("UPDATE deliveries SET status = 'Shipped', doc_overall = ?, doc_after_packing = ? WHERE id = ?")
-      .run(docOverall, docAfterPacking, delivery.id);
+      .run(shipPhotos.refs[0], shipPhotos.refs[1], delivery.id);
     // Goods leave the warehouse now: BKB + Surat Jalan (snapshot of what shipped).
     const docs = createShipmentDocuments(db, {
       kind: "delivery", customer: delivery.customer || "Unassigned", sourceType: "delivery", sourceRef: delivery.id,
@@ -406,14 +416,20 @@ router.post("/:id/ship", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
     });
     addHistory(delivery.id, `Ditandai Shipped oleh ${req.user.name} — dokumentasi pengiriman lengkap · BKB ${docs.bkb.number} · Surat Jalan ${docs.sj.number}`);
   });
-  tx();
+  try {
+    tx();
+  } catch (e) {
+    await shipPhotos.discard();
+    throw e;
+  }
+  shipPhotos.commit(deliveryDrivePath(delivery.id));
 
   announceDelivery(delivery, { event: "shipped", actor: req.user.name });
 
   res.json(loadDelivery(delivery.id));
-});
+}));
 
-router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), asyncRoute(async (req, res) => {
   const { resiNumber, resiPhoto, estArrivalDate } = req.body;
   if (!resiNumber?.trim() && !resiPhoto) {
     return res.status(400).json({ error: "Isi nomor resi atau upload foto resi" });
@@ -428,7 +444,8 @@ router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
   }
 
   const nextNumber = resiNumber?.trim() || delivery.resi_number;
-  const nextPhoto = resiPhoto || delivery.resi_photo;
+  const resi = await intake(db, [{ value: resiPhoto, name: "Foto-Resi" }], { folder: "deliveries" });
+  const nextPhoto = resi.refs[0] || delivery.resi_photo;
   // A changed ETA re-arms both reminders (e.g. resi corrected/updated) so a
   // pushed-back date still gets its own H-2/H-1 check instead of staying
   // silent because the old date already fired one.
@@ -439,11 +456,13 @@ router.post("/:id/resi", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
     WHERE id = ?
   `).run(nextNumber, nextPhoto, nextEstArrival, delivery.id);
   if (nextNumber) db.prepare("UPDATE documents SET shipping_ref = ? WHERE type = 'SJ' AND source_type = 'delivery' AND source_ref = ?").run(nextNumber, delivery.id);
+  resi.commit(deliveryDrivePath(delivery.id));
+  if (resi.refs[0]) await resi.dropReplaced([delivery.resi_photo]);
   addHistory(delivery.id, `Resi ditambahkan${nextNumber ? `: ${nextNumber}` : " (foto)"} — estimasi sampai ${nextEstArrival}`);
   res.json(loadDelivery(delivery.id));
-});
+}));
 
-router.post("/:id/bast", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+router.post("/:id/bast", requireAuth, requireRole(LOGISTICS, MANAGER), asyncRoute(async (req, res) => {
   const { bastDocument, bastFilename } = req.body;
   if (!bastDocument) return res.status(400).json({ error: "Upload dokumen BAST terlebih dahulu" });
   const delivery = db.prepare("SELECT * FROM deliveries WHERE id = ?").get(req.params.id);
@@ -452,10 +471,13 @@ router.post("/:id/bast", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res
   if (!["Shipped", "Delivered"].includes(delivery.status)) {
     return res.status(409).json({ error: `Tidak bisa upload BAST untuk status "${delivery.status}"` });
   }
-  db.prepare("UPDATE deliveries SET bast_document = ?, bast_filename = ? WHERE id = ?").run(bastDocument, bastFilename || "BAST", delivery.id);
+  const bast = await intake(db, [{ value: bastDocument, name: "BAST" }], { folder: "deliveries/bast", allowPdf: true });
+  db.prepare("UPDATE deliveries SET bast_document = ?, bast_filename = ? WHERE id = ?").run(bast.refs[0], bastFilename || "BAST", delivery.id);
+  bast.commit(deliveryDrivePath(delivery.id));
+  await bast.dropReplaced([delivery.bast_document]);
   addHistory(delivery.id, `Dokumen BAST diupload oleh ${req.user.name}`);
   res.json(loadDelivery(delivery.id));
-});
+}));
 
 router.post("/:id/bkb-link", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const { bkbLink } = req.body;
@@ -474,7 +496,7 @@ router.post("/:id/bkb-link", requireAuth, requireRole(LOGISTICS, MANAGER), (req,
 // state. Tool items are unaffected (already Checked Out) — they get
 // returned independently via POST /:id/return-tools, any time, regardless
 // of the delivery's own status.
-router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), asyncRoute(async (req, res) => {
   const delivery = loadDelivery(req.params.id);
   if (!delivery) return res.status(404).json({ error: "Delivery request not found" });
   if (!scopeAllows(scopeOf(req.user), delivery.customer)) return res.status(403).json({ error: "Delivery ini bukan milik divisi Anda" });
@@ -486,6 +508,7 @@ router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, 
   if (!deliveredPhoto) {
     return res.status(400).json({ error: "Foto bukti penerimaan barang wajib diisi" });
   }
+  const delivered = await intake(db, [{ value: deliveredPhoto, name: "Foto-Bukti-Diterima" }], { folder: "deliveries" });
 
   const materialItems = delivery.items.filter((i) => i.type !== "tool" && i.type !== "consumable");
   const consumableItems = delivery.items.filter((i) => i.type === "consumable");
@@ -519,15 +542,21 @@ router.post("/:id/advance", requireAuth, requireRole(LOGISTICS, MANAGER), (req, 
       adjustConsumable(item.material, "in_transit", -item.qty);
     });
     db.prepare("UPDATE deliveries SET status = 'Delivered', delivered_photo = ?, received_by = ? WHERE id = ?")
-      .run(deliveredPhoto, receivedBy || null, delivery.id);
+      .run(delivered.refs[0], receivedBy || null, delivery.id);
     addHistory(delivery.id, `Status diubah ke Delivered oleh ${req.user.name}${receivedBy ? ` — diterima oleh ${receivedBy}` : ""}`);
   });
-  tx();
+  try {
+    tx();
+  } catch (e) {
+    await delivered.discard();
+    throw e;
+  }
+  delivered.commit(deliveryDrivePath(delivery.id));
 
   announceDelivery(delivery, { event: "delivered", actor: req.user.name, note: receivedBy ? `Diterima oleh ${receivedBy}` : null });
 
   res.json(loadDelivery(delivery.id));
-});
+}));
 
 // Tools attached to this delivery come back independently of the delivery's
 // own status/lifecycle — a delivery can sit at "Delivered" forever with its

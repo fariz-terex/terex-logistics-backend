@@ -96,4 +96,12 @@ router.post("/originals", requireAuth, async (req, res) => {
   }
 });
 
+// The shared photo viewer asks: is there an archived ORIGINAL behind this
+// (presigned) photo URL? -> { link } to the file in Google Drive, or null.
+router.post("/original-link", requireAuth, (req, res) => {
+  const store = getObjectStore();
+  const key = store ? store.keyFromUrl(String(req.body?.url || "")) : null;
+  res.json({ link: key ? originals.originalLink(db, `obj:${key}`) : null });
+});
+
 module.exports = router;

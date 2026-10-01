@@ -2,6 +2,7 @@ const express = require("express");
 const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, paddedSequenceId, isoDate } = require("../utils/ids");
+const { intake, asyncRoute } = require("../utils/photoIntake");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -191,7 +192,7 @@ router.post("/checkouts", requireAuth, requireRole(SPV, TECH, MANAGER), (req, re
 // Single-stage approval (unlike Delivery's two-stage flow — tools have no
 // division complexity, so Logistics/Manager approves AND picks the specific
 // units to hand over in one step). Handover photo is optional.
-router.post("/checkouts/:id/approve", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+router.post("/checkouts/:id/approve", requireAuth, requireRole(LOGISTICS, MANAGER), asyncRoute(async (req, res) => {
   const co = loadCheckout(req.params.id);
   if (!co) return res.status(404).json({ error: "Checkout not found" });
   if (co.status !== "Waiting Approval") return res.status(409).json({ error: `Cannot approve status "${co.status}"` });
@@ -226,6 +227,7 @@ router.post("/checkouts/:id/approve", requireAuth, requireRole(LOGISTICS, MANAGE
     }
   }
 
+  const handover = await intake(db, [{ value: handoverPhoto, name: "Foto-Serah-Terima" }], { folder: "tools" });
   const tx = db.transaction(() => {
     co.items.forEach((item) => {
       adjustToolStock(item.tool, "available", -item.qty);
@@ -237,13 +239,19 @@ router.post("/checkouts/:id/approve", requireAuth, requireRole(LOGISTICS, MANAGE
         chosen.forEach((sn) => markOut.run(co.id, sn));
       }
     });
-    db.prepare("UPDATE tool_checkouts SET status = 'Checked Out', handover_photo = ? WHERE id = ?").run(handoverPhoto, co.id);
+    db.prepare("UPDATE tool_checkouts SET status = 'Checked Out', handover_photo = ? WHERE id = ?").run(handover.refs[0], co.id);
     addHistory(co.id, `Disetujui oleh ${req.user.name} — alat diserahkan`);
   });
-  tx();
+  try {
+    tx();
+  } catch (e) {
+    await handover.discard();
+    throw e;
+  }
+  handover.commit(`LMS Terex/Peminjaman Alat/${co.id}`);
 
   res.json(loadCheckout(co.id));
-});
+}));
 
 router.post("/checkouts/:id/reject", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
   const co = db.prepare("SELECT * FROM tool_checkouts WHERE id = ?").get(req.params.id);
@@ -257,7 +265,7 @@ router.post("/checkouts/:id/reject", requireAuth, requireRole(LOGISTICS, MANAGER
 // Return: the whole checkout comes back at once (no partial returns in v1).
 // Condition is noted per the transaction as a whole — "Rusak" moves every
 // unit in it to Under Repair instead of back to Available.
-router.post("/checkouts/:id/return", requireAuth, requireRole(LOGISTICS, MANAGER, SPV, TECH), (req, res) => {
+router.post("/checkouts/:id/return", requireAuth, requireRole(LOGISTICS, MANAGER, SPV, TECH), asyncRoute(async (req, res) => {
   const co = loadCheckout(req.params.id);
   if (!co) return res.status(404).json({ error: "Checkout not found" });
   if (co.status !== "Checked Out") return res.status(409).json({ error: `Cannot return status "${co.status}"` });
@@ -267,6 +275,7 @@ router.post("/checkouts/:id/return", requireAuth, requireRole(LOGISTICS, MANAGER
   const nextSnStatus = condition === "Rusak" ? "Under Repair" : "Available";
   const nextField = condition === "Rusak" ? "under_repair" : "available";
 
+  const returned = await intake(db, [{ value: returnPhoto, name: "Foto-Pengembalian" }], { folder: "tools" });
   const tx = db.transaction(() => {
     co.items.forEach((item) => {
       adjustToolStock(item.tool, "checked_out", -item.qty);
@@ -275,12 +284,18 @@ router.post("/checkouts/:id/return", requireAuth, requireRole(LOGISTICS, MANAGER
         .run(nextSnStatus, co.id, item.tool);
     });
     db.prepare("UPDATE tool_checkouts SET status = 'Returned', return_condition = ?, return_note = ?, return_photo = ?, returned_date = ? WHERE id = ?")
-      .run(condition, returnNote || "", returnPhoto || null, isoDate(), co.id);
+      .run(condition, returnNote || "", returned.refs[0], isoDate(), co.id);
     addHistory(co.id, `Dikembalikan oleh ${req.user.name} — kondisi: ${condition}`);
   });
-  tx();
+  try {
+    tx();
+  } catch (e) {
+    await returned.discard();
+    throw e;
+  }
+  returned.commit(`LMS Terex/Peminjaman Alat/${co.id}`);
 
   res.json(loadCheckout(co.id));
-});
+}));
 
 module.exports = router;

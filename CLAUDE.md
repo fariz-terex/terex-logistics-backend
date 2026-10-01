@@ -74,7 +74,17 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
   `storePhoto` (data URL → upload → ref; URL presigned yang dikirim balik
   → dipetakan ke ref lagi), `photoUrl` (ref → presigned URL 12 jam; data
   URL lama dikembalikan apa adanya — foto lama di DB tetap jalan).
-  **Setiap route yang mengembalikan kolom foto harus lewat `photoUrl()`.**
+  **Sisi baca sudah global**: middleware di `server.js` melewatkan SEMUA
+  response JSON ke `presignDeep` (ref `obj:` → URL), jadi route tidak
+  perlu memanggil `photoUrl()` sendiri dan tidak bisa lupa.
+  **Sisi tulis**: setiap route yang menyimpan foto WAJIB lewat
+  `utils/photoIntake.js` → `intake(db, [{value, name}], {folder})` sebelum
+  transaksi, tulis `p.refs[i]`, lalu `p.commit("LMS Terex/<Menu>/<id>")`
+  (klaim foto asli untuk Drive), `p.discard()` kalau transaksi gagal,
+  `p.dropReplaced(oldRefs)` kalau mengganti foto lama. Handler async
+  dibungkus `asyncRoute` (Express 4 tidak menangkap rejection). JANGAN
+  menulis nilai foto dari request langsung ke DB — itu bisa menyimpan URL
+  presigned yang kedaluwarsa 12 jam kemudian.
   Tanpa env bucket (lokal/test), foto tetap data URL.
 - Saat start, log `[photos] bucket OK` / `FAILED` (self-test put/get/delete).
 - **Foto ASLI → Google Drive** (akun `logistik.terex@gmail.com`, scope
@@ -91,7 +101,17 @@ peminjaman alat, dan stok gudang — lintas beberapa divisi customer.
   Drive (`LMS Terex/Reconciliation/<RC>`, `LMS Terex/Terima Barang/<WR>`);
   `archiveWorker` (tiap 60 dtk) upload ke Drive, hapus salinan staging,
   retry s/d 5x; staging yg tak diklaim dihapus setelah 3 hari. Link
-  "Asli (Drive)" di detail (`originalLink`). Menu lain belum ikut.
+  "Asli (Drive)" di detail (`originalLink`). Sejak 2026-10-01 SEMUA menu
+  berfoto ikut: Return Faulty, Delivery (ship/resi/BAST/delivered),
+  Replacement (Material Swap), Peminjaman Alat. `ImageLightbox` di
+  frontend menampilkan "Lihat foto asli (Google Drive)" untuk foto mana pun
+  lewat `POST /api/gdrive/original-link`.
+- **Migrasi foto lama** (data URL di dalam DB → bucket):
+  `utils/photoMigration.js` + `routes/photos.js`
+  (`GET/POST /api/photos/migration`, batch ber-cursor, Manager),
+  `POST /api/photos/compact` (VACUUM, cek ruang kosong dulu). Dijalankan
+  dari Settings → "Pindahkan Foto Lama ke Bucket". Foto lama tidak punya
+  file asli, jadi tidak masuk Drive.
 - Sudah pakai bucket: Goods Receipt (`receipts.photo`,
   `serial_numbers.receipt_photo`), Reconciliation (`reconciliations.photo`
   + `reconciliation_serials.photo`), file BKB Customer. Rencana berikutnya (keputusan user

@@ -3,6 +3,7 @@ const db = require("../db");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { dailySequenceId, isoDate } = require("../utils/ids");
 const { scopeOf, scopeAllows } = require("../utils/stock");
+const { intake, asyncRoute } = require("../utils/photoIntake");
 
 const router = express.Router();
 const MANAGER = "Admin / Manager Logistics";
@@ -47,7 +48,7 @@ router.get("/", requireAuth, (req, res) => {
 // Request). It's recorded as plain text/material choice, and — if it DOES
 // happen to match a known Serial Number — that unit is also flipped to
 // Faulty as a bonus, but its absence from the system is never an error.
-router.post("/", requireAuth, requireRole(TECH, LOGISTICS, MANAGER), (req, res) => {
+router.post("/", requireAuth, requireRole(TECH, LOGISTICS, MANAGER), asyncRoute(async (req, res) => {
   const { newSn, site, homebase, oldSn, oldMaterial, photo, oldPhoto, note } = req.body || {};
   if (!newSn?.trim()) return res.status(400).json({ error: "Pilih unit yang akan dipasang" });
   if (!site?.trim()) return res.status(400).json({ error: "Site wajib diisi" });
@@ -62,12 +63,18 @@ router.post("/", requireAuth, requireRole(TECH, LOGISTICS, MANAGER), (req, res) 
 
   const trimmedOldSn = oldSn?.trim() || null;
   const trimmedOldMaterial = trimmedOldSn ? oldMaterial.trim() : null;
-  const trimmedOldPhoto = trimmedOldSn ? oldPhoto : null;
+  // Proof photos go to the bucket first; originals to Drive under "LMS Terex/Replacement/<id>".
+  const proof = await intake(db, [
+    { value: photo, name: `Terpasang-SN-${newRow.sn}` },
+    { value: trimmedOldSn ? oldPhoto : null, name: `Dicabut-SN-${trimmedOldSn || ""}` },
+  ], { folder: "swaps" });
+  const photoRef = proof.refs[0];
+  const trimmedOldPhoto = proof.refs[1];
   const id = dailySequenceId(db, "material_swaps", "SW");
 
   const tx = db.transaction(() => {
     db.prepare("UPDATE serial_numbers SET status = 'Installed', installed_date = ?, installed_by = ?, install_photo = ?, install_site = ? WHERE sn = ?")
-      .run(isoDate(), req.user.name, photo, site.trim(), newRow.sn);
+      .run(isoDate(), req.user.name, photoRef, site.trim(), newRow.sn);
 
     if (trimmedOldSn) {
       // If this SN happens to already be tracked, close its loop properly.
@@ -79,15 +86,21 @@ router.post("/", requireAuth, requireRole(TECH, LOGISTICS, MANAGER), (req, res) 
     }
 
     db.prepare(`INSERT INTO material_swaps (id, site, homebase, old_sn, old_material, old_photo, new_sn, new_material, performed_by, date, photo, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(id, site.trim(), homebase?.trim() || "", trimmedOldSn, trimmedOldMaterial, trimmedOldPhoto, newRow.sn, newRow.material, req.user.name, isoDate(), photo, note || "");
+      .run(id, site.trim(), homebase?.trim() || "", trimmedOldSn, trimmedOldMaterial, trimmedOldPhoto, newRow.sn, newRow.material, req.user.name, isoDate(), photoRef, note || "");
   });
-  tx();
+  try {
+    tx();
+  } catch (e) {
+    await proof.discard();
+    throw e;
+  }
+  proof.commit(`LMS Terex/Replacement/${id}`);
 
   res.status(201).json({
     id, site: site.trim(), homebase: homebase?.trim() || "",
     oldSn: trimmedOldSn, oldMaterial: trimmedOldMaterial, oldPhoto: trimmedOldPhoto, newSn: newRow.sn, newMaterial: newRow.material,
-    performedBy: req.user.name, date: isoDate(), photo, note: note || "",
+    performedBy: req.user.name, date: isoDate(), photo: photoRef, note: note || "",
   });
-});
+}));
 
 module.exports = router;
