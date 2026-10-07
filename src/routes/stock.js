@@ -520,7 +520,9 @@ router.get("/transfers", requireAuth, (req, res) => {
 // approval (see POST /:id/approve below) like the other two request types.
 // Business logic lives in utils/stockTransfers.js (unit-tested there); this
 // handler is just auth/scope + translating thrown errors to HTTP status.
-router.post("/transfers", requireAuth, requireRole(LOGISTICS, MANAGER), (req, res) => {
+// Any SPV may REQUEST one (within their own divisions — scope check below);
+// approving stays with Logistics/Manager.
+router.post("/transfers", requireAuth, requireRole("SPV", LOGISTICS, MANAGER), (req, res) => {
   const { material, customer, homebaseFrom, homebaseTo, qty, serials, note } = req.body || {};
   if (customer && !scopeAllows(scopeOf(req.user), customer)) return res.status(403).json({ error: "Divisi tersebut bukan divisi Anda" });
 
